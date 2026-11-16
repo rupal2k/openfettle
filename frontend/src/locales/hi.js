@@ -1238,8 +1238,8 @@ export default {
   'White': 'सफ़ेद',
   'Pink': 'गुलाबी',
   'Brown': 'भूरा',
-  'Noise colour': 'शोर का रंग',
-  'Noise volume': 'शोर की आवाज़',
+  'Noise color': 'शोर का रंग',
+  'Noise volume': 'शोर का वॉल्यूम',
   'Sleep timer': 'स्लीप टाइमर',
   '{0} min': '{0} मिनट',
   'Fades out at {0}': '{0} पर धीरे-धीरे बंद',
@@ -1247,4 +1247,5 @@ export default {
   'Play': 'चलाएँ',
   'White, pink or brown noise to help you rest': 'आराम के लिए सफ़ेद, गुलाबी या भूरा शोर',
   'Steady noise, generated on this device. Nothing is downloaded.': 'इसी डिवाइस पर बना स्थिर शोर। कुछ भी डाउनलोड नहीं होता।',
+  'Sound can’t play on this device.': 'इस डिवाइस पर आवाज़ नहीं चल सकती।',
 }

@@ -1238,7 +1238,7 @@ export default {
   'White': 'Branco',
   'Pink': 'Rosa',
   'Brown': 'Marrom',
-  'Noise colour': 'Cor do ruído',
+  'Noise color': 'Cor do ruído',
   'Noise volume': 'Volume do ruído',
   'Sleep timer': 'Timer para dormir',
   '{0} min': '{0} min',
@@ -1247,4 +1247,5 @@ export default {
   'Play': 'Tocar',
   'White, pink or brown noise to help you rest': 'Ruído branco, rosa ou marrom para descansar',
   'Steady noise, generated on this device. Nothing is downloaded.': 'Ruído contínuo gerado neste dispositivo. Nada é baixado.',
+  'Sound can’t play on this device.': 'Não é possível reproduzir som neste dispositivo.',
 }

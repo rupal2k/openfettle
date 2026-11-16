@@ -84,7 +84,7 @@ export default function Home() {
           <span className="wind-t">{t('Wind down')}</span>
           <span className="muted small">{t('White, pink or brown noise to help you rest')}</span>
         </span>
-        <Icon name="play" className="chev" />
+        <Icon name="chevronRight" className="chev" />
       </button>
     )}
 

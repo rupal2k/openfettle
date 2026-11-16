@@ -1259,7 +1259,7 @@ export default {
   'White': 'Weiß',
   'Pink': 'Rosa',
   'Brown': 'Braun',
-  'Noise colour': 'Rauschfarbe',
+  'Noise color': 'Rauschfarbe',
   'Noise volume': 'Lautstärke',
   'Sleep timer': 'Schlaf-Timer',
   '{0} min': '{0} Min.',
@@ -1268,4 +1268,5 @@ export default {
   'Play': 'Abspielen',
   'White, pink or brown noise to help you rest': 'Weißes, rosa oder braunes Rauschen zum Entspannen',
   'Steady noise, generated on this device. Nothing is downloaded.': 'Gleichmäßiges Rauschen, auf diesem Gerät erzeugt. Nichts wird heruntergeladen.',
+  'Sound can’t play on this device.': 'Auf diesem Gerät kann kein Ton abgespielt werden.',
 }

@@ -1238,7 +1238,7 @@ export default {
   'White': '화이트',
   'Pink': '핑크',
   'Brown': '브라운',
-  'Noise colour': '노이즈 색',
+  'Noise color': '노이즈 색',
   'Noise volume': '노이즈 볼륨',
   'Sleep timer': '수면 타이머',
   '{0} min': '{0}분',
@@ -1247,4 +1247,5 @@ export default {
   'Play': '재생',
   'White, pink or brown noise to help you rest': '휴식을 돕는 화이트, 핑크, 브라운 노이즈',
   'Steady noise, generated on this device. Nothing is downloaded.': '이 기기에서 만든 일정한 노이즈입니다. 다운로드하지 않습니다.',
+  'Sound can’t play on this device.': '이 기기에서는 소리를 재생할 수 없습니다.',
 }

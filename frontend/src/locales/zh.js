@@ -1234,11 +1234,11 @@ export default {
   // --- 1.7.0 rename ---
   'OPENFIT is now OpenFettle. Same app, same data, new name.': 'OPENFIT 现已更名为 OpenFettle。同一个应用，同样的数据，新的名字。',
   // --- wind down (generated noise) ---
-  'Wind down': '放松入眠',
+  'Wind down': '放松一下',
   'White': '白',
   'Pink': '粉',
   'Brown': '棕',
-  'Noise colour': '噪声颜色',
+  'Noise color': '噪声颜色',
   'Noise volume': '噪声音量',
   'Sleep timer': '睡眠定时',
   '{0} min': '{0} 分钟',
@@ -1247,4 +1247,5 @@ export default {
   'Play': '播放',
   'White, pink or brown noise to help you rest': '白噪声、粉噪声或棕噪声，帮助休息',
   'Steady noise, generated on this device. Nothing is downloaded.': '在本设备上生成的稳定噪声，无需下载。',
+  'Sound can’t play on this device.': '此设备无法播放声音。',
 }

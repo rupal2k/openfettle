@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fillNoise, loopNoise, createNoisePlayer, FADE, SLEEP_FADE } from './noise.js'
 
+const rmsDb = x => { let e = 0; for (const v of x) e += v * v; return 10 * Math.log10(e / x.length) }
+
 // seeded so the spectral checks never flake
 const rng = (seed = 1) => () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32)
 // first-difference energy over signal energy: ~2 for white, smaller the more low-frequency weight
@@ -25,6 +27,15 @@ describe('noise generators', () => {
     expect(p).toBeLessThan(w * 0.8)
     expect(b).toBeLessThan(p * 0.5)
   })
+  it('all three colours play at about the same loudness', () => {
+    const db = ['white', 'pink', 'brown'].map(c => rmsDb(fillNoise(c, new Float32Array(48000 * 20), rng(11))))
+    expect(Math.max(...db) - Math.min(...db)).toBeLessThan(1.5)
+  })
+  it('the loop seam keeps its level (equal-power blend)', () => {
+    const n = 48000, x = loopNoise('white', n, rng(9))
+    const seam = rmsDb(x.subarray(0, 2048)), rest = rmsDb(x.subarray(10000, 40000))
+    expect(Math.abs(seam - rest)).toBeLessThan(1)
+  })
   it('loops without a jump at the seam', () => {
     const x = loopNoise('brown', 48000, rng(5))
     expect(Math.abs(x[0] - x[x.length - 1])).toBeLessThan(0.05)
@@ -36,7 +47,8 @@ function fakeContext() {
   const param = { value: 0, cancelScheduledValues: vi.fn(), setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(v => { param.target = v }) }
   const sources = []
   const ctx = {
-    sampleRate: 8000, currentTime: 0, destination: {},
+    sampleRate: 8000, currentTime: 0, destination: {}, state: 'running', onstatechange: null,
+    resume: vi.fn(() => Promise.resolve()),
     createGain: () => ({ gain: param, connect: vi.fn() }),
     createBuffer: (ch, n) => ({ length: n, copyToChannel: vi.fn() }),
     createBufferSource: () => { const s = { connect: vi.fn(), start: vi.fn(), stop: vi.fn() }; sources.push(s); return s },
@@ -104,5 +116,46 @@ describe('noise player', () => {
     expect(ctxs).toHaveLength(1)
     expect(ctxs[0].sources[0].stop).toHaveBeenCalled()
     expect(ctxs[0].sources[1].start).toHaveBeenCalled()
+  })
+
+  it('the sleep timer also stops on the audio clock, in case JS timers are throttled', () => {
+    p.setSleep(15); p.play()
+    const { param, sources } = ctxs[0]
+    const at = 15 * 60
+    expect(param.linearRampToValueAtTime).toHaveBeenCalledWith(0, at + SLEEP_FADE)
+    expect(sources[0].stop).toHaveBeenCalledWith(at + SLEEP_FADE)
+  })
+
+  it('a volume change keeps the audio-clock stop in place', () => {
+    p.setSleep(15); p.play(); p.setVolume(0.9)
+    expect(ctxs[0].param.linearRampToValueAtTime).toHaveBeenLastCalledWith(0, 15 * 60 + SLEEP_FADE)
+  })
+
+  it('turning the timer off removes the audio-clock stop', () => {
+    p.setSleep(15); p.play(); p.setSleep(0)
+    const s = ctxs[0].sources[0]
+    expect(s.stop.mock.calls.at(-1)[0]).toBeGreaterThan(1e8)
+  })
+
+  it('after the sleep timer fires, it is reset to Off', () => {
+    p.setSleep(15); p.play()
+    vi.advanceTimersByTime(15 * 60000)
+    expect(p.get().sleep).toBe(0)
+  })
+
+  it('shows paused when the system interrupts the audio', () => {
+    p.play()
+    const c = ctxs[0]
+    c.state = 'suspended'; c.onstatechange()
+    expect(p.get().playing).toBe(false)
+    p.play()                                         // and Play recovers with a fresh context
+    expect(p.get().playing).toBe(true)
+    expect(ctxs).toHaveLength(2)
+  })
+
+  it('reports false instead of throwing when Web Audio is missing', () => {
+    const q = createNoisePlayer({ newContext: () => { throw new TypeError('AudioContext is not a constructor') } })
+    expect(q.play()).toBe(false)
+    expect(q.get().playing).toBe(false)
   })
 })

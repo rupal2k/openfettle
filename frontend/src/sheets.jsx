@@ -431,7 +431,7 @@ function WindDown() {
     <h3>{t('Wind down')}</h3>
     <div className="muted small">{t('Steady noise, generated on this device. Nothing is downloaded.')}</div>
     <div style={{ height: 14 }} />
-    <div className="small muted" id="wd-color" style={{ marginBottom: 6 }}>{t('Noise colour')}</div>
+    <div className="small muted" id="wd-color" style={{ marginBottom: 6 }}>{t('Noise color')}</div>
     <div role="group" aria-labelledby="wd-color">
       <Segmented className="tall" options={COLORS.map(c => ({ value: c, label: { white: t('White'), pink: t('Pink'), brown: t('Brown') }[c] }))} value={st.color} onChange={c => p.setColor(c)} />
     </div>
@@ -447,7 +447,7 @@ function WindDown() {
       {st.endsAt ? t('Fades out at {0}', new Date(st.endsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })) : ''}
     </div>
     <div style={{ height: 10 }} />
-    <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : p.play()}>{st.playing ? t('Pause') : t('Play')}</Button>
+    <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : (p.play() || toast(t('Sound can’t play on this device.')))}>{st.playing ? t('Pause') : t('Play')}</Button>
     <div style={{ height: 8 }} />
   </>
 }

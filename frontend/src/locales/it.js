@@ -1238,7 +1238,7 @@ export default {
   'White': 'Bianco',
   'Pink': 'Rosa',
   'Brown': 'Marrone',
-  'Noise colour': 'Colore del rumore',
+  'Noise color': 'Colore del rumore',
   'Noise volume': 'Volume del rumore',
   'Sleep timer': 'Timer di spegnimento',
   '{0} min': '{0} min',
@@ -1247,4 +1247,5 @@ export default {
   'Play': 'Riproduci',
   'White, pink or brown noise to help you rest': 'Rumore bianco, rosa o marrone per riposare',
   'Steady noise, generated on this device. Nothing is downloaded.': 'Rumore costante generato su questo dispositivo. Non viene scaricato nulla.',
+  'Sound can’t play on this device.': 'Su questo dispositivo non è possibile riprodurre audio.',
 }

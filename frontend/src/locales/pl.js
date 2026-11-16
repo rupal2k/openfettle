@@ -1238,7 +1238,7 @@ export default {
   'White': 'Biały',
   'Pink': 'Różowy',
   'Brown': 'Brązowy',
-  'Noise colour': 'Kolor szumu',
+  'Noise color': 'Kolor szumu',
   'Noise volume': 'Głośność szumu',
   'Sleep timer': 'Wyłącznik czasowy',
   '{0} min': '{0} min',
@@ -1247,4 +1247,5 @@ export default {
   'Play': 'Odtwórz',
   'White, pink or brown noise to help you rest': 'Biały, różowy lub brązowy szum na odpoczynek',
   'Steady noise, generated on this device. Nothing is downloaded.': 'Stały szum generowany na tym urządzeniu. Nic nie jest pobierane.',
+  'Sound can’t play on this device.': 'Na tym urządzeniu nie można odtworzyć dźwięku.',
 }

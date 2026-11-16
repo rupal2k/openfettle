@@ -1238,7 +1238,7 @@ export default {
   'White': 'Blanc',
   'Pink': 'Rose',
   'Brown': 'Brun',
-  'Noise colour': 'Couleur du bruit',
+  'Noise color': 'Couleur du bruit',
   'Noise volume': 'Volume du bruit',
   'Sleep timer': 'Minuterie de sommeil',
   '{0} min': '{0} min',
@@ -1247,4 +1247,5 @@ export default {
   'Play': 'Lecture',
   'White, pink or brown noise to help you rest': 'Bruit blanc, rose ou brun pour vous reposer',
   'Steady noise, generated on this device. Nothing is downloaded.': 'Bruit continu généré sur cet appareil. Rien n’est téléchargé.',
+  'Sound can’t play on this device.': 'Impossible de lire du son sur cet appareil.',
 }

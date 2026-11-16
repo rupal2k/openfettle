@@ -1238,7 +1238,7 @@ export default {
   'White': 'Beyaz',
   'Pink': 'Pembe',
   'Brown': 'Kahverengi',
-  'Noise colour': 'Gürültü rengi',
+  'Noise color': 'Gürültü rengi',
   'Noise volume': 'Gürültü sesi',
   'Sleep timer': 'Uyku zamanlayıcısı',
   '{0} min': '{0} dk',
@@ -1247,4 +1247,5 @@ export default {
   'Play': 'Oynat',
   'White, pink or brown noise to help you rest': 'Dinlenmen için beyaz, pembe veya kahverengi gürültü',
   'Steady noise, generated on this device. Nothing is downloaded.': 'Bu cihazda üretilen sabit gürültü. Hiçbir şey indirilmez.',
+  'Sound can’t play on this device.': 'Bu cihazda ses çalınamıyor.',
 }
