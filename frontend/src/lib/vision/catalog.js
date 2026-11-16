@@ -1,4 +1,4 @@
-// On-device food recognition models — the OPENFIT counterpart of fud-ai's LocalModelCatalog
+// On-device food recognition models — the OpenFettle counterpart of fud-ai's LocalModelCatalog
 // (MIT): pinned commit, exact byte size and sha256 per file, license, memory floor.
 // The Task 1 spike (docs/superpowers/notes/2026-10-15-photo-spike.md) rejected SmolVLM 256M/500M
 // (3–5/10 dishes, no usable grams, 20–40 s); the Food-101 classifier won (6–7/10, ~2.5 s, 53–93 MB).

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates an animated showcase GIF carousel of the OPENFIT mobile app screenshots.
+"""Generates an animated showcase GIF carousel of the OpenFettle mobile app screenshots.
 Renders an elegant mobile device frame with rounded screen corners,
 animated pagination dots, and the screen title and subtitle labels below.
 
@@ -44,7 +44,7 @@ if font_title is None:
     font_title = ImageFont.load_default()
     font_sub = ImageFont.load_default()
 
-# Theme colors (matching OPENFIT dark theme & GitHub card)
+# Theme colors (matching OpenFettle dark theme & GitHub card)
 BG_COLOR = (13, 17, 23)           # GitHub dark background #0d1117
 CARD_BORDER = (33, 38, 45)         # Card border #21262d
 BEZEL_FILL = (22, 26, 34)          # Phone bezel #161a22
@@ -218,7 +218,7 @@ def main():
     print(f"Total animation frames: {len(frames)}")
     out_dir = os.path.join(repo_root, "assets", "screenshots")
     os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, "openfit-carousel.gif")
+    out_path = os.path.join(out_dir, "openfettle-carousel.gif")
     
     print("Quantizing frames with adaptive 256-color palette...")
     palette_frames = [f.convert("P", palette=Image.ADAPTIVE, colors=256) for f in frames]

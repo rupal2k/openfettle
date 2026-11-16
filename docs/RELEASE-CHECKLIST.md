@@ -77,7 +77,7 @@ Run on a real device with the **signed release APK**, installed over the previou
 ## 11. Backup, import, export
 - [ ] Export backup → share sheet → save to Files/Drive; only the latest export kept in cache
 - [ ] Import that backup on a fresh install restores everything (workouts, meals, lab reports, settings)
-- [ ] Import non-OPENFIT JSON → clear error; >20 MB → refused
+- [ ] Import non-OpenFettle JSON → clear error; >20 MB → refused
 - [ ] Import from another app (Strong/Hevy/FitNotes CSV, Apple Health XML): summary counts dropped sets and ratings
 - [ ] Reset everything wipes data after confirmation
 

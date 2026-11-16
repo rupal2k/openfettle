@@ -1,24 +1,26 @@
 <div align="center">
 
-<img src="assets/banner.png" alt="OPENFIT: training, body weight and nutrition, self-hosted" width="720">
+<img src="assets/banner.png" alt="OpenFettle: training, body weight and nutrition, self-hosted" width="720">
 
-<h1>OPENFIT</h1>
+<h1>OpenFettle</h1>
+
+<sub>Called OPENFIT until November 2026. Same app, same data, new name.</sub>
 
 **Self-hosted training, body-weight and nutrition tracking that you own.**
 
 Plan routines, run guided workouts with automatic progressive overload, log meals by search or barcode, track body weight, and read your blood-test reports on your own device, all in one app that runs on your own server.
 
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-a3e635?style=flat-square)](LICENSE)
-[![Latest release](https://img.shields.io/github/v/release/rupal2k/openfit?style=flat-square&label=release&color=22d3ee)](https://github.com/rupal2k/openfit/releases/latest)
-[![CI](https://img.shields.io/github/actions/workflow/status/rupal2k/openfit/ci.yml?branch=main&style=flat-square&label=tests)](https://github.com/rupal2k/openfit/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/rupal2k/openfettle?style=flat-square&label=release&color=22d3ee)](https://github.com/rupal2k/openfettle/releases/latest)
+[![CI](https://img.shields.io/github/actions/workflow/status/rupal2k/openfettle/ci.yml?branch=main&style=flat-square&label=tests)](https://github.com/rupal2k/openfettle/actions/workflows/ci.yml)
 ![Self-hosted](https://img.shields.io/badge/self--hosted-docker-22d3ee?style=flat-square&logo=docker&logoColor=white)
 
-[![Download APK](https://img.shields.io/badge/Download-Android%20APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/rupal2k/openfit/releases/latest/download/app-release.apk)
+[![Download APK](https://img.shields.io/badge/Download-Android%20APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/rupal2k/openfettle/releases/latest/download/app-release.apk)
 [![Watch the video tour](https://img.shields.io/badge/Watch-8--episode%20tour-ff0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/playlist?list=PLIlQz5UNxQ1c)
 
 <br>
 
-<img src="assets/screenshots/openfit-carousel.gif" alt="OPENFIT App Walkthrough Carousel" width="360" style="max-width: 100%; height: auto; border-radius: 12px;">
+<img src="assets/screenshots/openfettle-carousel.gif" alt="OpenFettle App Walkthrough Carousel" width="360" style="max-width: 100%; height: auto; border-radius: 12px;">
 
 </div>
 
@@ -28,13 +30,13 @@ Plan routines, run guided workouts with automatic progressive overload, log meal
 
 A short trailer and eight comic-style episodes, one per module, about a minute and a half each.
 
-<a href="https://www.youtube.com/playlist?list=PLIlQz5UNxQ1c"><img src="assets/video-tour.jpg" alt="OPENFIT video tour: the whole app in 8 episodes" width="640"></a>
+<a href="https://www.youtube.com/playlist?list=PLIlQz5UNxQ1c"><img src="assets/video-tour.jpg" alt="OpenFettle video tour: the whole app in 8 episodes" width="640"></a>
 
 [Trailer](https://www.youtube.com/watch?v=8bsf6MMnFoA&list=PLIlQz5UNxQ1c) · [1. Today](https://www.youtube.com/watch?v=hB6LLFcCpPI&list=PLIlQz5UNxQ1c) · [2. Guided workouts](https://www.youtube.com/watch?v=LpxnzEjcCTc&list=PLIlQz5UNxQ1c) · [3. My Plan](https://www.youtube.com/watch?v=-yHLYWLfpzE&list=PLIlQz5UNxQ1c) · [4. My Meals](https://www.youtube.com/watch?v=w5pAtuHNU38&list=PLIlQz5UNxQ1c) · [5. My Stats](https://www.youtube.com/watch?v=JdfB-Oq2mR8&list=PLIlQz5UNxQ1c) · [6. Exercise library](https://www.youtube.com/watch?v=1WvinN-iHXM&list=PLIlQz5UNxQ1c) · [7. Settings & backups](https://www.youtube.com/watch?v=ZjggkLvZ_64&list=PLIlQz5UNxQ1c) · [8. Blood tests](https://www.youtube.com/watch?v=fM3kZanQOA8&list=PLIlQz5UNxQ1c)
 
-## Why OPENFIT
+## Why OpenFettle
 
-Fitness apps tend to put your own training history behind a subscription, or lose it when the company changes direction. OPENFIT keeps the data with you:
+Fitness apps tend to put your own training history behind a subscription, or lose it when the company changes direction. OpenFettle keeps the data with you:
 
 - **Self-hosted:** one Docker Compose stack on your server or home lab, with no external database.
 - **One app:** workouts, progressive overload, body weight, nutrition and blood tests live in one place.
@@ -59,7 +61,7 @@ Fitness apps tend to put your own training history behind a subscription, or los
 | **Daily diary** | Breakfast, lunch, dinner and snacks, with live calorie and macro totals. |
 | **Food search** | Open Food Facts search through a cached server-side proxy. |
 | **Barcode scanner** | Native camera scanning with HD capture, tap-to-focus, zoom and torch. Manual code entry as a fallback. |
-| **Photo logging (on-device AI)** | Snap a dish and OPENFIT recognises it (101 common dishes) with a small Hugging Face model (~120 MB incl. runtime, downloaded once and verified) that runs on your device. Nutrition and the typical portion come from USDA data. Photos are never uploaded, and it works offline. |
+| **Photo logging (on-device AI)** | Snap a dish and OpenFettle recognises it (101 common dishes) with a small Hugging Face model (~120 MB incl. runtime, downloaded once and verified) that runs on your device. Nutrition and the typical portion come from USDA data. Photos are never uploaded, and it works offline. |
 | **Flexible portions** | Log by serving, grams, kilograms, ounces or millilitres. Product serving sizes are detected automatically. |
 | **Science-based targets** | IOM 2005 energy equations with a lifter-focused protein target of 1.6 g/kg. |
 | **History stays accurate** | Each entry snapshots the food's nutrition values, so later database edits never rewrite old logs. |
@@ -67,8 +69,8 @@ Fitness apps tend to put your own training history behind a subscription, or los
 ### Blood tests
 | | |
 |---|---|
-| **Lab report import** | Import a lab report PDF and OPENFIT reads it on your device in about a second, with no AI model and nothing uploaded (68 of 68 results on the [getbased](https://github.com/elkimek/get-based) reference report). The sample date is filled in when the report shows it. Check every value, unit and range before you save; Save stays on screen however long the list is. Files up to 25 MB, text PDFs up to 30 pages. |
-| **Photos and scans** | Photograph a printed report or import a scanned PDF: on-device OCR (Tesseract, bundled in the app, works offline) reads it, puts back decimal points OCR drops and flags every value it changed or was unsure of. Flagged rows start unticked, and OPENFIT asks for the sample date when the report has none. Photos up to 120 megapixels. |
+| **Lab report import** | Import a lab report PDF and OpenFettle reads it on your device in about a second, with no AI model and nothing uploaded (68 of 68 results on the [getbased](https://github.com/elkimek/get-based) reference report). The sample date is filled in when the report shows it. Check every value, unit and range before you save; Save stays on screen however long the list is. Files up to 25 MB, text PDFs up to 30 pages. |
+| **Photos and scans** | Photograph a printed report or import a scanned PDF: on-device OCR (Tesseract, bundled in the app, works offline) reads it, puts back decimal points OCR drops and flags every value it changed or was unsure of. Flagged rows start unticked, and OpenFettle asks for the sample date when the report has none. Photos up to 120 megapixels. |
 | **Trends** | Every marker gets a chart over time, with High and Low against the lab's own range, in SI or US units. |
 | **Published scores** | HOMA-IR, TG/HDL, ApoB/ApoA1, FIB-4, non-HDL cholesterol, homocysteine and Omega-3 Index, plus a PhenoAge biological-age estimate, each with its formula and source. Scores use each marker's latest value from the last 120 days, so a partial follow-up report keeps them. Information, not medical advice. |
 | **Private by design** | Only the birth year and the import type (PDF, scan or photo) are stored with a report, never the file name or the full date of birth. On Android, your data is left out of Google's cloud backup. |
@@ -147,8 +149,8 @@ The web request path, the code layers (presentation / state / domain / adapters)
 **Requirements:** [Docker](https://docs.docker.com/get-docker/) with Compose.
 
 ```bash
-git clone https://github.com/rupal2k/openfit.git
-cd openfit
+git clone https://github.com/rupal2k/openfettle.git
+cd openfettle
 cp .env.example .env
 # edit .env — set RP_ID and ORIGIN at minimum
 docker compose up -d --build
@@ -165,7 +167,7 @@ TRUST_PROXY=2
 
 The session signing key and web-push keys are generated on first start and stored in `./data` (see [Backups](#backups)); there is nothing to set for them.
 
-> **TLS note:** browsers require HTTPS for passkeys (except on `localhost`). Put OPENFIT behind Caddy, Traefik, or Cloudflare Tunnel, set `RP_ID`/`ORIGIN` to your public domain, and set `TRUST_PROXY=2` so rate limiting sees each visitor's real IP.
+> **TLS note:** browsers require HTTPS for passkeys (except on `localhost`). Put OpenFettle behind Caddy, Traefik, or Cloudflare Tunnel, set `RP_ID`/`ORIGIN` to your public domain, and set `TRUST_PROXY=2` so rate limiting sees each visitor's real IP.
 
 ---
 
@@ -178,7 +180,7 @@ The session signing key and web-push keys are generated on first start and store
 | `RP_ID` | Hostname that passkeys are bound to | `localhost` |
 | `ORIGIN` | Full public origin of the instance | `http://localhost:8080` |
 | `WEB_PORT` | Host port for the web service | `8080` |
-| `RP_NAME` | Name shown in passkey prompts | `openfit` |
+| `RP_NAME` | Name shown in passkey prompts | `OpenFettle` |
 | `ADMIN_UIDS` | Comma-separated user IDs with admin access | — |
 | `INVITE_ONLY` | `1` requires an invite code to register | `0` |
 | `TRUST_PROXY` | Proxies in front of the API: `1` = bundled nginx only, `2` = also behind Caddy, Traefik or Cloudflare Tunnel | `1` |
@@ -199,10 +201,10 @@ All state lives in `./data`:
 
 ```bash
 # Manual backup
-tar -czf openfit-backup.tar.gz data/
+tar -czf openfettle-backup.tar.gz data/
 
 # Daily scheduled backup (add to crontab: crontab -e)
-0 3 * * * cd /path/to/openfit && tar -czf ~/backups/openfit-$(date +\%F).tar.gz data/
+0 3 * * * cd /path/to/openfettle && tar -czf ~/backups/openfettle-$(date +\%F).tar.gz data/
 ```
 
 ## Cloud deploy
@@ -214,14 +216,14 @@ These options are for managed hosting without a VPS.
 
 ### Render
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/rupal2k/openfit)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/rupal2k/openfettle)
 
 Deploys two services (API + web) from the `render.yaml` in this repo:
 
 1. Click **Deploy to Render** above and connect your GitHub account.
-2. After the deploy finishes, open the **openfit-api** service → **Environment** and set:
-   - `RP_ID` → your Render web domain, e.g. `openfit-web.onrender.com`
-   - `ORIGIN` → `https://openfit-web.onrender.com`
+2. After the deploy finishes, open the **openfettle-api** service → **Environment** and set:
+   - `RP_ID` → your Render web domain, e.g. `openfettle-web.onrender.com`
+   - `ORIGIN` → `https://openfettle-web.onrender.com`
 3. Redeploy the API service to apply the changes.
 
 > **Note on persistence:** The API service uses a 1 GB managed disk (`./data`). Render's free tier does not include persistent disks — you'll need the Starter plan ($7/month) or above. Without a disk, data resets on every deploy.
@@ -248,15 +250,15 @@ Set `RP_ID` and `ORIGIN` in the Railway dashboard to your project's domain, then
 
 ```bash
 fly auth login
-fly launch --name openfit --region iad   # detects Dockerfile, prompts for config
-fly volumes create openfit_data --size 1  # persistent data volume
+fly launch --name openfettle --region iad   # detects Dockerfile, prompts for config
+fly volumes create openfettle_data --size 1  # persistent data volume
 fly deploy
 ```
 
 Set `RP_ID` and `ORIGIN` as secrets:
 
 ```bash
-fly secrets set RP_ID=openfit.fly.dev ORIGIN=https://openfit.fly.dev
+fly secrets set RP_ID=openfettle.fly.dev ORIGIN=https://OpenFettle.fly.dev
 ```
 
 ---
@@ -271,7 +273,7 @@ Paste the repo URL into Coolify's **New Resource → Docker Compose** flow. Copy
 
 ## Android app
 
-**[⬇ Download the latest APK](https://github.com/rupal2k/openfit/releases/latest/download/app-release.apk)** (sideload: allow "Install unknown apps" for your browser or file manager). All releases: [Releases](https://github.com/rupal2k/openfit/releases).
+**[⬇ Download the latest APK](https://github.com/rupal2k/openfettle/releases/latest/download/app-release.apk)** (sideload: allow "Install unknown apps" for your browser or file manager). All releases: [Releases](https://github.com/rupal2k/openfettle/releases).
 
 The Android build is a standalone Capacitor app. Data stays on the device, and food search calls Open Food Facts directly. Your data is left out of Google's cloud backup: moving to a new phone (Android 12 or later) copies it across, and **Settings → Export backup** works on any version.
 
@@ -298,7 +300,7 @@ To regenerate every icon, splash screen and the banner from `assets/icon-source.
 
 ## Acknowledgements
 
-OPENFIT builds on these open-source projects:
+OpenFettle builds on these open-source projects:
 
 - **[openGym](https://github.com/DuarteSantos8/openGym)** by Duarte Santos: the upstream tracker this project forks (AGPL-3.0).
 - **[OpenNutriTracker](https://github.com/simonoppowa/OpenNutriTracker)** by Simon Oppowa: energy and macro equations (GPL-3.0).

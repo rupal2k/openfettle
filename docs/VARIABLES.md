@@ -1,4 +1,4 @@
-# OPENFIT — Configuration & Secrets
+# OpenFettle — Configuration & Secrets
 
 All variables are consumed by `api/server.js` at startup unless noted. Frontend build-time vars are bundled into the shipped JS — treat them as public.
 
@@ -12,7 +12,7 @@ All variables are consumed by `api/server.js` at startup unless noted. Frontend 
 | `DATA_DIR` | server.js:14 | server | env | `/data` | medium | Root of all persistent data; must be a writable volume |
 | `RP_ID` | server.js:15 | server | env | `localhost` | high | WebAuthn relying party ID — must match the domain users visit |
 | `ORIGIN` | server.js:16 | server | env | `http://localhost:8080` | high | WebAuthn expected origin — must match scheme+host+port users visit |
-| `RP_NAME` | server.js:17 | server | env | `openfit` | none | Display name in passkey browser dialog |
+| `RP_NAME` | server.js:17 | server | env | `OpenFettle` | none | Display name in passkey browser dialog |
 | `ADMIN_UIDS` | server.js:20 | server | env | _(empty)_ | **critical** | Comma-separated user IDs with admin access; takes effect immediately on change |
 | `INVITE_ONLY` | server.js:21 | server | env | `false` | medium | `1/true/yes/on` = new registrations require an invite code |
 | `SESSION_DAYS` | server.js:26 | server | env | `90` | medium | Cookie max-age in days (min 1); only affects newly minted cookies |

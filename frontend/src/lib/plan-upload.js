@@ -154,7 +154,7 @@ export function parseCSVPlan(csvText, filename = '') {
 }
 
 /**
- * Parse structured JSON plan (either OPENFIT native or user-friendly simplified format).
+ * Parse structured JSON plan (either OpenFettle native or user-friendly simplified format).
  */
 export function parseJSONPlan(jsonText, filename = '') {
   const data = typeof jsonText === 'string' ? JSON.parse(jsonText) : jsonText
@@ -226,7 +226,7 @@ export function parseJSONPlan(jsonText, filename = '') {
 }
 
 /**
- * Universal plan loader: automatically detects JSON vs CSV and parses into an OPENFIT bundle.
+ * Universal plan loader: automatically detects JSON vs CSV and parses into an OpenFettle bundle.
  */
 export function parseAnyPlan(raw, filename = '') {
   const isJson = (filename && filename.toLowerCase().endsWith('.json')) ||
@@ -327,10 +327,10 @@ export const SAMPLE_JSON = {
 
 export function downloadSampleCSV(variant = 'ppl') {
   let content = SAMPLE_CSV
-  let filename = 'openfit_sample_plan_ppl.csv'
+  let filename = 'openfettle_sample_plan_ppl.csv'
   if (variant === 'primal') {
     content = SAMPLE_PRIMAL_CSV
-    filename = 'openfit_sample_upper_lower.csv'
+    filename = 'openfettle_sample_upper_lower.csv'
   }
   const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
   const a = document.createElement('a')
@@ -344,7 +344,7 @@ export function downloadSampleJSON() {
   const blob = new Blob([JSON.stringify(SAMPLE_JSON, null, 2)], { type: 'application/json;charset=utf-8;' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = 'openfit_sample_plan.json'
+  a.download = 'openfettle_sample_plan.json'
   a.click()
   URL.revokeObjectURL(a.href)
 }

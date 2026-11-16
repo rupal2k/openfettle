@@ -1,6 +1,6 @@
 # Security policy
 
-openfit is a self-hosted app: you run the server, you hold the data. This file says which
+OpenFettle is a self-hosted app: you run the server, you hold the data. This file says which
 versions get fixes, how to report something privately, and — the part most people actually
 need — what the app protects you from and what it doesn't.
 
@@ -20,7 +20,7 @@ git pull && docker compose pull && docker compose up -d
 
 Use GitHub's private vulnerability reporting — repo **Security** tab → **Report a vulnerability**:
 
-<https://github.com/rupal2k/openfit/security/advisories/new>
+<https://github.com/rupal2k/openfettle/security/advisories/new>
 
 > Private reporting has to be switched on in the repository settings for that link to work
 > (Settings → Advanced Security → Private vulnerability reporting). If it 404s, open a normal
@@ -49,7 +49,7 @@ you want to disclose publicly, say so in the thread.
   change a signed-in user's data.
 - **Shipped deployment config** — `docker-compose.yml`, `web/nginx.conf`, the Dockerfile:
   a default that exposes something a self-hoster wouldn't expect to be exposed.
-- **The published images** `ghcr.io/rupal2k/openfit-api` and `-web`.
+- **The published images** `ghcr.io/rupal2k/openfettle-api` and `-web`.
 
 ## Out of scope
 
@@ -72,7 +72,7 @@ you want to disclose publicly, say so in the thread.
 
 ## Security model
 
-Read this before hosting openfit for anyone other than yourself.
+Read this before hosting OpenFettle for anyone other than yourself.
 
 ### What it does
 
@@ -102,7 +102,7 @@ Read this before hosting openfit for anyone other than yourself.
   subscriptions, invite codes), one `state-<uid>.json` per user with their complete workout
   history and body-weight log, `secret`, and `vapid.json`. Anyone who can read that folder — you,
   whoever holds the backups, whoever gets into the host — can read every user's data, and with
-  `secret` can mint a valid session cookie for any account. **If you host openfit for other
+  `secret` can mint a valid session cookie for any account. **If you host OpenFettle for other
   people, they are trusting you exactly as much as they'd trust any server operator.**
 - **Admins can read everything.** A user listed in `ADMIN_UIDS` (or flagged `admin: true` in
   `db.json`) gets every user's full history and body weight, can disable accounts, and can create

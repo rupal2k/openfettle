@@ -1,6 +1,6 @@
-# Contributing to openfit
+# Contributing to OpenFettle
 
-Thanks for taking a look! openfit is intentionally small and dependency-light, and the goal is
+Thanks for taking a look! OpenFettle is intentionally small and dependency-light, and the goal is
 to keep it that way — easy to read, easy to self-host.
 
 ## Project layout
@@ -53,9 +53,9 @@ cd frontend && npm test
 
 | You have | Goes to |
 | --- | --- |
-| A question, or self-hosting that won't behave | [Discussions → Q&A](https://github.com/rupal2k/openfit/discussions/categories/q-a) |
-| An idea you're not sure about yet | [Discussions → Ideas](https://github.com/rupal2k/openfit/discussions/categories/ideas) |
-| A reproducible bug | [Issues](https://github.com/rupal2k/openfit/issues) |
+| A question, or self-hosting that won't behave | [Discussions → Q&A](https://github.com/rupal2k/openfettle/discussions/categories/q-a) |
+| An idea you're not sure about yet | [Discussions → Ideas](https://github.com/rupal2k/openfettle/discussions/categories/ideas) |
+| A reproducible bug | [Issues](https://github.com/rupal2k/openfettle/issues) |
 | A change you've already built | A pull request |
 
 An answered question in Q&A is worth more than the same answer buried in a closed issue — the

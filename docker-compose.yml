@@ -1,3 +1,4 @@
+# The project name stays "openfit": it names the data volumes, so changing it would start empty.
 name: openfit
 
 services:
@@ -24,7 +25,7 @@ services:
   # Passkey auth + per-user data (Node, no framework).
   # image: prebuilt (docker compose pull). build: from source (docker compose up --build).
   api:
-    image: ghcr.io/rupal2k/openfit-api:latest
+    image: ghcr.io/rupal2k/openfettle-api:latest
     build: ./api
     restart: unless-stopped
     env_file: .env
@@ -38,7 +39,7 @@ services:
   # Builds the React frontend (multi-stage) and serves it, proxying /api → api
   # and the exercise media from the shared volume. Single origin for passkeys.
   web:
-    image: ghcr.io/rupal2k/openfit-web:latest
+    image: ghcr.io/rupal2k/openfettle-web:latest
     build:
       context: .
       dockerfile: Dockerfile

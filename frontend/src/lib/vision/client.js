@@ -1,4 +1,4 @@
-// OPENFIT's LocalModelManager: lifecycle state for the UI, verified install, cancel, delete,
+// OpenFettle's LocalModelManager: lifecycle state for the UI, verified install, cancel, delete,
 // and the worker RPC. transformers.js caches files in Cache Storage ('transformers-cache') under
 // their Hugging Face resolve URL; we hash them once after download and then trust a marker
 // (localStorage) — fud-ai's "size + marker" rule — so startup never re-hashes the model.

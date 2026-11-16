@@ -1,4 +1,4 @@
-# OPENFIT — Auth & Permission Flows
+# OpenFettle — Auth & Permission Flows
 
 Permission-relevant journeys: each protected step's auth check, trust-boundary crossings, and side effects. Sections 1–8 are the self-host API; sections 9–15 are app-side flows (no roles; integrity, privacy and code-provenance checks).
 

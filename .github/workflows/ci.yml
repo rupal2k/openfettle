@@ -65,13 +65,13 @@ jobs:
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           mv frontend/android/app/build/outputs/apk/debug/app-debug.apk \
-             OPENFIT-android-${SHORT_SHA}.apk
-          echo "APK_NAME=OPENFIT-android-${SHORT_SHA}.apk" >> $GITHUB_ENV
+             OpenFettle-android-${SHORT_SHA}.apk
+          echo "APK_NAME=OpenFettle-android-${SHORT_SHA}.apk" >> $GITHUB_ENV
       # A CI artifact only. A debug build is WebView-debuggable, so it must never sit next to
       # the signed app-release.apk on a public release (it used to be attached to the latest one).
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: openfit-apk-debug
+          name: openfettle-apk-debug
           path: ${{ env.APK_NAME }}
           retention-days: 30

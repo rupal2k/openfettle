@@ -304,7 +304,7 @@ export default function Labs() {
     {!reports.length && <div className="card lab-empty">
       <Icon name="heart" />
       <h2>{t('Bring in your blood tests')}</h2>
-      <p className="muted">{t('Import a lab report PDF or take a photo of a printed one. OPENFIT reads it on this device, you check the values, and every marker gets a chart over time, plus published scores such as HOMA-IR and a biological age estimate.')}</p>
+      <p className="muted">{t('Import a lab report PDF or take a photo of a printed one. OpenFettle reads it on this device, you check the values, and every marker gets a chart over time, plus published scores such as HOMA-IR and a biological age estimate.')}</p>
       <div className="lab-actions">
         <Button variant="primary" icon="upload" onClick={pick}>{t('Import a PDF')}</Button>
         <Button icon="camera" onClick={pickPhoto}>{t('Take a photo')}</Button>

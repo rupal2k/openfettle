@@ -1,4 +1,4 @@
-# Data Flow — openfit
+# Data Flow — OpenFettle
 
 > Where data originates, how it transforms, where it ends up.
 

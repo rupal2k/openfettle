@@ -6,11 +6,13 @@ import { bindUI } from './components/ui.jsx'
 import { ACCENTS } from './lib/format.js'
 import { MOBILE } from './lib/mobile.js'
 import { saveMedia, routineExIds } from './lib/media-cache.js'
-import { setLang, useLang } from './lib/i18n.js'
+import { setLang, useLang, t } from './lib/i18n.js'
 import { setNav } from './lib/nav.js'
 import { useWakeLock } from './lib/wakelock.js'
 import { startFlow, runUpdateCheck } from './sheets.jsx'
 import { dueForCheck } from './lib/updates.js'
+import { shouldShowRenameNotice } from './lib/rename-notice.js'
+import { DEMO } from './lib/demo.js'
 import Icon from './components/Icon.jsx'
 import TabBar from './components/TabBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
@@ -70,6 +72,15 @@ function Shell() {
     return () => clearTimeout(tm)
   }, [S.updateCheck])
   useEffect(() => { document.documentElement.lang = S.lang || 'en' }, [langV, S.lang])
+  // once, after the stored data has loaded: people who used the app before 1.7.0 knew it as OPENFIT
+  useEffect(() => {
+    if (!ready || DEMO) return
+    let show = false
+    try { show = shouldShowRenameNotice(useStore.getState().S, localStorage) } catch { /* no storage */ }
+    if (!show) return
+    const tm = setTimeout(() => useUI.getState().toast(t('OPENFIT is now OpenFettle. Same app, same data, new name.')), 1500)
+    return () => clearTimeout(tm)
+  }, [ready])
   // every tab/route change starts at the top of the page
   useEffect(() => { window.scrollTo(0, 0) }, [loc.pathname])
   // bound to the workout, not to the route — checking Stats mid-session keeps the screen on

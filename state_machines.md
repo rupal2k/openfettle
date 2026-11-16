@@ -1,4 +1,4 @@
-# State Machines — openfit
+# State Machines — OpenFettle
 
 > Entity lifecycles: what states exist, how transitions happen, what guards them.
 

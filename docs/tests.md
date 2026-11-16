@@ -1,4 +1,4 @@
-# Test Coverage — openfit
+# Test Coverage — OpenFettle
 
 Coverage map produced by ship-check (step 7, derive-tests), refreshed 2026-11-11 on `fix/photo-capture` at `2cdaac1`. It replaces the 2026-10 map, which predated Labs, food photo recognition, interval formats, the i18n coverage tests and photo/capture handling.
 
@@ -24,7 +24,7 @@ Rule sources: `CLAUDE.md` (trust boundaries, do-not-touch list), `docs/ARCHITECT
 | Lab report repair on load | `cleanReports()` in `normalizeState` (ARCH §4) | malformed reports/markers dropped; empty report dropped; old reports migrated to birth year only | `lib/labs/reports.test.js` › cleanReports; cleanReports migrates old reports; reports with nothing left… | unit | **existing** |
 | Size caps before reading | `tooBig` 20 MB text, Labs 25 MB, 120 MP photo (CLAUDE.md; ARCH §5) | over-cap file refused with a toast before it is read | `sheets.jsx`, `Settings.jsx`, `Labs.jsx` inline checks | unit (extract predicate) + manual | **manual** (checklist §4, §9, §11); **proposed** unit |
 | Food photo size check | ARCH §6 known risk: no size check before `readOnce` in `vision-sheets.jsx pickFile` | (documented gap, not a rule yet) | `vision-sheets.jsx:90` | — | **none** |
-| Backup must look like OPENFIT | must have `workouts`, `routines` or `nutrition` (FLOWS 12) | non-OPENFIT JSON → clear error | `Settings.jsx doImport` | unit (extract predicate) + manual | **manual** (checklist §11); **proposed** unit |
+| Backup must look like OpenFettle | must have `workouts`, `routines` or `nutrition` (FLOWS 12) | non-OpenFettle JSON → clear error | `Settings.jsx doImport` | unit (extract predicate) + manual | **manual** (checklist §11); **proposed** unit |
 
 ### Pickers, camera captures, file inputs (photo/capture handling)
 
@@ -32,7 +32,7 @@ Rule sources: `CLAUDE.md` (trust boundaries, do-not-touch list), `docs/ARCHITECT
 |---|---|---|---|---|---|
 | readOnce | picked images pass through `readOnce()`; Android picker files read only once (CLAUDE.md; FLOWS 10.3, 11.5) | file read exactly once, in-memory copy keeps name/type/size | `lib/mobile.test.js` › readOnce › reads the picked file exactly once… | unit | **existing** |
 | Read before clearing the input | read the picked file before clearing `<input>` (CLAUDE.md; FLOWS 10.1, 11.5) | clearing the input first must not lose the file | `views/Labs.jsx:43`, `vision-sheets.jsx:90`, `sheets.jsx` | component/manual | **manual** (checklist §8, §9). `mobile.test.js` pins `readOnce` only, not the call order in the views |
-| Camera captures deleted after read | `clearCaptures()` removes camera photos once read, and at boot for cancelled/killed captures (`lib/mobile.js:99`, `useStore.js:255`) | after a capture is read, `Pictures/` holds no OPENFIT photo; a killed capture is cleaned on next boot | `lib/mobile.js clearCaptures` | unit (mock Filesystem) + manual | **manual only** (device); **proposed** unit with a mocked `@capacitor/filesystem` |
+| Camera captures deleted after read | `clearCaptures()` removes camera photos once read, and at boot for cancelled/killed captures (`lib/mobile.js:99`, `useStore.js:255`) | after a capture is read, `Pictures/` holds no OpenFettle photo; a killed capture is cleaned on next boot | `lib/mobile.js clearCaptures` | unit (mock Filesystem) + manual | **manual only** (device); **proposed** unit with a mocked `@capacitor/filesystem` |
 | Take photo opens the camera | FileProvider `external-files-path Pictures/`; `<queries>` IMAGE_CAPTURE (CLAUDE.md; PERMISSIONS native surfaces) | camera app opens on both phones, not the gallery | `res/xml/file_paths.xml`, `AndroidManifest.xml` | manual | **manual** (checklist §8, §9) |
 | Choose photo preview / Retake | preview of the picked image; Retake clears it (checklist §8) | preview shown, Recognise → review → save | `vision-sheets.jsx` | manual | **manual** |
 | FileProvider not exported | `exported=false`, `grantUriPermissions=true` (PERMISSIONS) | — | manifest | manual (config review) | **manual** |

@@ -1,12 +1,12 @@
-# OPENFIT privacy policy
+# OpenFettle privacy policy
 
-Applies to the OPENFIT Android app and the OPENFIT web app (version 1.6.2 and later).
-OPENFIT is open source (AGPL v3); everything below can be checked in the code.
+Applies to the OpenFettle Android app and the OpenFettle web app (version 1.6.2 and later).
+OpenFettle is open source (AGPL v3); everything below can be checked in the code.
 
 ## The short version
 
 - **Your data stays on your phone.** Workouts, body weight, meals, blood test results and
-  settings are stored only on the device. There is no account and no OPENFIT cloud.
+  settings are stored only on the device. There is no account and no OpenFettle cloud.
 - **No analytics, no ads, no tracking.** The app contains no analytics or advertising SDK and
   sends no usage data anywhere.
 - **Photos and lab reports are read on the device.** Food photos and blood test reports (PDF,
@@ -21,7 +21,7 @@ OPENFIT is open source (AGPL v3); everything below can be checked in the code.
 | Camera photos (food, lab reports) | Copied into memory to be read, then the photo file is deleted | No |
 | Downloaded food-recognition model and exercise pictures | App cache, to work offline | No |
 
-Android cloud backup (Google) is turned off for OPENFIT's data. Moving to a new phone with
+Android cloud backup (Google) is turned off for OpenFettle's data. Moving to a new phone with
 Android's device-to-device transfer copies it.
 
 ## When the app uses the network
@@ -48,9 +48,9 @@ apply.
 
 ## Sync (self-hosted servers only)
 
-The Android app has no sign-in. If you run your own OPENFIT server and sign in to it from the
+The Android app has no sign-in. If you run your own OpenFettle server and sign in to it from the
 web app, your data is copied to **your** server so your devices stay in step. It is never sent
-to the OPENFIT project or anyone else.
+to the OpenFettle project or anyone else.
 
 ## Permissions (Android)
 
@@ -61,14 +61,14 @@ to the OPENFIT project or anyone else.
 
 ## Deleting your data
 
-Settings → Reset everything deletes all OPENFIT data on the phone, including cached backup files
+Settings → Reset everything deletes all OpenFettle data on the phone, including cached backup files
 and photos. Uninstalling the app also removes it. Delete the food model separately under
 Settings → On-device food recognition.
 
 ## Children
 
-OPENFIT is not designed for children. Calorie targets are calculated only for adults (18+).
+OpenFettle is not designed for children. Calorie targets are calculated only for adults (18+).
 
 ## Contact
 
-Questions or concerns: open an issue at https://github.com/rupal2k/openfit/issues.
+Questions or concerns: open an issue at https://github.com/rupal2k/openfettle/issues.

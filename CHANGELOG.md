@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased (1.6.2)
+## 1.7.0
+
+OPENFIT is now **OpenFettle**. Same app, same data, new name.
+
+- ✏️ **New name everywhere you see it:** the app name on your home screen, the sign-in screen, Settings, notifications, backup and plan file names, and all 11 languages. People who used the app before see a one-time note.
+- 💾 **Nothing to do:** update over 1.6.x as usual. Your workouts, plans, meals and lab reports stay; backups and plan files made with OPENFIT still import.
+- 🔗 **New address:** the project lives at github.com/rupal2k/openfettle. The update check follows it; old links redirect.
+
+## 1.6.2
 
 Photos work again, every language is complete, and a full accessibility pass.
 
