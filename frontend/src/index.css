@@ -1155,3 +1155,6 @@ body.resting #startfab{bottom:calc(240px + var(--sab))}
 :root[data-theme="light"] .lab-band.mid{color:var(--lab-warn-ink)}
 :root[data-theme="light"] .lab-band.high,:root[data-theme="light"] .lab-st.high{color:var(--lab-bad-ink)}
 :root[data-theme="light"] .lab-st.low{color:var(--lab-warn-ink)}
+
+/* The name OpenFettle, wherever it stands as the brand: always Sora Bold */
+.wordmark { font-family: 'Sora', var(--font, sans-serif); font-weight: 700; letter-spacing: 0; }

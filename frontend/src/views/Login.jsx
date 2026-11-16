@@ -62,7 +62,7 @@ export default function Login() {
       display: 'block', margin: '0 auto 12px', borderRadius: 22,
       boxShadow: '0 8px 24px -4px color-mix(in srgb, var(--acc) 50%, transparent)'
     }} />
-    <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: '.02em', margin: '4px 0 4px' }}>OpenFettle</h1>
+    <h1 className="wordmark" style={{ fontSize: 32, margin: '4px 0 4px' }}>OpenFettle</h1>
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, margin: '0 auto 12px', padding: '3px 12px', borderRadius: 999, background: 'var(--acc-soft)', color: 'var(--acc-ink)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
       FITNESS & NUTRITION
     </div>

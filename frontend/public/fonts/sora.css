@@ -1,0 +1,8 @@
+/* Sora Bold, Latin only, for the OpenFettle wordmark (SIL Open Font License 1.1, see OFL-Sora.txt). */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(sora-700-latin.woff2) format('woff2');
+}

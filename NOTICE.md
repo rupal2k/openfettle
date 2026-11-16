@@ -100,9 +100,14 @@ the **Apache License 2.0**, with the English model from
 WebAssembly core and model are shipped inside the app under `ocr/` unmodified. PDF text and page
 rendering use Mozilla's [**pdf.js**](https://github.com/mozilla/pdf.js) (Apache License 2.0).
 
-## Font (Poppins)
+## Fonts (Poppins, Sora)
 
 The interface font is [**Poppins**](https://github.com/itfoundry/Poppins) by the Poppins Project
 Authors, under the **SIL Open Font License 1.1** (full text in `frontend/public/fonts/OFL.txt`). The
 Latin, Latin Extended and Devanagari subsets from Google Fonts are shipped unmodified in
 `frontend/public/fonts/`, so the app never requests fonts from Google.
+
+The OpenFettle wordmark uses [**Sora**](https://github.com/sora-xor/sora-font) Bold by the Sora Project
+Authors, under the **SIL Open Font License 1.1** (full text in `frontend/public/fonts/OFL-Sora.txt`).
+A Latin-only subset is shipped as `frontend/public/fonts/sora-700-latin.woff2`, and the outlined
+wordmark in `assets/wordmark.svg` is drawn from it.

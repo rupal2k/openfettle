@@ -43,12 +43,13 @@ const SRC = path.join(R, 'assets/icon-source.png'), BG = '#0d1117'
   }
   // README / social banner
   const W = 1440, H = 480, ic = await sharp(master).resize(300, 300).png().toBuffer()
+  // the name is always Sora Bold: outlined in assets/wordmark.svg (from scripts' Sora subset), placed as an image
+  const wm = await sharp(fs.readFileSync(path.join(R, 'assets/wordmark.svg')), { density: 300 }).resize({ width: 700 }).png().toBuffer()
   const txt = Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
     <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a3e635"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0e131a"/><stop offset="1" stop-color="#0a0d13"/></linearGradient></defs>
     <rect width="${W}" height="${H}" rx="36" fill="url(#bg)"/>
-    <text x="500" y="250" font-family="Fira Sans, Segoe UI, Helvetica, Arial, sans-serif" font-weight="800" font-size="132" letter-spacing="2" fill="url(#g)">OpenFettle</text>
     <text x="506" y="320" font-family="Fira Sans, Segoe UI, Helvetica, Arial, sans-serif" font-weight="400" font-size="36" fill="#9aa4b2">Training · Body weight · Nutrition — self-hosted</text>
   </svg>`)
-  await sharp(txt).composite([{ input: ic, left: 120, top: 90 }]).png().toFile(R + '/assets/banner.png')
+  await sharp(txt).composite([{ input: ic, left: 120, top: 90 }, { input: wm, left: 500, top: 140 }]).png().toFile(R + '/assets/banner.png')
 })().catch(e => { console.error(e); process.exit(1) })
