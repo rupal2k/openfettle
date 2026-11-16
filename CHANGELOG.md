@@ -6,6 +6,7 @@ OPENFIT is now **OpenFettle**. Same app, same data, new name.
 
 - ✏️ **New name everywhere you see it:** the app name on your home screen, the sign-in screen, Settings, notifications, backup and plan file names, and all 11 languages. People who used the app before see a one-time note.
 - 💾 **Nothing to do:** update over 1.6.x as usual. Your workouts, plans, meals and lab reports stay; backups and plan files made with OPENFIT still import.
+- 🌙 **Wind down:** white, pink or brown noise, generated on your phone (nothing downloaded), with volume and a sleep timer that fades out. On Home on rest days, and in Settings. Plays while the app is open; with the screen off Android may pause it.
 - 🔗 **New address:** the project lives at github.com/rupal2k/openfettle. The update check follows it; old links redirect.
 
 ## 1.6.2
