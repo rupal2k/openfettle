@@ -1233,4 +1233,18 @@ export default {
   'Could not check for updates — check your connection.': '업데이트를 확인할 수 없습니다. 연결을 확인하세요.',
   // --- 1.7.0 rename ---
   'OPENFIT is now OpenFettle. Same app, same data, new name.': 'OPENFIT의 이름이 OpenFettle로 바뀌었습니다. 같은 앱, 같은 데이터, 새 이름입니다.',
+  // --- wind down (generated noise) ---
+  'Wind down': '긴장 풀기',
+  'White': '화이트',
+  'Pink': '핑크',
+  'Brown': '브라운',
+  'Noise colour': '노이즈 색',
+  'Noise volume': '노이즈 볼륨',
+  'Sleep timer': '수면 타이머',
+  '{0} min': '{0}분',
+  'Fades out at {0}': '{0}에 서서히 꺼짐',
+  'Pause': '일시정지',
+  'Play': '재생',
+  'White, pink or brown noise to help you rest': '휴식을 돕는 화이트, 핑크, 브라운 노이즈',
+  'Steady noise, generated on this device. Nothing is downloaded.': '이 기기에서 만든 일정한 노이즈입니다. 다운로드하지 않습니다.',
 }

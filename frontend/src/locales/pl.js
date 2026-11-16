@@ -1233,4 +1233,18 @@ export default {
   'Could not check for updates — check your connection.': 'Nie udało się sprawdzić aktualizacji — sprawdź połączenie.',
   // --- 1.7.0 rename ---
   'OPENFIT is now OpenFettle. Same app, same data, new name.': 'OPENFIT nazywa się teraz OpenFettle. Ta sama aplikacja, te same dane, nowa nazwa.',
+  // --- wind down (generated noise) ---
+  'Wind down': 'Wycisz się',
+  'White': 'Biały',
+  'Pink': 'Różowy',
+  'Brown': 'Brązowy',
+  'Noise colour': 'Kolor szumu',
+  'Noise volume': 'Głośność szumu',
+  'Sleep timer': 'Wyłącznik czasowy',
+  '{0} min': '{0} min',
+  'Fades out at {0}': 'Wycisza się o {0}',
+  'Pause': 'Pauza',
+  'Play': 'Odtwórz',
+  'White, pink or brown noise to help you rest': 'Biały, różowy lub brązowy szum na odpoczynek',
+  'Steady noise, generated on this device. Nothing is downloaded.': 'Stały szum generowany na tym urządzeniu. Nic nie jest pobierane.',
 }
