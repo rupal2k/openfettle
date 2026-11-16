@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
 import { EXDB, EXIDX, BODYPARTS, isCardio, isBodyweightEq, allExercises, equipmentOf } from './lib/exercises.js'
 import { fmtDate, fmtNum, fmtVol, fmtDur, durPart, todayISO, uid, exCount, DAYN, MONTHS_LONG, ACCENTS } from './lib/format.js'
 import { lastEntryFor, bestWeightFor, buildSets, sessionSets, effectiveRoutineId, setsDone, setsDoneActive, lastBW, supersetUnits, unitOf, setLabel, defaultConfig, cleanupSg, modeOf, effortOf, isBw, isPerSide, sideReps } from './lib/history.js'
 import { beep, vibrate } from './lib/sound.js'
-import { t, instrFor, loadInstr, getLang, INSTR_LANGS } from './lib/i18n.js'
+import { t, instrFor, loadInstr, getLang, INSTR_LANGS, dateLocale } from './lib/i18n.js'
+import { noisePlayer, COLORS, SLEEP_OPTIONS } from './lib/noise.js'
 import { nav } from './lib/nav.js'
 import { starterRoutines, PLAN_TEMPLATES, PLAN_WHERE, instantiatePlan, templateEx } from './lib/starter.js'
 import Media, { Thumb } from './components/Media.jsx'
@@ -420,6 +421,37 @@ function GoalSheet({ close }) {
   </>
 }
 export const goalSheet = () => ui().openSheet(close => <GoalSheet close={close} />)
+
+/* ============================ wind down ============================ */
+// Generated noise player (lib/noise.js). The player is app-wide, so closing the sheet keeps it playing.
+function WindDown() {
+  const p = noisePlayer()
+  const st = useSyncExternalStore(p.subscribe, p.get)
+  return <>
+    <h3>{t('Wind down')}</h3>
+    <div className="muted small">{t('Steady noise, generated on this device. Nothing is downloaded.')}</div>
+    <div style={{ height: 14 }} />
+    <div className="small muted" id="wd-color" style={{ marginBottom: 6 }}>{t('Noise color')}</div>
+    <div role="group" aria-labelledby="wd-color">
+      <Segmented className="tall" options={COLORS.map(c => ({ value: c, label: { white: t('White'), pink: t('Pink'), brown: t('Brown') }[c] }))} value={st.color} onChange={c => p.setColor(c)} />
+    </div>
+    <div style={{ height: 14 }} />
+    <div className="small muted" style={{ marginBottom: 2 }}>{t('Noise volume')}</div>
+    <Slider className="tall" value={Math.round(st.volume * 100)} min={0} max={100} step={1} aria-label={t('Noise volume')} onChange={v => p.setVolume(v / 100)} />
+    <div style={{ height: 10 }} />
+    <div className="small muted" id="wd-sleep" style={{ marginBottom: 6 }}>{t('Sleep timer')}</div>
+    <div role="group" aria-labelledby="wd-sleep">
+      <Segmented className="tall" options={SLEEP_OPTIONS.map(m => ({ value: m, label: m ? t('{0} min', m) : t('Off') }))} value={st.sleep} onChange={m => p.setSleep(m)} />
+    </div>
+    <div className="small muted" style={{ marginTop: 6, minHeight: 18 }}>
+      {st.endsAt ? t('Fades out at {0}', new Date(st.endsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })) : ''}
+    </div>
+    <div style={{ height: 10 }} />
+    <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : (p.play() || toast(t('Sound can’t play on this device.')))}>{st.playing ? t('Pause') : t('Play')}</Button>
+    <div style={{ height: 8 }} />
+  </>
+}
+export const windDownSheet = () => ui().openSheet(() => <WindDown />)
 
 /* ============================ exercise detail ============================ */
 // Estimated 1RM for one exercise (issue #18): what the log already implies, plus a calculator

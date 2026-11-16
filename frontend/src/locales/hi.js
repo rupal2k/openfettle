@@ -1233,4 +1233,19 @@ export default {
   'Could not check for updates — check your connection.': 'अपडेट नहीं देख सके — अपना कनेक्शन जाँचें।',
   // --- 1.7.0 rename ---
   'OPENFIT is now OpenFettle. Same app, same data, new name.': 'OPENFIT अब OpenFettle है। वही ऐप, वही डेटा, नया नाम।',
+  // --- wind down (generated noise) ---
+  'Wind down': 'आराम करें',
+  'White': 'सफ़ेद',
+  'Pink': 'गुलाबी',
+  'Brown': 'भूरा',
+  'Noise color': 'शोर का रंग',
+  'Noise volume': 'शोर का वॉल्यूम',
+  'Sleep timer': 'स्लीप टाइमर',
+  '{0} min': '{0} मिनट',
+  'Fades out at {0}': '{0} पर धीरे-धीरे बंद',
+  'Pause': 'रोकें',
+  'Play': 'चलाएँ',
+  'White, pink or brown noise to help you rest': 'आराम के लिए सफ़ेद, गुलाबी या भूरा शोर',
+  'Steady noise, generated on this device. Nothing is downloaded.': 'इसी डिवाइस पर बना स्थिर शोर। कुछ भी डाउनलोड नहीं होता।',
+  'Sound can’t play on this device.': 'इस डिवाइस पर आवाज़ नहीं चल सकती।',
 }

@@ -4,7 +4,7 @@ import { useStore } from '../store/useStore.js'
 import { effectiveRoutine, effectiveRoutineId, streakWeeks, lastBW, setsDoneActive } from '../lib/history.js'
 import { fmtNum, fmtDate, todayISO, isoOf, weekKey, DAYS } from '../lib/format.js'
 import { t, dateLocale } from '../lib/i18n.js'
-import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, planCatalogSheet, bwDeltaColor } from '../sheets.jsx'
+import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, planCatalogSheet, bwDeltaColor, windDownSheet } from '../sheets.jsx'
 import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button, Segmented } from '../components/ui.jsx'
@@ -76,6 +76,17 @@ export default function Home() {
       </span>
       <span className="hero-cta">{S.active ? t('Resume') : routine ? t('Start') : <Icon name="plus" />}</span>
     </button>
+
+    {!routine && !S.active && (
+      <button type="button" className="card tappable wind-card" onClick={windDownSheet} aria-label={t('Wind down')}>
+        <span className="lrow-i" style={{ '--tint': 'var(--indigo)' }}><Icon name="moon" /></span>
+        <span className="wind-m">
+          <span className="wind-t">{t('Wind down')}</span>
+          <span className="muted small">{t('White, pink or brown noise to help you rest')}</span>
+        </span>
+        <Icon name="chevronRight" className="chev" />
+      </button>
+    )}
 
     <div className="card">
       <div className="row between" style={{ marginBottom: 8 }}>

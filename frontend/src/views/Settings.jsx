@@ -12,7 +12,7 @@ import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder, tooBig, clearExports, notificationsAllowed } from '../lib/mobile.js'
 import { convertWeights, hasWeights } from '../lib/units-convert.js'
 import { nutritionProfileSheet } from '../nutrition-sheets.jsx'
-import { loadStarterPlan, confirmSheet, importFromApp, planCatalogSheet, planUploadSheet, runUpdateCheck } from '../sheets.jsx'
+import { loadStarterPlan, confirmSheet, importFromApp, planCatalogSheet, planUploadSheet, runUpdateCheck, windDownSheet } from '../sheets.jsx'
 import { VisionSettings } from '../vision-sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
@@ -135,6 +135,7 @@ export default function Settings() {
       </Row>
       {(S.lang || 'en') !== 'en' && <Row icon="globe" iconTint="var(--grey)" title={t('Report a translation error')} subtitle={t('Translations are new and not yet checked by native speakers.')} accessory="chevron"
         onClick={() => window.open(REPO + '/issues/new?labels=translation&title=' + encodeURIComponent('Translation (' + S.lang + '): '), '_blank', 'noopener')} />}
+      <Row icon="moon" iconTint="var(--indigo)" title={t('Wind down')} subtitle={t('White, pink or brown noise to help you rest')} accessory="chevron" onClick={windDownSheet} />
       <Row icon="person" iconTint="var(--indigo)" title={t('Your profile')} subtitle={t('Sex, birth year and height, for calorie targets and blood test scores')} accessory="chevron" onClick={nutritionProfileSheet} />
     </Section>
     <VisionSettings />
