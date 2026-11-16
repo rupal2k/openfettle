@@ -97,11 +97,12 @@ export function Switch({ checked, onChange, disabled, 'aria-label': ariaLabel, l
 /* ============================ segmented ============================ */
 
 // options: [{ value, label, icon? }]  — the selected pill slides between cells.
-export function Segmented({ options, value, onChange, className = '' }) {
-  const i = Math.max(0, options.findIndex(o => o.value === value))
+// `noneOk`: when value is not one of the options, show nothing selected (one of several rows)
+export function Segmented({ options, value, onChange, className = '', noneOk = false }) {
+  const found = options.findIndex(o => o.value === value), i = Math.max(0, found)
   return (
     <div className={'seg ' + className} style={{ '--n': options.length, '--i': i }}>
-      <span className="seg-sel" aria-hidden="true" />
+      {(found >= 0 || !noneOk) && <span className="seg-sel" aria-hidden="true" />}
       {options.map(o => (
         <button
           key={o.value}

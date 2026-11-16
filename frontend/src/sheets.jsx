@@ -429,15 +429,17 @@ function WindDown() {
   const st = useSyncExternalStore(p.subscribe, p.get)
   return <>
     <h3>{t('Wind down')}</h3>
-    <div className="muted small">{t('Steady noise, generated on this device. Nothing is downloaded.')}</div>
+    <div className="muted small">{t('Sounds generated on this device. Nothing is downloaded.')}</div>
     <div style={{ height: 14 }} />
-    <div className="small muted" id="wd-color" style={{ marginBottom: 6 }}>{t('Noise color')}</div>
+    <div className="small muted" id="wd-color" style={{ marginBottom: 6 }}>{t('Sound')}</div>
     <div role="group" aria-labelledby="wd-color">
-      <Segmented className="tall" options={COLORS.map(c => ({ value: c, label: { white: t('White'), pink: t('Pink'), brown: t('Brown') }[c] }))} value={st.color} onChange={c => p.setColor(c)} />
+      {[COLORS.slice(0, 3), COLORS.slice(3)].map((row, k) => <Segmented key={k} className="tall" noneOk
+        options={row.map(c => ({ value: c, label: { white: t('White'), pink: t('Pink'), brown: t('Brown'), fire: t('Fire'), water: t('Water'), night: t('Night') }[c] }))}
+        value={st.color} onChange={c => p.setColor(c)} />)}
     </div>
     <div style={{ height: 14 }} />
-    <div className="small muted" style={{ marginBottom: 2 }}>{t('Noise volume')}</div>
-    <Slider className="tall" value={Math.round(st.volume * 100)} min={0} max={100} step={1} aria-label={t('Noise volume')} onChange={v => p.setVolume(v / 100)} />
+    <div className="small muted" style={{ marginBottom: 2 }}>{t('Sound volume')}</div>
+    <Slider className="tall" value={Math.round(st.volume * 100)} min={0} max={100} step={1} aria-label={t('Sound volume')} onChange={v => p.setVolume(v / 100)} />
     <div style={{ height: 10 }} />
     <div className="small muted" id="wd-sleep" style={{ marginBottom: 6 }}>{t('Sleep timer')}</div>
     <div role="group" aria-labelledby="wd-sleep">

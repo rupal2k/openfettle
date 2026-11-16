@@ -1042,6 +1042,7 @@ body.resting #startfab{bottom:calc(240px + var(--sab))}
 .wind-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .wind-t{font-size:17px;font-weight:600;letter-spacing:-.012em}
 .seg.tall button{min-height:44px}
+.seg+.seg{margin-top:6px}   /* stacked rows of one choice (Wind down sound) */
 .sld.tall{height:44px}
 .hero.rest .hero-i{background:var(--surface-3);color:var(--label-2)}
 .hero.rest .hero-cta{background:var(--acc);color:var(--on-acc)}
