@@ -62,6 +62,12 @@ describe('scene generators (fire, water, night)', () => {
   const gen = c => cache[c] || (cache[c] = loopNoise(c, N, rng(13), 48000))
   const pinkDb = rmsDb(loopNoise('pink', N, rng(13), 48000))
 
+  it('brown never clips, over many seeds', () => {
+    let clipped = 0
+    for (let seed = 1; seed <= 40; seed++) for (const v of fillNoise('brown', new Float32Array(48000 * 12), rng(seed))) if (Math.abs(v) >= 0.999) clipped++
+    expect(clipped).toBe(0)
+  })
+
   for (const c of ['fire', 'water', 'night']) {
     it(`${c}: bounded, not silent, never clipped, as loud as pink`, () => {
       const x = gen(c)

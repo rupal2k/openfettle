@@ -41,7 +41,7 @@ export function fillNoise(color, out, rand = Math.random, sr = 48000) {
     b6 = w * 0.115926
   } else if (color === 'brown') for (let i = 0; i < out.length; i++) {
     br = (br + 0.02 * (rand() * 2 - 1)) / 1.02
-    out[i] = clamp(br * 3.5)
+    out[i] = soft(br * 3.5)
   } else for (let i = 0; i < out.length; i++) out[i] = (rand() * 2 - 1) * WHITE_GAIN
   return out
 }
