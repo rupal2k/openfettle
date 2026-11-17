@@ -122,7 +122,7 @@ export function mergePlan(s, bundle, { schedule } = {}) {
     if (same) { exIdMap[c.id] = same.id; return }
     const nid = uid()
     exIdMap[c.id] = nid
-    s.customEx.push({ id: nid, n: c.n.slice(0, 80), bp: typeof c.bp === 'string' ? c.bp.slice(0, 40) : '', ...(typeof c.desc === 'string' && c.desc ? { desc: c.desc.slice(0, 1000) } : {}) })
+    s.customEx.push({ id: nid, n: c.n.slice(0, 80), bp: typeof c.bp === 'string' ? c.bp.slice(0, 40) : '', tg: '', eq: 'custom', custom: true, ...(typeof c.desc === 'string' && c.desc ? { desc: c.desc.slice(0, 1000) } : {}) })
   })
   const ridMap = Object.create(null)
   let added = 0
