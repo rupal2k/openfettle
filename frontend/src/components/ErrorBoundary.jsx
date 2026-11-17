@@ -17,13 +17,13 @@ import { Button } from './ui.jsx'
 export default class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { failed: false, err: null } }
   static getDerivedStateFromError(err) { return { failed: true, err } }
-  componentDidCatch(err) { console.error('OPENFIT render error:', err) }
+  componentDidCatch(err) { console.error('OpenFettle render error:', err) }
   // opt-in crash report: the person chooses to share it; it holds the error, never their data
   share = async () => {
     const e = this.state.err
-    const text = ['OPENFIT ' + __APP_VERSION__, navigator.userAgent, 'screen: ' + location.hash, String(e && (e.stack || e.message || e)).slice(0, 4000)].join('\n')
+    const text = ['OpenFettle ' + __APP_VERSION__, navigator.userAgent, 'screen: ' + location.hash, String(e && (e.stack || e.message || e)).slice(0, 4000)].join('\n')
     try {
-      if (MOBILE) { const { Share } = await import('@capacitor/share'); await Share.share({ title: 'OPENFIT error report', text }) }
+      if (MOBILE) { const { Share } = await import('@capacitor/share'); await Share.share({ title: 'OpenFettle error report', text }) }
       else { await navigator.clipboard.writeText(text); useUI.getState().toast(t('Error details copied')) }
     } catch { /* share sheet dismissed */ }
   }
@@ -38,7 +38,7 @@ export default class ErrorBoundary extends Component {
           <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('Something went wrong')}</div>
           {t('This screen could not be drawn. Your data is safe on this device.')}
         </div>
-        <Button variant="primary" icon="reset" onClick={() => location.reload()}>{t('Reload OPENFIT')}</Button>
+        <Button variant="primary" icon="reset" onClick={() => location.reload()}>{t('Reload OpenFettle')}</Button>
         <div style={{ height: 8 }} />
         <Button variant="tinted" icon="upload" onClick={this.share}>{t('Share error report')}</Button>
         <div className="small dim" style={{ marginTop: 6, textAlign: 'center' }}>{t('Only the error and app version, none of your data. You choose where it goes.')}</div>

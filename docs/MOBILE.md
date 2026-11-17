@@ -1,6 +1,6 @@
 # Building the mobile app (iOS / Android)
 
-openfit ships in two flavors from the same codebase:
+OpenFettle ships in two flavors from the same codebase:
 
 | | **Self-hosted** (this repo's default) | **Mobile app** (`VITE_MOBILE=1`) |
 |---|---|---|
@@ -59,7 +59,7 @@ The service worker is not registered in the mobile build (`main.jsx`).
 - **Android:** Android Studio (bundles the SDK). Java 21 for Gradle.
 - **iOS:** a Mac with Xcode 15+ and CocoaPods (`brew install cocoapods`). A free Apple ID
   is enough to run the app on your own iPhone (see below); paid membership is only needed
-  for App Store distribution, which openfit doesn't do.
+  for App Store distribution, which OpenFettle doesn't do.
 
 ## Build & run
 
@@ -95,7 +95,7 @@ and run the script again.
 
 ## Distribution — deliberately no app stores
 
-openfit's mobile app is not on the Play Store or App Store, and that's a choice: no store
+OpenFettle's mobile app is not on the Play Store or App Store, and that's a choice: no store
 accounts, no store rules, no yearly fees between you and an open-source app.
 
 ### Android — sideload the APK
@@ -108,11 +108,11 @@ cd android && ./gradlew assembleRelease            # → app/build/outputs/apk/r
 
 # one-time: create a keystore. KEEP IT — updates must be signed with the same key,
 # or Android refuses to install the new version over the old one.
-keytool -genkeypair -keystore my.keystore -alias openfit -keyalg RSA -validity 10950
+keytool -genkeypair -keystore my.keystore -alias openfettle -keyalg RSA -validity 10950
 
 # align + sign (zipalign/apksigner ship with the Android SDK build-tools)
 zipalign -f -p 4 app-release-unsigned.apk aligned.apk
-apksigner sign --ks my.keystore --ks-key-alias openfit --out openfit.apk aligned.apk
+apksigner sign --ks my.keystore --ks-key-alias openfettle --out OpenFettle.apk aligned.apk
 ```
 
 ### iPhone — what's actually possible
@@ -133,7 +133,7 @@ that would simply install. Your free options:
   install over an existing APK (current: versionCode 18, 1.6.2).
 - Before every build: the full on-device regression in `docs/RELEASE-CHECKLIST.md` on the
   signed release APK installed over the previous release, on both test phones.
-- **License:** openfit is AGPL-3.0, which by itself sits badly with app-store terms of
+- **License:** OpenFettle is AGPL-3.0, which by itself sits badly with app-store terms of
   service. `NOTICE.md` carries an app-store exception (an additional permission under
   AGPL §7) granted by the copyright holders — relevant only if store distribution ever happens.
 - The app requests notification permission only when the workout-day reminder is switched

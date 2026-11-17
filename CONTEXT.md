@@ -1,11 +1,11 @@
-# openfit
+# OpenFettle
 
 Self-hosted offline-first fitness tracker PWA with passkey auth and optional Node.js backend for multi-device sync.
 
 ## Language
 
 **Passkey**:
-A WebAuthn credential stored in the platform authenticator (Face ID, fingerprint, Windows Hello). The only login mechanism in openfit — there are no passwords.
+A WebAuthn credential stored in the platform authenticator (Face ID, fingerprint, Windows Hello). The only login mechanism in OpenFettle — there are no passwords.
 _Avoid_: password, login credential
 <!-- source: api/server.js:1 -->
 

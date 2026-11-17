@@ -62,3 +62,18 @@ describe('plan files with nothing usable (on-device audit 1.6.2)', () => {
     expect(() => parsePlan(bundle({ routines: [{ id: 'b', name: 'x', ex: [{ id: 'nope' }] }] }))).toThrow()
   })
 })
+
+describe('custom exercises from a shared plan can be searched (library crash, 1.7.0 release test)', () => {
+  it('an imported custom exercise has the same fields as one made in the app', () => {
+    const s = merge(bundle({ customEx: [{ id: 'c1', n: 'Old Move', bp: 'chest' }], routines: [{ id: 'r', name: 'R', ex: [{ id: 'c1', sets: 3, reps: 10 }] }] }))
+    expect(s.customEx[0]).toMatchObject({ n: 'Old Move', bp: 'chest', tg: '', eq: 'custom', custom: true })
+  })
+  it('search does not crash on a saved custom exercise missing target and equipment', async () => {
+    const { matchesQuery } = await import('./exercises.js')
+    const old = { id: 'c1', n: 'Old Move', bp: 'chest' }
+    expect(matchesQuery(old, 'curl')).toBe(false)
+    expect(matchesQuery(old, 'old')).toBe(true)
+    expect(matchesQuery({ id: 'x', n: 'Curl', tg: 'biceps', eq: 'dumbbell' }, 'biceps')).toBe(true)
+    expect(matchesQuery({ id: 'x', n: 'Row', tg: 'lats', eq: 'cable', desc: 'Pull to the waist' }, 'waist')).toBe(true)
+  })
+})

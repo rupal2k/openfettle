@@ -1,7 +1,7 @@
 // Opt-in update check for the sideloaded APK: there is no store to tell people a fix exists.
 // Asks GitHub for the latest release tag (no data about the person is sent) and compares it
 // with this build's version. Off unless the person turns it on, or taps "Check for updates".
-export const RELEASES_API = 'https://api.github.com/repos/rupal2k/openfit/releases/latest'
+export const RELEASES_API = 'https://api.github.com/repos/rupal2k/openfettle/releases/latest'
 const parse = v => String(v || '').replace(/^v/i, '').split('-')[0].split('.').map(n => parseInt(n, 10) || 0)
 
 // is version a newer than b? (1.6.10 > 1.6.9; a pre-release suffix is ignored)
@@ -19,8 +19,9 @@ export async function checkForUpdate(current, fetchFn = fetch) {
   const j = await r.json()
   const latest = String(j.tag_name || '').replace(/^v/i, '')
   if (!/^\d+\.\d+/.test(latest)) throw new Error('no version')
-  // only ever link to this project's own release page
-  const url = typeof j.html_url === 'string' && j.html_url.startsWith('https://github.com/rupal2k/openfit/') ? j.html_url : 'https://github.com/rupal2k/openfit/releases/latest'
+  // only ever link to this project's own release page (old links from before the rename redirect)
+  const own = ['https://github.com/rupal2k/openfettle/', 'https://github.com/rupal2k/openfit/']
+  const url = typeof j.html_url === 'string' && own.some(p => j.html_url.startsWith(p)) ? j.html_url : 'https://github.com/rupal2k/openfettle/releases/latest'
   return { latest, url, newer: isNewer(latest, current) }
 }
 

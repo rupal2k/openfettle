@@ -15,9 +15,20 @@ describe('update check', () => {
     const r = await checkForUpdate('1.6.2', res({ tag_name: 'v1.6.3', html_url: 'https://github.com/rupal2k/openfit/releases/tag/v1.6.3' }))
     expect(r).toEqual({ latest: '1.6.3', url: 'https://github.com/rupal2k/openfit/releases/tag/v1.6.3', newer: true })
   })
+  it('accepts release pages under the new repo name', async () => {
+    const page = 'https://github.com/rupal2k/openfettle/releases/tag/v1.7.0'
+    expect((await checkForUpdate('1.6.2', res({ tag_name: 'v1.7.0', html_url: page }))).url).toBe(page)
+  })
+  it('asks the renamed repo for releases', async () => {
+    let asked = ''
+    await checkForUpdate('1.6.2', async (url) => { asked = url; return { ok: true, json: async () => ({ tag_name: 'v1.7.0' }) } })
+    expect(asked).toBe('https://api.github.com/repos/rupal2k/openfettle/releases/latest')
+  })
   it('never links outside this project', async () => {
     const r = await checkForUpdate('1.6.2', res({ tag_name: 'v9.0.0', html_url: 'https://evil.example/x' }))
-    expect(r.url).toBe('https://github.com/rupal2k/openfit/releases/latest')
+    expect(r.url).toBe('https://github.com/rupal2k/openfettle/releases/latest')
+    const lookalike = await checkForUpdate('1.6.2', res({ tag_name: 'v9.0.0', html_url: 'https://github.com/rupal2k/openfettle-evil/x' }))
+    expect(lookalike.url).toBe('https://github.com/rupal2k/openfettle/releases/latest')
   })
   it('fails on an error response or a tag that is not a version', async () => {
     await expect(checkForUpdate('1.6.2', res({}, false))).rejects.toThrow()

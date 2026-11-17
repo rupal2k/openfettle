@@ -243,7 +243,7 @@ const effortNum = (raw, isRir) => {
   if (!isFinite(n) || n < 0 || (n === 0 && !isRir)) return null
   const val = Math.round(n * 100) / 100
   if (isRir) return Math.min(10, Math.max(0, val))
-  // OPENFIT RPE scale is 6–10. In external exports (e.g. Hevy), warm-up sets may be rated
+  // OpenFettle RPE scale is 6–10. In external exports (e.g. Hevy), warm-up sets may be rated
   // RPE 1–5. Discard the effort tag rather than rejecting the entire set in validateSet.
   if (val < 6) return null
   return Math.min(10, val)
@@ -293,7 +293,7 @@ const toKm = (v, unit) => num(v) * (KM[String(unit || 'km').toLowerCase().trim()
 /* --------------------------------------------------------------- parse ---- */
 
 /**
- * Read an export into workouts OPENFIT understands, WITHOUT touching state — the caller
+ * Read an export into workouts OpenFettle understands, WITHOUT touching state — the caller
  * shows the summary for confirmation first. Nothing here throws on a bad row: a history
  * of several thousand sets will contain oddities, and losing the file over one of them
  * helps nobody. Bad rows are counted and reported instead.

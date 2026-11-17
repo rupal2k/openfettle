@@ -1,4 +1,4 @@
-# OPENFIT — fitness, nutrition and blood-test tracker (PWA + Android)
+# OpenFettle — fitness, nutrition and blood-test tracker (PWA + Android)
 
 ## What this is
 One React codebase, two products:

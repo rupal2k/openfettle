@@ -12,7 +12,7 @@ import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder, tooBig, clearExports, notificationsAllowed } from '../lib/mobile.js'
 import { convertWeights, hasWeights } from '../lib/units-convert.js'
 import { nutritionProfileSheet } from '../nutrition-sheets.jsx'
-import { loadStarterPlan, confirmSheet, importFromApp, planCatalogSheet, planUploadSheet, runUpdateCheck } from '../sheets.jsx'
+import { loadStarterPlan, confirmSheet, importFromApp, planCatalogSheet, planUploadSheet, runUpdateCheck, windDownSheet } from '../sheets.jsx'
 import { VisionSettings } from '../vision-sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
@@ -29,7 +29,7 @@ export default function Settings() {
 
   const doExport = async () => {
     const json = JSON.stringify(S, null, 2)
-    const name = 'openfit-backup-' + todayISO() + '.json'
+    const name = 'openfettle-backup-' + todayISO() + '.json'
     // WKWebView can't download blob URLs — the native build hands the file to the share sheet.
     if (MOBILE) {
       try { await shareExport(json, name); toast(t('Backup exported')) } catch (e) { /* share sheet dismissed */ }
@@ -62,9 +62,9 @@ export default function Settings() {
     rd.onload = () => {
       try {
         const data = JSON.parse(rd.result)
-        if (!data || (!data.workouts && !data.routines && !data.nutrition)) throw new Error('not an OPENFIT backup')
+        if (!data || (!data.workouts && !data.routines && !data.nutrition)) throw new Error('not an OpenFettle backup')
         confirmSheet({ title: t('Import backup?'), message: t('This replaces all current data with the backup file.'), confirmText: t('Import'), danger: true, onConfirm: () => { replaceState(normalizeState(data), true); toast(t('Backup imported')) } })
-      } catch { toast(t('Import failed: {0}', t('That file isn’t an OPENFIT backup.'))) }   // not the parser's message: it quotes the file
+      } catch { toast(t('Import failed: {0}', t('That file isn’t an OpenFettle backup.'))) }   // not the parser's message: it quotes the file
     }
     rd.readAsText(f)
   }
@@ -96,13 +96,13 @@ export default function Settings() {
     <Section title={MOBILE ? t('Your data') : DEMO ? t('Demo') : t('Account')}>
       {MOBILE ? <>
         <Row icon="lock" iconTint="var(--acc)" title={t('All data stays on this phone')} subtitle={t('No account, no cloud — back it up anytime with Export below.')} />
-        <Row icon="rocket" iconTint="var(--indigo)" title={t('Self-host OPENFIT')} subtitle={t('Passkey sign-in, sync across your devices, your own data.')} accessory="chevron"
+        <Row icon="rocket" iconTint="var(--indigo)" title={t('Self-host OpenFettle')} subtitle={t('Passkey sign-in, sync across your devices, your own data.')} accessory="chevron"
           onClick={() => window.open(REPO, '_blank', 'noopener')} />
       </> : DEMO ? <>
         <Row icon="sparkles" iconTint="var(--acc)" title={t('You’re in the demo')} subtitle={t('Example data, stored only in this browser — change anything you like.')} />
         <Row icon="reset" iconTint="var(--blue)" title={t('Reset demo data')} accessory="chevron"
           onClick={() => confirmSheet({ title: t('Reset demo data?'), message: t('Puts the example plan, workouts and weigh-ins back the way they started.'), confirmText: t('Reset'), onConfirm: () => { resetDemo(); nav('/home'); toast(t('Demo data reset')) } })} />
-        <Row icon="rocket" iconTint="var(--indigo)" title={t('Self-host OPENFIT')} subtitle={t('Passkey sign-in, sync across your devices, your own data.')} accessory="chevron"
+        <Row icon="rocket" iconTint="var(--indigo)" title={t('Self-host OpenFettle')} subtitle={t('Passkey sign-in, sync across your devices, your own data.')} accessory="chevron"
           onClick={() => window.open(REPO, '_blank', 'noopener')} />
       </> : user ? <>
         <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Signed in with passkey — data syncs to this profile.')} />
@@ -135,6 +135,7 @@ export default function Settings() {
       </Row>
       {(S.lang || 'en') !== 'en' && <Row icon="globe" iconTint="var(--grey)" title={t('Report a translation error')} subtitle={t('Translations are new and not yet checked by native speakers.')} accessory="chevron"
         onClick={() => window.open(REPO + '/issues/new?labels=translation&title=' + encodeURIComponent('Translation (' + S.lang + '): '), '_blank', 'noopener')} />}
+      <Row icon="moon" iconTint="var(--indigo)" title={t('Wind down')} subtitle={t('Noise, fire, water or night sounds to help you rest')} accessory="chevron" onClick={windDownSheet} />
       <Row icon="person" iconTint="var(--indigo)" title={t('Your profile')} subtitle={t('Sex, birth year and height, for calorie targets and blood test scores')} accessory="chevron" onClick={nutritionProfileSheet} />
     </Section>
     <VisionSettings />
@@ -193,7 +194,7 @@ export default function Settings() {
         <div className="swatches">
           {Object.entries(ACCENTS).map(([k, c]) => (
             <button key={k} className={'swatch' + ((S.accent || 'openfit') === k ? ' on' : '')}
-              style={{ background: c }} onClick={() => update(s => { s.accent = k })} aria-label={t('Theme color: {0}', k)} aria-pressed={(S.accent || 'openfit') === k} />
+              style={{ background: c }} onClick={() => update(s => { s.accent = k })} aria-label={t('Theme color: {0}', k === 'openfit' ? 'OpenFettle' : k)} aria-pressed={(S.accent || 'openfit') === k} />
           ))}
         </div>
       </div>
@@ -225,12 +226,12 @@ export default function Settings() {
     {!MOBILE && <Section title={t('Tip')}>
       <Row icon="lightbulb" iconTint="var(--yellow)"
         title={IS_ANDROID ? t('In Chrome: ⋮ menu → Add to Home screen') : t('In Safari: Share → Add to Home Screen')}
-        subtitle={t('to install OPENFIT as a full-screen app.') + ' ' + (user ? t('Your data syncs with your profile — sign in anywhere to see it.') : t('Guest data stays on this device — export a backup now and then!'))} />
+        subtitle={t('to install OpenFettle as a full-screen app.') + ' ' + (user ? t('Your data syncs with your profile — sign in anywhere to see it.') : t('Guest data stays on this device — export a backup now and then!'))} />
     </Section>}
 
     <div className="dim small" style={{ textAlign: 'center', marginTop: 4, lineHeight: 1.6 }}>
-      OPENFIT {__APP_VERSION__} · {t('free & open source (AGPL v3)')}<br />
-      <a href="https://github.com/rupal2k/openfit" target="_blank" rel="noopener" style={{ textDecoration: 'underline' }}>source code</a> · exercise data: hasaneyldrm/exercises-dataset (CC)
+      <span className="wordmark">OpenFettle</span> {__APP_VERSION__} · {t('free & open source (AGPL v3)')}<br />
+      <a href="https://github.com/rupal2k/openfettle" target="_blank" rel="noopener" style={{ textDecoration: 'underline' }}>source code</a> · exercise data: hasaneyldrm/exercises-dataset (CC)
     </div>
   </div>
 }
@@ -303,7 +304,7 @@ function MobileReminderCard({ S, update, toast }) {
         <Switch aria-label={t('Workout day reminder')} checked={!!S.reminder?.on} onChange={toggle} />
       </Row>
       {S.reminder?.on && !allowed && (
-        <Row icon="bell" iconTint="var(--red)" title={t('Notifications are off for OPENFIT')} subtitle={t('Allow them in Android settings, or no reminder will arrive.')} />
+        <Row icon="bell" iconTint="var(--red)" title={t('Notifications are off for OpenFettle')} subtitle={t('Allow them in Android settings, or no reminder will arrive.')} />
       )}
       {S.reminder?.on && (
         <Row icon="clock" iconTint="var(--purple)" title={t('Reminder time')}>
@@ -352,7 +353,7 @@ function PushCard({ S, update, toast }) {
           (S.reminder?.tz ? ' ' + t('Timezone: {0} (auto-detected, updates if you travel).', S.reminder.tz) : '')
         : null}
     >
-      <Row icon="bell" iconTint="var(--red)" title={t('Push notifications')} subtitle={t('Rest-timer alerts, even if OPENFIT is closed.')}>
+      <Row icon="bell" iconTint="var(--red)" title={t('Push notifications')} subtitle={t('Rest-timer alerts, even if OpenFettle is closed.')}>
         <Switch aria-label={t('Push notifications')} checked={on} disabled={busy} onChange={toggle} />
       </Row>
       {on && (

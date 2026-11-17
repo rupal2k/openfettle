@@ -1,6 +1,6 @@
 {
-  "name": "OPENFIT",
-  "short_name": "OPENFIT",
+  "name": "OpenFettle",
+  "short_name": "OpenFettle",
   "description": "Personal gym, body weight & nutrition tracker",
   "start_url": "./",
   "scope": "./",

@@ -1,5 +1,5 @@
 /* ============================================================================
-   OPENFIT — design system
+   OpenFettle — design system
    ----------------------------------------------------------------------------
    Rebuilt around four rules, each aimed at a specific "generated" tell in the
    previous sheet:
@@ -1036,6 +1036,14 @@ body.resting #startfab{bottom:calc(240px + var(--sab))}
   background:#0c0e12;color:#fff;display:flex;align-items:center;justify-content:center;min-height:38px;
 }
 .hero.rest{background:var(--surface);color:var(--label);border:1px solid var(--sep-op);box-shadow:none}
+/* wind-down card (rest days) and the 44px controls of its sheet */
+.wind-card{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;text-align:left;color:var(--label);font:inherit}
+.wind-card:active{background:var(--surface-2)}
+.wind-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.wind-t{font-size:17px;font-weight:600;letter-spacing:-.012em}
+.seg.tall button{min-height:44px}
+.seg+.seg{margin-top:6px}   /* stacked rows of one choice (Wind down sound) */
+.sld.tall{height:44px}
 .hero.rest .hero-i{background:var(--surface-3);color:var(--label-2)}
 .hero.rest .hero-cta{background:var(--acc);color:var(--on-acc)}
 .hero.rec{background:linear-gradient(120deg,var(--orange),#ffb36b)}
@@ -1147,3 +1155,6 @@ body.resting #startfab{bottom:calc(240px + var(--sab))}
 :root[data-theme="light"] .lab-band.mid{color:var(--lab-warn-ink)}
 :root[data-theme="light"] .lab-band.high,:root[data-theme="light"] .lab-st.high{color:var(--lab-bad-ink)}
 :root[data-theme="light"] .lab-st.low{color:var(--lab-warn-ink)}
+
+/* The name OpenFettle, wherever it stands as the brand: always Sora Bold */
+.wordmark { font-family: 'Sora', var(--font, sans-serif); font-weight: 700; letter-spacing: 0; }

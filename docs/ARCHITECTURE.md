@@ -1,4 +1,4 @@
-# OPENFIT architecture
+# OpenFettle architecture
 
 One React codebase ships two ways: as a **self-hosted web app** with a small Node.js server, and as a **standalone Android app** that needs no server. The sections below go from the outside in: system context, the web request path, the code layers, then the app's own subsystems, trust boundaries and known risks (sections 4–6).
 
@@ -6,7 +6,7 @@ One React codebase ships two ways: as a **self-hosted web app** with a small Nod
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="images/architecture.png">
     <source media="(prefers-color-scheme: light)" srcset="images/architecture-light.png">
-    <img alt="OPENFIT Full System Architecture" src="images/architecture.png" width="100%">
+    <img alt="OpenFettle Full System Architecture" src="images/architecture.png" width="100%">
   </picture>
 </p>
 
@@ -55,7 +55,7 @@ flowchart LR
     BROWSER -->|"barcode lookup"| OFF
 ```
 
-The Android app talks to no OPENFIT server. Its state lives in `openfit-state.json` in app-private storage. Its only network peers are Open Food Facts, jsDelivr and (once, on request) Hugging Face; the CSP in `frontend/index.html` lists exactly these (section 4).
+The Android app talks to no OpenFettle server. Its state lives in `openfit-state.json` in app-private storage. Its only network peers are Open Food Facts, jsDelivr and (once, on request) Hugging Face; the CSP in `frontend/index.html` lists exactly these (section 4).
 
 ## 2. Web architecture
 
@@ -133,7 +133,7 @@ flowchart TB
 
 If you come from Android, the layers map onto the usual Clean Architecture terms like this:
 
-| OPENFIT layer | Folder | Android / Kotlin equivalent |
+| OpenFettle layer | Folder | Android / Kotlin equivalent |
 |---|---|---|
 | Presentation | `views/`, `components/`, `*-sheets.jsx` | Composables / Fragments |
 | State | `store/` (Zustand) | ViewModel + `StateFlow` |
@@ -195,7 +195,7 @@ Stack: React 19, Vite 8, Zustand 5, react-router 7 (`HashRouter`), Capacitor 7 (
 
 ## Decisions
 
-- [ADR-0001: Use cases only where they protect data](adr/0001-use-cases.md): why OPENFIT doesn't add a general use-case layer, and which flows get extracted into tested functions.
+- [ADR-0001: Use cases only where they protect data](adr/0001-use-cases.md): why OpenFettle doesn't add a general use-case layer, and which flows get extracted into tested functions.
 
 ## Related Documents
 
@@ -209,4 +209,4 @@ Stack: React 19, Vite 8, Zustand 5, react-router 7 (`HashRouter`), Capacitor 7 (
 | [PRD-openfit-labs.md](PRD-openfit-labs.md) | Product intent for blood tests (Labs) |
 | [SELF_HOSTING.md](SELF_HOSTING.md) | Running the server with Docker Compose |
 | [tests.md](tests.md) | Test coverage map: existing, proposed, and unverified rules (predates Labs, vision and interval formats) |
-| [adr/0001-use-cases.md](adr/0001-use-cases.md) | Why OPENFIT has no general use-case layer |
+| [adr/0001-use-cases.md](adr/0001-use-cases.md) | Why OpenFettle has no general use-case layer |

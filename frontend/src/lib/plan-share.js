@@ -1,7 +1,7 @@
 // Share a weekly plan.
 //
 // Two jobs:
-//  1. A small, self-contained file a friend can import into THEIR OPENFIT — just the
+//  1. A small, self-contained file a friend can import into THEIR OpenFettle — just the
 //     routines + the week schedule + the custom exercises those routines use. It never
 //     carries workouts, weigh-ins or settings, and importing MERGES (adds routines with
 //     fresh ids) so nothing the friend already has is touched.
@@ -77,7 +77,7 @@ export function buildPlanBundle(S, name) {
 export function parsePlan(raw) {
   const data = typeof raw === 'string' ? JSON.parse(raw) : raw
   if (!data || !data.opengym_plan || !Array.isArray(data.routines)) {
-    throw new Error(t('this isn’t an OPENFIT plan file'))
+    throw new Error(t('this isn’t an OpenFettle plan file'))
   }
   const customEx = (Array.isArray(data.customEx) ? data.customEx : [])
     .filter(c => c && typeof c.id === 'string' && typeof c.n === 'string' && c.n.trim())
@@ -122,7 +122,7 @@ export function mergePlan(s, bundle, { schedule } = {}) {
     if (same) { exIdMap[c.id] = same.id; return }
     const nid = uid()
     exIdMap[c.id] = nid
-    s.customEx.push({ id: nid, n: c.n.slice(0, 80), bp: typeof c.bp === 'string' ? c.bp.slice(0, 40) : '', ...(typeof c.desc === 'string' && c.desc ? { desc: c.desc.slice(0, 1000) } : {}) })
+    s.customEx.push({ id: nid, n: c.n.slice(0, 80), bp: typeof c.bp === 'string' ? c.bp.slice(0, 40) : '', tg: '', eq: 'custom', custom: true, ...(typeof c.desc === 'string' && c.desc ? { desc: c.desc.slice(0, 1000) } : {}) })
   })
   const ridMap = Object.create(null)
   let added = 0
@@ -256,7 +256,7 @@ export function planPrintHTML(S, owner) {
 </style></head>
 <body><div class="doc">
   <header>
-    <div class="kicker">OPENFIT</div>
+    <div class="kicker">OpenFettle</div>
     <h1>${esc(t('Weekly Training Plan'))}</h1>
     ${sub ? `<div class="sub">${sub}</div>` : ''}
   </header>
@@ -264,7 +264,7 @@ export function planPrintHTML(S, owner) {
   ${weekHTML(S)}
   <h3 class="block">${esc(t('Routines'))}</h3>
   ${body}
-  <footer>${esc(t('Made with OPENFIT'))} · github.com/rupal2k/openfit</footer>
+  <footer>${esc(t('Made with OpenFettle'))} · github.com/rupal2k/openfettle</footer>
 </div></body></html>`
 }
 

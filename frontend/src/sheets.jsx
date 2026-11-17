@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
-import { EXDB, EXIDX, BODYPARTS, isCardio, isBodyweightEq, allExercises, equipmentOf } from './lib/exercises.js'
+import { EXDB, EXIDX, BODYPARTS, isCardio, isBodyweightEq, allExercises, equipmentOf, matchesQuery } from './lib/exercises.js'
 import { fmtDate, fmtNum, fmtVol, fmtDur, durPart, todayISO, uid, exCount, DAYN, MONTHS_LONG, ACCENTS } from './lib/format.js'
 import { lastEntryFor, bestWeightFor, buildSets, sessionSets, effectiveRoutineId, setsDone, setsDoneActive, lastBW, supersetUnits, unitOf, setLabel, defaultConfig, cleanupSg, modeOf, effortOf, isBw, isPerSide, sideReps } from './lib/history.js'
 import { beep, vibrate } from './lib/sound.js'
-import { t, instrFor, loadInstr, getLang, INSTR_LANGS } from './lib/i18n.js'
+import { t, instrFor, loadInstr, getLang, INSTR_LANGS, dateLocale } from './lib/i18n.js'
+import { noisePlayer, COLORS, SLEEP_OPTIONS } from './lib/noise.js'
 import { nav } from './lib/nav.js'
 import { starterRoutines, PLAN_TEMPLATES, PLAN_WHERE, instantiatePlan, templateEx } from './lib/starter.js'
 import Media, { Thumb } from './components/Media.jsx'
@@ -421,6 +422,39 @@ function GoalSheet({ close }) {
 }
 export const goalSheet = () => ui().openSheet(close => <GoalSheet close={close} />)
 
+/* ============================ wind down ============================ */
+// Generated noise player (lib/noise.js). The player is app-wide, so closing the sheet keeps it playing.
+function WindDown() {
+  const p = noisePlayer()
+  const st = useSyncExternalStore(p.subscribe, p.get)
+  return <>
+    <h3>{t('Wind down')}</h3>
+    <div className="muted small">{t('Sounds generated on this device. Nothing is downloaded.')}</div>
+    <div style={{ height: 14 }} />
+    <div className="small muted" id="wd-color" style={{ marginBottom: 6 }}>{t('Sound')}</div>
+    <div role="group" aria-labelledby="wd-color">
+      {[COLORS.slice(0, 3), COLORS.slice(3)].map((row, k) => <Segmented key={k} className="tall" noneOk
+        options={row.map(c => ({ value: c, label: { white: t('White'), pink: t('Pink'), brown: t('Brown'), fire: t('Fire'), water: t('Water'), night: t('Night') }[c] }))}
+        value={st.color} onChange={c => p.setColor(c)} />)}
+    </div>
+    <div style={{ height: 14 }} />
+    <div className="small muted" style={{ marginBottom: 2 }}>{t('Sound volume')}</div>
+    <Slider className="tall" value={Math.round(st.volume * 100)} min={0} max={100} step={1} aria-label={t('Sound volume')} onChange={v => p.setVolume(v / 100)} />
+    <div style={{ height: 10 }} />
+    <div className="small muted" id="wd-sleep" style={{ marginBottom: 6 }}>{t('Sleep timer')}</div>
+    <div role="group" aria-labelledby="wd-sleep">
+      <Segmented className="tall" options={SLEEP_OPTIONS.map(m => ({ value: m, label: m ? t('{0} min', m) : t('Off') }))} value={st.sleep} onChange={m => p.setSleep(m)} />
+    </div>
+    <div className="small muted" style={{ marginTop: 6, minHeight: 18 }}>
+      {st.endsAt ? t('Fades out at {0}', new Date(st.endsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })) : ''}
+    </div>
+    <div style={{ height: 10 }} />
+    <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : (p.play() || toast(t('Sound can’t play on this device.')))}>{st.playing ? t('Pause') : t('Play')}</Button>
+    <div style={{ height: 8 }} />
+  </>
+}
+export const windDownSheet = () => ui().openSheet(() => <WindDown />)
+
 /* ============================ exercise detail ============================ */
 // Estimated 1RM for one exercise (issue #18): what the log already implies, plus a calculator
 // for a set you have not done — so the number is reachable before there is any history.
@@ -463,7 +497,7 @@ function ExerciseDetail({ ex, close }) {
     <div className="row" style={{ gap: 6, flexWrap: 'wrap', margin: '10px 0' }}>
       <span className="tag acc">{t(ex.bp)}</span>
       {ex.tg && <span className="tag"><Icon name="target" />{t(ex.tg)}</span>}
-      <span className="tag"><Icon name="dumbbell" />{t(ex.eq)}</span>
+      {ex.eq && <span className="tag"><Icon name="dumbbell" />{t(ex.eq)}</span>}
       {(ex.sm || []).slice(0, 3).map((s, i) => <span key={i} className="tag">{t(s)}</span>)}
     </div>
     {ex.desc && <div className="exnote">{ex.desc}</div>}
@@ -592,7 +626,7 @@ function ExercisePicker({ onPick, close }) {
   const all = allExercises(st)
   let base = all.filter(e =>
     (bp === '★' ? usage[e.id] : (!bp || e.bp === bp)) &&
-    (!ql || e.n.toLowerCase().includes(ql) || e.tg.includes(ql) || e.eq.includes(ql) || (e.desc || '').toLowerCase().includes(ql)))
+    matchesQuery(e, ql))
   if (bp === '★') base = [...base].sort((a, b) => (usage[b.id] - usage[a.id]) || (a.n < b.n ? -1 : 1))
   const eqOpts = equipmentOf(base)
   // Drop the equipment filter if the search narrowed it away, so you never hit a dead end.
@@ -618,7 +652,7 @@ function ExercisePicker({ onPick, close }) {
         <div className="grow"><div className="tt">{t('Create your own exercise')}</div><div className="ss">{t('name + body part, no animation')}</div></div><Icon name="plus" className="chev" />
       </div>}
       {f.slice(0, shown).map(e => <div key={e.id} className="item" onClick={() => onPick(e)}>
-        <Thumb ex={e} /><div className="grow"><div className="tt capitalize">{e.n}</div><div className="ss capitalize">{t(e.tg || e.bp)} · {t(e.eq)}</div></div>
+        <Thumb ex={e} /><div className="grow"><div className="tt capitalize">{e.n}</div><div className="ss capitalize">{[e.tg || e.bp, e.eq].filter(Boolean).map(x => t(x)).join(' · ')}</div></div>
         {usage[e.id] && <span className="tag acc"><Icon name="starFill" /></span>}<Icon name="plus" className="chev" />
       </div>)}
       {f.length === 0 && bp === '★' && <div className="empty">{t('Nothing chosen yet — add exercises and they’ll show up here.')}</div>}
@@ -702,7 +736,7 @@ function ExConfig({ ex, existing, onSave: save0, onDelete, close, routine }) {
     <Media ex={ex} />
     <div className="row" style={{ gap: 6, flexWrap: 'wrap', margin: '10px 0 14px' }}>
       {cardio && <span className="tag acc"><Icon name="figureRun" />{t('Cardio')}</span>}
-      <span className="tag">{t(ex.tg || ex.bp)}</span><span className="tag">{t(ex.eq)}</span>
+      <span className="tag">{t(ex.tg || ex.bp)}</span>{ex.eq && <span className="tag">{t(ex.eq)}</span>}
     </div>
     {ex.desc && <div className="exnote">{ex.desc}</div>}
     {!cardio && <div style={{ marginBottom: 14 }}>
@@ -808,7 +842,7 @@ function PlanTools({ close }) {
   const exportFile = async () => {
     const bundle = buildPlanBundle(st, user?.name ? t('{0}’s plan', user.name) : '')
     const json = JSON.stringify(bundle, null, 2)
-    const name = 'openfit-plan-' + todayISO() + '.json'
+    const name = 'openfettle-plan-' + todayISO() + '.json'
     if (MOBILE) { try { await shareExport(json, name) } catch (e) { /* dismissed */ } close(); return }
     const blob = new Blob([json], { type: 'application/json' })
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href)
@@ -832,7 +866,7 @@ function PlanTools({ close }) {
     <h3>{t('Share your plan')}</h3>
     <div className="muted small" style={{ marginBottom: 16 }}>{t('Send your routines to a friend, or put your week on paper.')}</div>
     <Button variant="primary" icon="upload" onClick={exportFile} disabled={!hasRoutines}>{t('Export plan file')}</Button>
-    <div className="dim small" style={{ margin: '7px 2px 0', lineHeight: 1.4 }}>{t('A small file a friend imports into their own OPENFIT — routines only, none of your workouts or weigh-ins.')}</div>
+    <div className="dim small" style={{ margin: '7px 2px 0', lineHeight: 1.4 }}>{t('A small file a friend imports into their own OpenFettle — routines only, none of your workouts or weigh-ins.')}</div>
     {!MOBILE && <>
       <div style={{ height: 12 }} />
       <Button variant="tinted" icon="download" onClick={() => { close(); printPlan(st, user?.name || '') }} disabled={!hasRoutines}>{t('Print / Save as PDF')}</Button>
@@ -1129,7 +1163,7 @@ export async function runUpdateCheck(interactive) {
     const r = await checkForUpdate(__APP_VERSION__)
     if (!r.newer) { if (interactive) toast(t('You have the latest version ({0}).', __APP_VERSION__)); return }
     confirmSheet({
-      title: t('OPENFIT {0} is available', r.latest),
+      title: t('OpenFettle {0} is available', r.latest),
       message: t('You have {0}. Download the new APK and install it over this app; your data stays.', __APP_VERSION__),
       confirmText: t('Open the download page'), cancelText: t('Later'),
       onConfirm: () => window.open(r.url, '_blank', 'noopener')

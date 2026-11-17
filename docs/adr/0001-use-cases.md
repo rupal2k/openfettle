@@ -70,7 +70,7 @@ Everything else stays inline in the component.
 
 - **Easier:** progression and PR rules get unit tests, and the use cases exist where they pay off.
 - **Harder:** very little. About four new `lib/` functions, and the UI files get shorter.
-- **Revisit:** if OPENFIT gains a second storage backend or needs offline sync with conflict resolution, data access would justify a repository-style interface.
+- **Revisit:** if OpenFettle gains a second storage backend or needs offline sync with conflict resolution, data access would justify a repository-style interface.
 
 ## Action items
 

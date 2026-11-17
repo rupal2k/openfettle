@@ -1,4 +1,4 @@
-/* openfit-api — passkey (WebAuthn) auth + per-user state storage for openfit
+/* openfettle-api — passkey (WebAuthn) auth + per-user state storage for OpenFettle
    No framework, JSON-file storage, signed session cookies.               */
 import http from 'node:http';
 import crypto from 'node:crypto';
@@ -14,7 +14,7 @@ const PORT = +(process.env.PORT || 3000);
 const DATA = process.env.DATA_DIR || '/data';
 const RP_ID = process.env.RP_ID || 'localhost';
 const ORIGIN = process.env.ORIGIN || 'http://localhost:8080';
-const RP_NAME = process.env.RP_NAME || 'openfit';
+const RP_NAME = process.env.RP_NAME || 'OpenFettle';
 // Admin dashboard (issue): admins are matched by uid; INVITE_ONLY gates new signups behind a
 // code the admin generates. Both default off so a fresh self-hosted instance stays open.
 const ADMIN_UIDS = (process.env.ADMIN_UIDS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -302,7 +302,7 @@ setInterval(() => { for (const [k, v] of presence) if (Date.now() - v.updatedAt 
 /* ---------- food search proxy (Open Food Facts) ---------- */
 // search.openfoodfacts.org sends no CORS headers, so the browser can't query it itself.
 // Signed-in users only — never an open proxy. Cached briefly: search-as-you-type repeats a lot.
-const OFF_UA = 'openfit/1 (self-hosted; github.com/rupal2k/openfit)';
+const OFF_UA = 'openfettle/1 (self-hosted; github.com/rupal2k/openfettle)';
 const OFF_FIELDS = 'code,product_name,product_name_en,brands,nutriments,serving_quantity,serving_size,serving_quantity_unit';
 const foodCache = new Map();               // query -> { at, hits }; insertion-ordered = FIFO
 const FOOD_TTL = 10 * 60000, FOOD_CACHE_MAX = 500;
@@ -513,7 +513,7 @@ const routes = {
   'POST /api/push/test': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
-    await sendPush(user.id, { title: 'openfit', body: 'Test notification ✅ — this is what alerts look like.', tag: 'test' });
+    await sendPush(user.id, { title: 'OpenFettle', body: 'Test notification ✅ — this is what alerts look like.', tag: 'test' });
     json(res, 200, { ok: true });
   },
 

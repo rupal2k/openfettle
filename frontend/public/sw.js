@@ -1,4 +1,4 @@
-/* OPENFIT service worker — runtime caching (works with Vite's hashed asset names).
+/* OpenFettle service worker — runtime caching (works with Vite's hashed asset names).
    Media (img/gif) cache-first; everything else network-first with offline fallback. */
 const CACHE = 'opengym-rt-v1'
 
@@ -10,7 +10,7 @@ self.addEventListener('activate', e => {
 })
 self.addEventListener('push', e => {
   const data = e.data ? e.data.json() : {}
-  e.waitUntil(self.registration.showNotification(data.title || 'OPENFIT', {
+  e.waitUntil(self.registration.showNotification(data.title || 'OpenFettle', {
     body: data.body || '',
     icon: 'icon-512.png',
     badge: 'icon-180.png',

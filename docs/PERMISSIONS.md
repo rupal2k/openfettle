@@ -1,4 +1,4 @@
-# OPENFIT — Permissions
+# OpenFettle — Permissions
 
 ## Roles
 

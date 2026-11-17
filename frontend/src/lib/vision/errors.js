@@ -5,7 +5,7 @@ export const MESSAGES = {
   NO_STORAGE: 'Not enough free storage for the model.',
   DOWNLOAD: 'Download failed — check your connection and try again.',
   VERIFY: 'The downloaded model failed verification and was removed. Try again.',
-  GPU_INIT: 'The GPU couldn’t run the model, so OPENFIT switched to CPU mode. The CPU version needs its own download.',
+  GPU_INIT: 'The GPU couldn’t run the model, so OpenFettle switched to CPU mode. The CPU version needs its own download.',
   IMAGE: 'That photo couldn’t be read. Try a JPEG or PNG.',
   CANCELLED: 'Cancelled.',
 }

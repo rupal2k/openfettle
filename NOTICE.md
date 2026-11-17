@@ -1,13 +1,13 @@
 # Third-party notices
 
-openfit — Copyright (C) 2026 Rupal Das and openfit contributors.
+OpenFettle (called OPENFIT until November 2026) — Copyright (C) 2026 Rupal Das and OpenFettle contributors.
 Based upon openGym — Copyright (C) 2026 Duarte Santos.
-openfit's own code is licensed under the **GNU AGPL v3.0** (see [LICENSE](LICENSE)).
+OpenFettle's own code is licensed under the **GNU AGPL v3.0** (see [LICENSE](LICENSE)).
 
 ## App store exception
 
 As an additional permission under section 7 of the AGPL v3.0, the copyright holders permit
-distribution of the openfit mobile application through app store platforms (such as the
+distribution of the OpenFettle mobile application through app store platforms (such as the
 Apple App Store and Google Play) whose terms of service would otherwise be incompatible
 with the AGPL, provided the corresponding source code remains available under the AGPL at
 the project repository. This permission applies to the distribution channel only and does
@@ -51,9 +51,9 @@ The exercise names, instructions (English in `frontend/src/lib/exercises-data.js
 languages in `frontend/src/instr/`, regenerated via `scripts/build-instructions.mjs`), images
 and animations (fetched into `media/` at build time) come from
 [**hasaneyldrm/exercises-dataset**](https://github.com/hasaneyldrm/exercises-dataset)
-and are **not** covered by openfit's AGPL license — they remain under that dataset's own terms.
+and are **not** covered by OpenFettle's AGPL license — they remain under that dataset's own terms.
 The media files are not distributed in this repository; they are downloaded from the upstream
-source on first run. If you redistribute openfit with the media included, review the upstream
+source on first run. If you redistribute OpenFettle with the media included, review the upstream
 license first.
 
 ## Nutrition formulas & food data
@@ -81,7 +81,7 @@ available under the Open Database License (ODbL).
 The lab-report reader (`frontend/src/lib/labs/`) follows the marker keys, canonical SI units and
 unit conversion factors of [**getbased**](https://github.com/elkimek/get-based) by elkimek and
 contributors, licensed under the **GNU AGPL v3.0 or later**. These are factual laboratory values;
-the marker names' aliases, the parser and the scoring code are openfit's own. The PhenoAge
+the marker names' aliases, the parser and the scoring code are OpenFettle's own. The PhenoAge
 coefficients are from the published paper (Levine ME et al., *Aging*, 2018).
 
 The test fixtures in `frontend/src/lib/labs/fixtures/` (`getbased-reference-us-v2.pdf` and
@@ -100,9 +100,14 @@ the **Apache License 2.0**, with the English model from
 WebAssembly core and model are shipped inside the app under `ocr/` unmodified. PDF text and page
 rendering use Mozilla's [**pdf.js**](https://github.com/mozilla/pdf.js) (Apache License 2.0).
 
-## Font (Poppins)
+## Fonts (Poppins, Sora)
 
 The interface font is [**Poppins**](https://github.com/itfoundry/Poppins) by the Poppins Project
 Authors, under the **SIL Open Font License 1.1** (full text in `frontend/public/fonts/OFL.txt`). The
 Latin, Latin Extended and Devanagari subsets from Google Fonts are shipped unmodified in
 `frontend/public/fonts/`, so the app never requests fonts from Google.
+
+The OpenFettle wordmark uses [**Sora**](https://github.com/sora-xor/sora-font) Bold by the Sora Project
+Authors, under the **SIL Open Font License 1.1** (full text in `frontend/public/fonts/OFL-Sora.txt`).
+A Latin-only subset is shipped as `frontend/public/fonts/sora-700-latin.woff2`, and the outlined
+wordmark in `assets/wordmark.svg` is drawn from it.

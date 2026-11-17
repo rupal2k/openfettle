@@ -25,6 +25,9 @@ export function registerCustom(list) {
 }
 // Full searchable catalogue — customs first so your own exercises are easy to find.
 export const allExercises = st => [...(st.customEx || []), ...EXDB]
+// Search match for the library and the exercise picker. Custom exercises saved by older
+// shared-plan imports have no tg/eq, so those fields are optional here.
+export const matchesQuery = (e, ql) => !ql || e.n.toLowerCase().includes(ql) || (e.tg || '').includes(ql) || (e.eq || '').includes(ql) || (e.desc || '').toLowerCase().includes(ql)
 
 // Media normally sits next to the app (img/ and gif/, mounted into the web container).
 // A build can point them somewhere else — the demo build pulls them off a CDN instead of

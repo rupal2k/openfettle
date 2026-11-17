@@ -1,6 +1,6 @@
-// Blood markers OPENFIT can read from a lab report.
+// Blood markers OpenFettle can read from a lab report.
 // Keys, canonical (SI) units and unit factors follow getbased's marker schema and UNIT_CONVERSIONS
-// (github.com/elkimek/get-based, AGPL-3.0-or-later; see NOTICE.md). Aliases are OPENFIT's own.
+// (github.com/elkimek/get-based, AGPL-3.0-or-later; see NOTICE.md). Aliases are OpenFettle's own.
 //
 // unit:  canonical unit; every stored value is in it.
 // alt:   other units a report may use: reported = canonical × f (+ o). us: 1 marks the unit US

@@ -40,7 +40,7 @@ export async function nativeSave(state) {
 // routine in the weekly plan. Cheap enough to run after any state change — the plan or the
 // reminder time may just have been edited. `interactive` gates the OS permission prompt to
 // the Settings toggle; a background resync never pops a dialog.
-// Is OPENFIT allowed to show notifications? (revoked in Android settings = reminders never arrive)
+// Is OpenFettle allowed to show notifications? (revoked in Android settings = reminders never arrive)
 export async function notificationsAllowed() {
   if (!MOBILE) return true
   try {
@@ -123,7 +123,7 @@ export async function clearExports() {
   try {
     const { Filesystem, Directory } = await import('@capacitor/filesystem')
     const { files } = await Filesystem.readdir({ path: '', directory: Directory.Cache })
-    for (const f of files) if (/^openfit-(backup|plan)-.*\.json$/.test(f.name)) await Filesystem.deleteFile({ path: f.name, directory: Directory.Cache }).catch(() => {})
+    for (const f of files) if (/^open(fit|fettle)-(backup|plan)-.*\.json$/.test(f.name)) await Filesystem.deleteFile({ path: f.name, directory: Directory.Cache }).catch(() => {})
   } catch { /* nothing cached */ }
   lastExport = null
   await clearCaptures()

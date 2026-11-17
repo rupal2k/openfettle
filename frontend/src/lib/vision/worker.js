@@ -1,4 +1,4 @@
-// The on-device runtime — OPENFIT's LocalGemmaRuntime. One worker = one loaded model.
+// The on-device runtime — OpenFettle's LocalGemmaRuntime. One worker = one loaded model.
 // Model files are fetched HERE: in the APK, CapacitorHttp patches window.fetch and would push the
 // download through the native bridge as base64; a worker's fetch is untouched, and Hugging Face
 // allows CORS. Like fud-ai, a GPU init failure is reported so the client can fall back to CPU.
