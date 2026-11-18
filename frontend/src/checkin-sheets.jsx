@@ -125,6 +125,8 @@ function Flow({ close, lockSheet }) {
   const dirty = Object.keys(a).length > 0 || keep || happened
   useEffect(() => { lockSheet(!!dirty && !saved) }, [dirty, saved])
   useEffect(() => { privacyScreen(true); return () => privacyScreen(false) }, [])   // private notes stay out of screenshots
+  // however the sheet goes away (Close, Back, a swipe before any answer), a new check-in can open
+  useEffect(() => { flowOpen = true; return () => { flowOpen = false } }, [])
 
   const leave = () => dirty && !saved
     ? confirmSheet({ title: t('Leave without saving?'), message: t('Nothing from this check-in will be saved.'), confirmText: t('Leave'), danger: true, onConfirm: () => { lockSheet(false); close() } })
@@ -271,9 +273,9 @@ export function openCheckin() {
   if (flowOpen) return
   if (S().active) { toast(t('Finish or discard your workout first.')); return }
   const go = () => {
-    flowOpen = true
+    flowOpen = true   // set at once so a double tap can't open two; the Flow keeps it while mounted
     let h = null
-    h = ui().openSheet(close => <Flow close={() => { flowOpen = false; close() }} lockSheet={v => h?.lock(v)} />)
+    h = ui().openSheet(close => <Flow close={close} lockSheet={v => h?.lock(v)} />)
   }
   if (doneOn(S().checkins, todayISO())) confirmSheet({ title: t('Replace today’s check-in?'), message: t('Your new answers replace the ones you saved today.'), confirmText: t('Replace'), onConfirm: go })
   else go()

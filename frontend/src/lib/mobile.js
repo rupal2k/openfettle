@@ -112,9 +112,17 @@ export async function syncCheckinReminder(S, interactive = false) {
 // few hundred KB, and reading a huge file can take the WebView down.
 // Android app: keep a screen out of screenshots and the recent-apps preview while it shows
 // health results (native PrivacyScreen plugin, MainActivity). A no-op on the web.
+// Counted: each screen that needs it turns it on and off again, and the block stays on while any
+// still does. (Opening the check-in from its settings sheet unmounts that sheet after the check-in
+// has turned the block on; without the count, the older sheet's "off" lifted it.)
+let secureScreens = 0
 export function privacyScreen(on) {
   if (!MOBILE) return
-  import('@capacitor/core').then(({ registerPlugin }) => registerPlugin('PrivacyScreen').set({ on })).catch(() => {})
+  const before = secureScreens > 0
+  secureScreens = Math.max(0, secureScreens + (on ? 1 : -1))
+  const now = secureScreens > 0
+  if (now === before) return
+  import('@capacitor/core').then(({ registerPlugin }) => registerPlugin('PrivacyScreen').set({ on: now })).catch(() => {})
 }
 
 export const MAX_IMPORT_BYTES = 20 * 1024 * 1024
