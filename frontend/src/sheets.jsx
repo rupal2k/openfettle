@@ -23,7 +23,7 @@ import { estimate1RM, best1RM, REP_CAP } from './lib/onerm.js'
 import { finishSession, recordSession, invalidDoneSets, doubtfulDoneSets, cleanConfig } from './lib/workout.js'
 import { checkForUpdate } from './lib/updates.js'
 import { nextPrescription, applyPrescription, sessionTarget, policyFor, defaultIncrement, POLICIES_FOR, POLICY_NAME, POLICY_DESC, MAX_BW_SETS } from './lib/progression.js'
-import { MOBILE, shareExport, tooBig } from './lib/mobile.js'
+import { MOBILE, shareExport, tooBig, askNotifications } from './lib/mobile.js'
 
 const S = () => useStore.getState().S
 const update = (...a) => useStore.getState().update(...a)
@@ -475,7 +475,7 @@ function WindDown() {
       {st.endsAt ? t('Fades out at {0}', new Date(st.endsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })) : ''}
     </div>
     <div style={{ height: 10 }} />
-    <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : (p.play() || toast(t('Sound can’t play on this device.')))}>{st.playing ? t('Pause') : t('Play')}</Button>
+    <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : p.play() ? askNotifications() : toast(t('Sound can’t play on this device.'))}>{st.playing ? t('Pause') : t('Play')}</Button>
     {/* a sleep timer suggests a locked phone: say where the sound can be stopped once the app is gone */}
     {MOBILE && <div className="small dim" style={{ marginTop: 8 }}>{t('Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.')}</div>}
     <div style={{ height: 8 }} />
