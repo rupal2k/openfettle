@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.2
+
+Wind down is now a sound mixer, with calmer fire, water and night sounds.
+
+- 🎚️ **Mix your own sounds:** switch on any of white, pink and brown noise, fire, water and night, and set each one’s volume. One volume and the sleep timer control the whole mix.
+- 🔥 **Calmer nature sounds, each on its own:** fire is warm crackles with no hiss, water is a flowing stream with small bubbles (no more waves), and night is crickets only. Add a noise underneath only if you want one.
+- 💾 **Mixes you keep:** three mixes to start from, save up to five of your own, and your last mix is remembered (and kept in your backup).
+- 🔔 The notification shows which sounds are playing, for example “Fire + Water + Night”.
+
 ## 1.7.1
 
 Wind down keeps playing in the background, and shows up on the evenings after training.
