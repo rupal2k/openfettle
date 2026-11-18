@@ -102,6 +102,14 @@ describe('scene generators (fire, water, night)', () => {
     const p = spiky(loopNoise('pink', N, rng(13), 48000)), f = spiky(gen('fire'))
     expect(f).toBeGreaterThan(2 * p)   // measured: pink 2.2, fire 5.1
   })
+  it('water flows like a stream, not waves: its level stays steady from second to second', () => {
+    const x = gen('water'), w = 24000, lv = []
+    for (let i = 0; i + w <= x.length; i += w) lv.push(rmsDb(x.subarray(i, i + w)))
+    expect(Math.max(...lv) - Math.min(...lv)).toBeLessThan(3)   // measured 1.0 dB over 0.5 s windows
+  })
+  it('water has bubbles: more spiky than its smooth flow bed would be', () => {
+    expect(spiky(gen('water'))).toBeGreaterThan(spiky(loopNoise('pink', N, rng(13), 48000)))
+  })
   it('water leans to low frequencies like pink/brown', () => {
     const w = diffRatio(fillNoise('white', new Float32Array(48000), rng(3)))
     expect(diffRatio(gen('water'))).toBeLessThan(w * 0.5)

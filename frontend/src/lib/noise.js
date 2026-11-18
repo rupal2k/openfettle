@@ -84,17 +84,30 @@ const SCENES = {
     }
     return out
   },
-  // a gentle brook: pink noise low-passed hard (WATER.lpHz) so it has no hiss, high-passed (~60 Hz)
-  // so it does not boom, with a slow swell and a faster burble
+  // a flowing stream, not waves: a steady band of flowing water (pink noise, ~300 Hz-2.2 kHz, so
+  // neither boom nor hiss) with a fast flutter and no slow swell, plus many small bubbles. Each
+  // bubble is a short tone that rises in pitch as it decays, the way real bubbles ring.
   water(out, rand, sr) {
     fillNoise('pink', out, rand)
-    const lp = 1 - Math.exp(-2 * Math.PI * WATER.lpHz / sr), hp = 1 - Math.exp(-2 * Math.PI * 60 / sr)
-    const slow = wander(rand, sr / BLOCK, 0.3), burble = wander(rand, sr / BLOCK, 6)
+    const lp = 1 - Math.exp(-2 * Math.PI * WATER.lpHz / sr), hp = 1 - Math.exp(-2 * Math.PI * WATER.hpHz / sr)
+    const flutter = wander(rand, sr / BLOCK, 12), drift = wander(rand, sr / BLOCK, 0.1)
+    const rate = WATER.bubbles / sr, bubbles = []
     let l = 0, h = 0, g = 0
     for (let i = 0; i < out.length; i++) {
-      if (i % BLOCK === 0) g = WATER.gain * (0.65 + 0.2 * slow() + 0.25 * burble())
+      if (i % BLOCK === 0) g = WATER.bed * (0.75 + 0.15 * flutter() + 0.1 * drift())
       l += (out[i] - l) * lp; h += (l - h) * hp
-      out[i] = soft((l - h) * g)
+      let v = (l - h) * g
+      if (rand() < rate) {
+        const f = 300 + 1700 * rand() ** 2, len = Math.round(sr * (0.008 + 0.032 * rand()))
+        bubbles.push({ ph: 0, f, rise: f * (0.3 + 0.7 * rand()) / len, amp: WATER.pop * (0.3 + 0.7 * rand()), k: 0, len })
+      }
+      for (let j = bubbles.length - 1; j >= 0; j--) {
+        const bb = bubbles[j], env = Math.sin(Math.PI * bb.k / bb.len) * (1 - bb.k / bb.len)
+        v += bb.amp * env * Math.sin(bb.ph)
+        bb.ph += 2 * Math.PI * (bb.f + bb.rise * bb.k) / sr
+        if (++bb.k >= bb.len) bubbles.splice(j, 1)
+      }
+      out[i] = soft(v)
     }
     return out
   },
@@ -119,7 +132,7 @@ const SCENES = {
 }
 const CRICKETS = [[4500, 34, 0.8, 0.12], [4800, 38, 1.1, 0.08], [4150, 30, 1.6, 0.05]]  // Hz, pulses/s, s between chirps, level
 const FIRE = { rumble: 0.95, rumbleHz: 250, rate: 7, pop: 0.16, popVar: 0.6, crackleHz: 3000, crackleGain: 1.8 }
-const WATER = { lpHz: 900, gain: 2.1 }
+const WATER = { lpHz: 2200, hpHz: 300, bed: 2.2, bubbles: 60, pop: 0.35 }
 const NIGHT = { crickets: 6 }
 
 // n samples that loop without a jump: the tail is generated past n and blended into the head.
