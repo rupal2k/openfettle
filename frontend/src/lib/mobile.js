@@ -10,6 +10,7 @@
 // Like the demo build, MOBILE is replaced at build time, so all of this folds away in
 // web bundles; the Capacitor plugins are only ever imported behind it.
 import { t } from './i18n.js'
+import { checkinSchedule, REMIND_ID0, REMIND_DAYS } from './checkin.js'
 
 export const MOBILE = import.meta.env.VITE_MOBILE === '1'
 
@@ -78,6 +79,29 @@ export async function syncReminder(S, interactive = false) {
         schedule: { on: { weekday: Number(day) + 1, hour, minute }, allowWhileIdle: true },
       }))
     if (notifications.length) await LocalNotifications.schedule({ notifications })
+    return true
+  } catch (e) { return false }
+}
+
+// End-of-day check-in reminder: one-shot notifications for the next 14 days (lib/checkin.js
+// checkinSchedule), so a day that is already checked in or skipped simply has none. Re-run when the
+// prefs or today's check-in change and whenever the app comes back, so the window rolls forward.
+// Tapping one opens the check-in (listener in main.jsx). No action buttons in 1.8.0: the plugin
+// opens the app for every action, so Snooze/Skip would not stay in the shade (spec 6.4, P2).
+export async function syncCheckinReminder(S, interactive = false) {
+  if (!MOBILE) return true
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications')
+    await LocalNotifications.cancel({ notifications: Array.from({ length: REMIND_DAYS }, (_, k) => ({ id: REMIND_ID0 + k })) }).catch(() => {})
+    const list = checkinSchedule(S.checkinPrefs, S.checkins)
+    if (!list.length) return true
+    let perm = await LocalNotifications.checkPermissions()
+    if (perm.display !== 'granted' && interactive) perm = await LocalNotifications.requestPermissions()
+    if (perm.display !== 'granted') return false
+    await LocalNotifications.schedule({ notifications: list.map(n => ({
+      id: n.id, title: t('End-of-day check-in'), body: t('Your workday is ending. A few minutes to close it?'),
+      schedule: { at: n.at, allowWhileIdle: true }, extra: { kind: 'checkin', day: n.day }
+    })) })
     return true
   } catch (e) { return false }
 }

@@ -3,7 +3,7 @@ import { api } from '../lib/api.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
-import { MOBILE, nativeLoad, nativeSave, syncReminder, clearCaptures } from '../lib/mobile.js'
+import { MOBILE, nativeLoad, nativeSave, syncReminder, syncCheckinReminder, clearCaptures } from '../lib/mobile.js'
 import { mergeState } from '../lib/sync.js'
 import { cleanReports } from '../lib/labs/reports.js'
 import { cleanRoutine, cleanWeek } from '../lib/clean.js'
@@ -114,6 +114,9 @@ export const useStore = create((set, get) => {
   // was wasted bridge traffic (performance audit 1.6.2)
   let reminderKey = null
   const reminderInputs = S => JSON.stringify([S.reminder, S.week, (S.routines || []).map(r => [r.id, r.name])])
+  // the check-in reminder depends on its prefs and on whether today is already done
+  let checkinKey = null
+  const checkinInputs = S => JSON.stringify([S.checkinPrefs, (S.checkins || []).at(-1)?.d, S.lang])
   const nativePersist = () => {
     clearTimeout(saveTm)
     saveTm = setTimeout(() => {
@@ -122,6 +125,8 @@ export const useStore = create((set, get) => {
       nativeSave(S)
       const k = reminderInputs(S)
       if (k !== reminderKey) { reminderKey = k; syncReminder(S) }
+      const c = checkinInputs(S)
+      if (c !== checkinKey) { checkinKey = c; syncCheckinReminder(S) }
     }, 800)
   }
 
@@ -153,6 +158,8 @@ export const useStore = create((set, get) => {
   // same applies to the file mirror — backgrounding is often the last thing before the OS
   // kills the app.
   document.addEventListener('visibilitychange', () => {
+    // back in the app: the 14-day window of check-in reminders moves on with the calendar
+    if (document.visibilityState === 'visible') { if (MOBILE && get().ready) syncCheckinReminder(get().S); return }
     if (document.visibilityState !== 'hidden') return
     if (lsTm) flushLocal()
     if (MOBILE && saveTm) {
@@ -297,6 +304,7 @@ export const useStore = create((set, get) => {
         }
         get().setGuest(true)
         syncReminder(get().S)
+        syncCheckinReminder(get().S)
         clearCaptures()   // camera photos left by a cancelled or killed capture
         set({ ready: true })
         return

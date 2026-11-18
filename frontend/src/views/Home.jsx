@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
 import { effectiveRoutine, effectiveRoutineId, streakWeeks, lastBW, setsDoneActive, showWindDown } from '../lib/history.js'
+import { checkinDue } from '../lib/checkin.js'
 import { fmtNum, fmtDate, todayISO, isoOf, weekKey, DAYS } from '../lib/format.js'
 import { t, dateLocale } from '../lib/i18n.js'
 import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, planCatalogSheet, bwDeltaColor, windDownSheet } from '../sheets.jsx'
@@ -82,7 +83,7 @@ export default function Home() {
         <span className="lrow-i" style={{ '--tint': 'var(--indigo)' }}><Icon name="moon" /></span>
         <span className="wind-m">
           <span className="wind-t">{t('Wind down')}</span>
-          <span className="muted small">{t('Mix noise, fire, water and night sounds to help you rest')}</span>
+          <span className="muted small">{checkinDue(S, today) ? t('End-of-day check-in') : t('Mix noise, fire, water and night sounds to help you rest')}</span>
         </span>
         <Icon name="chevronRight" className="chev" />
       </button>
