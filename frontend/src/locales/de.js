@@ -1271,5 +1271,6 @@ export default {
   'Play': 'Abspielen',
   'Noise, fire, water or night sounds to help you rest': 'Rauschen, Feuer, Wasser oder Nachtgeräusche zum Entspannen',
   'Sounds generated on this device. Nothing is downloaded.': 'Auf diesem Gerät erzeugte Klänge. Nichts wird heruntergeladen.',
+  'Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.': 'Spielt weiter, wenn du die App verlässt oder den Bildschirm sperrst. Pausiere hier oder über die Benachrichtigung.',
   'Sound can’t play on this device.': 'Auf diesem Gerät kann kein Ton abgespielt werden.',
 }

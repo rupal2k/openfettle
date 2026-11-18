@@ -424,6 +424,32 @@ export const goalSheet = () => ui().openSheet(close => <GoalSheet close={close} 
 
 /* ============================ wind down ============================ */
 // Generated noise player (lib/noise.js). The player is app-wide, so closing the sheet keeps it playing.
+const soundName = c => ({ white: t('White'), pink: t('Pink'), brown: t('Brown'), fire: t('Fire'), water: t('Water'), night: t('Night') }[c])
+
+// Android app: while Wind down plays, the native WindDownService keeps it going with the app
+// minimised or the screen off, and shows a notification (sound, fade-out time, Pause).
+let windDownBridged = false
+function bridgeWindDown(p) {
+  if (!MOBILE || windDownBridged) return
+  windDownBridged = true
+  import('@capacitor/core').then(({ registerPlugin }) => {
+    const wd = registerPlugin('WindDown')
+    wd.addListener('stopped', () => p.stop()).catch(() => {})
+    let last = ''
+    const sync = () => {
+      const st = p.get()
+      const key = st.playing ? [st.color, st.endsAt].join() : ''
+      if (key === last) return   // volume changes don't touch the notification
+      last = key
+      if (!st.playing) return wd.stop().catch(() => {})
+      const fade = st.endsAt && t('Fades out at {0}', new Date(st.endsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' }))
+      wd.start({ title: t('Wind down'), text: soundName(st.color) + (fade ? ' · ' + fade : ''), stop: t('Pause'),
+        until: st.endsAt ? st.endsAt + 15000 : 0 }).catch(() => {})
+    }
+    p.subscribe(sync); sync()
+  }).catch(() => {})
+}
+
 function WindDown() {
   const p = noisePlayer()
   const st = useSyncExternalStore(p.subscribe, p.get)
@@ -434,7 +460,7 @@ function WindDown() {
     <div className="small muted" id="wd-color" style={{ marginBottom: 6 }}>{t('Sound')}</div>
     <div role="group" aria-labelledby="wd-color">
       {[COLORS.slice(0, 3), COLORS.slice(3)].map((row, k) => <Segmented key={k} className="tall" noneOk
-        options={row.map(c => ({ value: c, label: { white: t('White'), pink: t('Pink'), brown: t('Brown'), fire: t('Fire'), water: t('Water'), night: t('Night') }[c] }))}
+        options={row.map(c => ({ value: c, label: soundName(c) }))}
         value={st.color} onChange={c => p.setColor(c)} />)}
     </div>
     <div style={{ height: 14 }} />
@@ -450,10 +476,12 @@ function WindDown() {
     </div>
     <div style={{ height: 10 }} />
     <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : (p.play() || toast(t('Sound can’t play on this device.')))}>{st.playing ? t('Pause') : t('Play')}</Button>
+    {/* a sleep timer suggests a locked phone: say where the sound can be stopped once the app is gone */}
+    {MOBILE && <div className="small dim" style={{ marginTop: 8 }}>{t('Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.')}</div>}
     <div style={{ height: 8 }} />
   </>
 }
-export const windDownSheet = () => ui().openSheet(() => <WindDown />)
+export const windDownSheet = () => { bridgeWindDown(noisePlayer()); return ui().openSheet(() => <WindDown />) }
 
 /* ============================ exercise detail ============================ */
 // Estimated 1RM for one exercise (issue #18): what the log already implies, plus a calculator

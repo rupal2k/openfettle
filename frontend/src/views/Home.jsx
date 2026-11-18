@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
-import { effectiveRoutine, effectiveRoutineId, streakWeeks, lastBW, setsDoneActive } from '../lib/history.js'
+import { effectiveRoutine, effectiveRoutineId, streakWeeks, lastBW, setsDoneActive, showWindDown } from '../lib/history.js'
 import { fmtNum, fmtDate, todayISO, isoOf, weekKey, DAYS } from '../lib/format.js'
 import { t, dateLocale } from '../lib/i18n.js'
 import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, planCatalogSheet, bwDeltaColor, windDownSheet } from '../sheets.jsx'
@@ -77,7 +77,7 @@ export default function Home() {
       <span className="hero-cta">{S.active ? t('Resume') : routine ? t('Start') : <Icon name="plus" />}</span>
     </button>
 
-    {!routine && !S.active && (
+    {showWindDown(S, today) && (
       <button type="button" className="card tappable wind-card" onClick={windDownSheet} aria-label={t('Wind down')}>
         <span className="lrow-i" style={{ '--tint': 'var(--indigo)' }}><Icon name="moon" /></span>
         <span className="wind-m">

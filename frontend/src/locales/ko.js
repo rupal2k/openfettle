@@ -1250,5 +1250,6 @@ export default {
   'Play': '재생',
   'Noise, fire, water or night sounds to help you rest': '휴식을 돕는 노이즈, 모닥불, 물, 밤 소리',
   'Sounds generated on this device. Nothing is downloaded.': '이 기기에서 만든 소리입니다. 다운로드하지 않습니다.',
+  'Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.': '앱을 나가거나 화면을 잠가도 계속 재생됩니다. 여기나 알림에서 일시정지하세요.',
   'Sound can’t play on this device.': '이 기기에서는 소리를 재생할 수 없습니다.',
 }

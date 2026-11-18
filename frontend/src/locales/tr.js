@@ -1250,5 +1250,6 @@ export default {
   'Play': 'Oynat',
   'Noise, fire, water or night sounds to help you rest': 'Dinlenmen için gürültü, ateş, su veya gece sesleri',
   'Sounds generated on this device. Nothing is downloaded.': 'Bu cihazda üretilen sesler. Hiçbir şey indirilmez.',
+  'Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.': 'Uygulamadan çıktığında veya ekranı kilitlediğinde çalmaya devam eder. Buradan veya bildirimden duraklat.',
   'Sound can’t play on this device.': 'Bu cihazda ses çalınamıyor.',
 }

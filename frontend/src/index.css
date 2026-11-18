@@ -400,9 +400,12 @@ h4.sec,.sect-t{
   background:linear-gradient(135deg,var(--acc),var(--acc-2));color:var(--on-acc);
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 6px 20px -2px color-mix(in srgb,var(--acc) 50%,transparent);
-  transition:transform var(--fast) var(--ease);
+  transition:transform var(--fast) var(--ease),opacity var(--fast) var(--ease);
 }
 #startfab:active{transform:scale(.93)}
+/* tucked while the page scrolls down; hidden (not just transparent) so it can't be tapped or focused */
+#startfab.tuck{transform:translateY(24px) scale(.6);opacity:0;visibility:hidden;
+  transition:transform var(--fast) var(--ease),opacity var(--fast) var(--ease),visibility 0s linear var(--fast)}
 #startfab .icn{font-size:26px;--icon-stroke:2}
 /* the rest timer floats in the same strip — sit above it */
 body.resting #startfab{bottom:calc(240px + var(--sab))}

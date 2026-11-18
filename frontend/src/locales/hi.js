@@ -1250,5 +1250,6 @@ export default {
   'Play': 'चलाएँ',
   'Noise, fire, water or night sounds to help you rest': 'आराम के लिए शोर, आग, पानी या रात की आवाज़ें',
   'Sounds generated on this device. Nothing is downloaded.': 'इसी डिवाइस पर बनी आवाज़ें। कुछ भी डाउनलोड नहीं होता।',
+  'Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.': 'ऐप छोड़ने या स्क्रीन लॉक करने पर भी चलता रहता है। इसे यहाँ या नोटिफ़िकेशन से रोकें।',
   'Sound can’t play on this device.': 'इस डिवाइस पर आवाज़ नहीं चल सकती।',
 }
