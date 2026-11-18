@@ -6,13 +6,13 @@ import { fmtDate, fmtNum, fmtVol, fmtDur, durPart, todayISO, uid, exCount, DAYN,
 import { lastEntryFor, bestWeightFor, buildSets, sessionSets, effectiveRoutineId, setsDone, setsDoneActive, lastBW, supersetUnits, unitOf, setLabel, defaultConfig, cleanupSg, modeOf, effortOf, isBw, isPerSide, sideReps } from './lib/history.js'
 import { beep, vibrate } from './lib/sound.js'
 import { t, instrFor, loadInstr, getLang, INSTR_LANGS, dateLocale } from './lib/i18n.js'
-import { noisePlayer, COLORS, SLEEP_OPTIONS } from './lib/noise.js'
+import { noisePlayer, COLORS, SLEEP_OPTIONS, STARTER_MIXES, MAX_MIXES, activeLayers } from './lib/noise.js'
 import { nav } from './lib/nav.js'
 import { starterRoutines, PLAN_TEMPLATES, PLAN_WHERE, instantiatePlan, templateEx } from './lib/starter.js'
 import Media, { Thumb } from './components/Media.jsx'
 import Stepper from './components/Stepper.jsx'
 import Icon from './components/Icon.jsx'
-import { Button, Slider, Switch, Segmented, SelectRow, Row } from './components/ui.jsx'
+import { Button, Slider, Switch, Segmented, SelectRow, Row, TextField } from './components/ui.jsx'
 import { glyphOf, GLYPH_GROUPS, DEFAULT_GLYPH } from './lib/glyphs.js'
 import BodyMap from './components/BodyMap.jsx'
 import { loadOfWorkouts } from './lib/muscles.js'
@@ -423,11 +423,13 @@ function GoalSheet({ close }) {
 export const goalSheet = () => ui().openSheet(close => <GoalSheet close={close} />)
 
 /* ============================ wind down ============================ */
-// Generated noise player (lib/noise.js). The player is app-wide, so closing the sheet keeps it playing.
+// Generated sound mixer (lib/noise.js). The player is app-wide, so closing the sheet keeps it playing.
 const soundName = c => ({ white: t('White'), pink: t('Pink'), brown: t('Brown'), fire: t('Fire'), water: t('Water'), night: t('Night') }[c])
+const mixLabel = mix => activeLayers(mix).map(soundName).join(' + ')
+const fadeLabel = endsAt => endsAt && t('Fades out at {0}', new Date(endsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' }))
 
 // Android app: while Wind down plays, the native WindDownService keeps it going with the app
-// minimised or the screen off, and shows a notification (sound, fade-out time, Pause).
+// minimised or the screen off, and shows a notification (the layers, fade-out time, Pause).
 let windDownBridged = false
 function bridgeWindDown(p) {
   if (!MOBILE || windDownBridged) return
@@ -438,16 +440,66 @@ function bridgeWindDown(p) {
     let last = ''
     const sync = () => {
       const st = p.get()
-      const key = st.playing ? [st.color, st.endsAt].join() : ''
+      const key = st.playing ? [mixLabel(st.mix), st.endsAt].join() : ''
       if (key === last) return   // volume changes don't touch the notification
       last = key
       if (!st.playing) return wd.stop().catch(() => {})
-      const fade = st.endsAt && t('Fades out at {0}', new Date(st.endsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' }))
-      wd.start({ title: t('Wind down'), text: soundName(st.color) + (fade ? ' · ' + fade : ''), stop: t('Pause'),
+      const fade = fadeLabel(st.endsAt)
+      wd.start({ title: t('Wind down'), text: mixLabel(st.mix) + (fade ? ' · ' + fade : ''), stop: t('Pause'),
         until: st.endsAt ? st.endsAt + 15000 : 0 }).catch(() => {})
     }
     p.subscribe(sync); sync()
   }).catch(() => {})
+}
+
+// The last mix and volume are kept (S.winddown, so they are in backups too): restored once when
+// Wind down first opens, saved shortly after they change (not on every step of a slider drag).
+let windDownRestored = false
+function keepWindDown(p) {
+  if (windDownRestored) return
+  windDownRestored = true
+  p.restore(S().winddown || {})
+  let tm = null
+  p.subscribe(() => {
+    clearTimeout(tm)
+    tm = setTimeout(() => {
+      const { mix, volume } = p.get(), w = S().winddown || {}
+      if (JSON.stringify(w.mix) === JSON.stringify(mix) && w.volume === volume) return
+      update(s => { s.winddown = { ...(s.winddown || {}), mix, volume } })
+    }, 600)
+  })
+}
+
+function SavedMixes({ p, mix }) {
+  const saved = useStore(s => s.S.winddown?.mixes) || []
+  const [naming, setNaming] = useState(false)
+  const [name, setName] = useState('')
+  const same = m => COLORS.every(c => (m[c] || 0) === (mix[c] || 0))
+  const save = () => {
+    const n = name.trim().slice(0, 30)
+    if (!n) return
+    update(s => { s.winddown = { ...(s.winddown || {}), mixes: [...(s.winddown?.mixes || []).filter(m => m.name !== n), { name: n, mix: { ...mix } }].slice(-MAX_MIXES) } })
+    setNaming(false); setName(''); toast(t('Mix saved'))
+  }
+  const remove = n => update(s => { s.winddown = { ...(s.winddown || {}), mixes: (s.winddown?.mixes || []).filter(m => m.name !== n) } })
+  const list = saved.length ? saved : STARTER_MIXES.map(m => ({ ...m, name: t(m.name), starter: true }))
+  return <>
+    <div className="small muted" id="wd-mixes" style={{ marginBottom: 2 }}>{saved.length ? t('Your mixes') : t('Try a mix')}</div>
+    <div className="chips" role="group" aria-labelledby="wd-mixes">
+      {list.map(m => <span key={m.name} className="row" style={{ gap: 2, flex: 'none' }}>
+        <button type="button" className={'chip nocap' + (same(m.mix) ? ' on' : '')} aria-pressed={same(m.mix)} onClick={() => p.setMix(m.mix)}>{m.name}</button>
+        {!m.starter && <button type="button" className="iconbtn" style={{ width: 32, height: 32 }} aria-label={t('Delete mix {0}', m.name)} onClick={() => remove(m.name)}><Icon name="xmark" /></button>}
+      </span>)}
+    </div>
+    {naming
+      ? <div className="row" style={{ gap: 8, marginTop: 4 }}>
+          <TextField autoFocus maxLength={30} placeholder={t('Mix name')} aria-label={t('Mix name')} value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && save()} />
+          <Button variant="tinted" size="sm" onClick={save} disabled={!name.trim()}>{t('Save')}</Button>
+        </div>
+      : saved.length >= MAX_MIXES
+        ? <div className="small dim" style={{ marginTop: 4 }}>{t('You can keep {0} mixes. Delete one to save another.', MAX_MIXES)}</div>
+        : <Button variant="plain" size="sm" icon="plus" onClick={() => setNaming(true)}>{t('Save this mix')}</Button>}
+  </>
 }
 
 function WindDown() {
@@ -457,13 +509,17 @@ function WindDown() {
     <h3>{t('Wind down')}</h3>
     <div className="muted small">{t('Sounds generated on this device. Nothing is downloaded.')}</div>
     <div style={{ height: 14 }} />
-    <div className="small muted" id="wd-color" style={{ marginBottom: 6 }}>{t('Sound')}</div>
-    <div role="group" aria-labelledby="wd-color">
-      {[COLORS.slice(0, 3), COLORS.slice(3)].map((row, k) => <Segmented key={k} className="tall" noneOk
-        options={row.map(c => ({ value: c, label: soundName(c) }))}
-        value={st.color} onChange={c => p.setColor(c)} />)}
+    <div className="small muted" id="wd-layers" style={{ marginBottom: 6 }}>{t('Switch on any sounds you like and set each one’s volume.')}</div>
+    <div className="chips" role="group" aria-labelledby="wd-layers" style={{ flexWrap: 'wrap', overflowX: 'visible' }}>
+      {COLORS.map(c => <button key={c} type="button" className={'chip' + (st.mix[c] > 0 ? ' on' : '')} aria-pressed={st.mix[c] > 0} onClick={() => p.toggle(c)}>{soundName(c)}</button>)}
     </div>
-    <div style={{ height: 14 }} />
+    {activeLayers(st.mix).map(c => <div key={c} className="row" style={{ gap: 10, alignItems: 'center' }}>
+      <span className="small" style={{ width: 52, flex: 'none' }}>{soundName(c)}</span>
+      <div style={{ flex: 1, minWidth: 0 }}><Slider className="tall" value={Math.round(st.mix[c] * 100)} min={1} max={100} step={1} aria-label={t('{0} volume', soundName(c))} onChange={v => p.setLevel(c, v / 100)} /></div>
+    </div>)}
+    <div style={{ height: 10 }} />
+    <SavedMixes p={p} mix={st.mix} />
+    <div style={{ height: 12 }} />
     <div className="small muted" style={{ marginBottom: 2 }}>{t('Sound volume')}</div>
     <Slider className="tall" value={Math.round(st.volume * 100)} min={0} max={100} step={1} aria-label={t('Sound volume')} onChange={v => p.setVolume(v / 100)} />
     <div style={{ height: 10 }} />
@@ -471,9 +527,7 @@ function WindDown() {
     <div role="group" aria-labelledby="wd-sleep">
       <Segmented className="tall" options={SLEEP_OPTIONS.map(m => ({ value: m, label: m ? t('{0} min', m) : t('Off') }))} value={st.sleep} onChange={m => p.setSleep(m)} />
     </div>
-    <div className="small muted" style={{ marginTop: 6, minHeight: 18 }}>
-      {st.endsAt ? t('Fades out at {0}', new Date(st.endsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })) : ''}
-    </div>
+    <div className="small muted" style={{ marginTop: 6, minHeight: 18 }}>{fadeLabel(st.endsAt) || ''}</div>
     <div style={{ height: 10 }} />
     <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : askNotifications().then(() => p.play() || toast(t('Sound can’t play on this device.')))}>{st.playing ? t('Pause') : t('Play')}</Button>
     {/* a sleep timer suggests a locked phone: say where the sound can be stopped once the app is gone */}
@@ -481,7 +535,7 @@ function WindDown() {
     <div style={{ height: 8 }} />
   </>
 }
-export const windDownSheet = () => { bridgeWindDown(noisePlayer()); return ui().openSheet(() => <WindDown />) }
+export const windDownSheet = () => { const p = noisePlayer(); keepWindDown(p); bridgeWindDown(p); return ui().openSheet(() => <WindDown />) }
 
 /* ============================ exercise detail ============================ */
 // Estimated 1RM for one exercise (issue #18): what the log already implies, plus a calculator

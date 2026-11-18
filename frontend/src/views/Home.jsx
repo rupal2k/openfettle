@@ -82,7 +82,7 @@ export default function Home() {
         <span className="lrow-i" style={{ '--tint': 'var(--indigo)' }}><Icon name="moon" /></span>
         <span className="wind-m">
           <span className="wind-t">{t('Wind down')}</span>
-          <span className="muted small">{t('Noise, fire, water or night sounds to help you rest')}</span>
+          <span className="muted small">{t('Mix noise, fire, water and night sounds to help you rest')}</span>
         </span>
         <Icon name="chevronRight" className="chev" />
       </button>

@@ -55,16 +55,19 @@ function wander(rand, sr, rate) {
   return () => { if (++n >= hold) { n = 0; target = rand() } return (v += (target - v) * a) }
 }
 
-// Gains below were tuned by measurement (12 s at 48 kHz) so every scene sits within ~1 dB RMS of
-// pink/brown; `soft` catches the rare peak, so nothing clips, the loop blend included.
+// The scenes are isolated layers for the mixer: fire and night carry no noise bed of their own
+// (pick brown or pink alongside if you want one). Gains were tuned by measurement (12 s at 48 kHz),
+// see SCENE_DB in the tests; `soft` catches the rare peak, so nothing clips, the loop blend included.
 const SCENES = {
-  // brown rumble that flickers slowly, plus sparse crackles (short decaying noise bursts), some in clusters
+  // crackles and pops (short decaying bursts, some in clusters) over a low, warm, flickering rumble.
+  // Both are low-passed: unfiltered, the rumble reads as hiss and the pops as fizz, not a fire.
   fire(out, rand, sr) {
     fillNoise('brown', out, rand)
-    const slow = wander(rand, sr / BLOCK, 0.4), flick = wander(rand, sr / BLOCK, 3), rate = 4 / sr
-    let env = 0, decay = 0, pending = 0, gap = 0, g = 0
+    const slow = wander(rand, sr / BLOCK, 0.4), flick = wander(rand, sr / BLOCK, 3), rate = FIRE.rate / sr
+    const lpR = 1 - Math.exp(-2 * Math.PI * FIRE.rumbleHz / sr), lpC = 1 - Math.exp(-2 * Math.PI * FIRE.crackleHz / sr)
+    let env = 0, decay = 0, pending = 0, gap = 0, g = 0, r = 0, c = 0
     const pop = () => {
-      env = Math.max(env, 0.07 + 0.3 * rand() ** 2)
+      env = Math.max(env, FIRE.pop + FIRE.popVar * rand() ** 2)
       decay = Math.exp(-1 / (sr * (0.0006 + rand() * 0.0025)))
     }
     for (let i = 0; i < out.length; i++) {
@@ -73,35 +76,37 @@ const SCENES = {
         pop()
         if (rand() < 0.3) { pending = 1 + Math.floor(rand() * 4); gap = sr * (0.008 + rand() * 0.05) }
       }
-      if (i % BLOCK === 0) g = 1.2 * (0.65 + 0.25 * slow() + 0.1 * flick())
-      let v = out[i] * g
-      if (env > 1e-4) { v += env * (rand() * 2 - 1); env *= decay }
+      if (i % BLOCK === 0) g = FIRE.rumble * (0.65 + 0.25 * slow() + 0.1 * flick())
+      r += (out[i] - r) * lpR
+      let v = r * g
+      if (env > 1e-4) { c += (env * (rand() * 2 - 1) - c) * lpC; v += c * FIRE.crackleGain; env *= decay } else c *= 0.9
       out[i] = soft(v)
     }
     return out
   },
-  // pink noise, low-passed (~2.5 kHz) and high-passed (~120 Hz), with a slow swell and a faster burble
+  // a gentle brook: pink noise low-passed hard (WATER.lpHz) so it has no hiss, high-passed (~60 Hz)
+  // so it does not boom, with a slow swell and a faster burble
   water(out, rand, sr) {
     fillNoise('pink', out, rand)
-    const lp = 1 - Math.exp(-2 * Math.PI * 2500 / sr), hp = 1 - Math.exp(-2 * Math.PI * 120 / sr)
+    const lp = 1 - Math.exp(-2 * Math.PI * WATER.lpHz / sr), hp = 1 - Math.exp(-2 * Math.PI * 60 / sr)
     const slow = wander(rand, sr / BLOCK, 0.3), burble = wander(rand, sr / BLOCK, 6)
     let l = 0, h = 0, g = 0
     for (let i = 0; i < out.length; i++) {
-      if (i % BLOCK === 0) g = 2.0 * (0.65 + 0.2 * slow() + 0.25 * burble())
+      if (i % BLOCK === 0) g = WATER.gain * (0.65 + 0.2 * slow() + 0.25 * burble())
       l += (out[i] - l) * lp; h += (l - h) * hp
       out[i] = soft((l - h) * g)
     }
     return out
   },
-  // a soft brown bed and three crickets: chirps of 3-4 pulses of a ~4-5 kHz tone, irregularly spaced
+  // three crickets and nothing else (no noise bed): chirps of 3-4 pulses of a ~4-5 kHz tone,
+  // irregularly spaced, with quiet in between
   night(out, rand, sr) {
-    fillNoise('brown', out, rand)
-    for (let i = 0; i < out.length; i++) out[i] *= 0.95
+    out.fill(0)
     for (const [hz, pulsesPerSec, every, level] of CRICKETS) {
       const P = Math.round(sr / pulsesPerSec), on = P * 0.6, w = 2 * Math.PI * hz / sr
       let i = Math.floor(rand() * every * sr)
       while (i < out.length) {
-        const len = (3 + (rand() < 0.5)) * P, amp = level * (0.7 + 0.3 * rand())
+        const len = (3 + (rand() < 0.5)) * P, amp = NIGHT.crickets * level * (0.7 + 0.3 * rand())
         for (let k = 0; k < len && i + k < out.length; k++) {
           const ph = k % P
           if (ph < on) out[i + k] = soft(out[i + k] + amp * Math.sin(Math.PI * ph / on) ** 2 * Math.sin(w * k))
@@ -113,6 +118,9 @@ const SCENES = {
   }
 }
 const CRICKETS = [[4500, 34, 0.8, 0.12], [4800, 38, 1.1, 0.08], [4150, 30, 1.6, 0.05]]  // Hz, pulses/s, s between chirps, level
+const FIRE = { rumble: 0.95, rumbleHz: 250, rate: 7, pop: 0.16, popVar: 0.6, crackleHz: 3000, crackleGain: 1.8 }
+const WATER = { lpHz: 900, gain: 2.1 }
+const NIGHT = { crickets: 6 }
 
 // n samples that loop without a jump: the tail is generated past n and blended into the head.
 // Equal-power curves keep the level steady through the blend (noise halves are uncorrelated).
@@ -127,15 +135,50 @@ export function loopNoise(color, n, rand = Math.random, sr = 48000) {
   return out
 }
 
-// One player for the whole app, so the noise keeps playing after its sheet closes.
+// A mix: how loud each layer plays, 0 (off) to 1. Any combination is allowed.
+export const LAYER_DEFAULT = 0.6                // a layer switched on starts here
+export const MAX_MIXES = 5                      // saved mixes kept
+export const emptyMix = () => Object.fromEntries(COLORS.map(c => [c, 0]))
+export const activeLayers = mix => COLORS.filter(c => mix?.[c] > 0)
+// Starter mixes, shown before anyone has saved their own (names are i18n keys)
+export const STARTER_MIXES = [
+  { name: 'Campfire by a stream', mix: { fire: 0.7, water: 0.45 } },
+  { name: 'Summer night', mix: { night: 0.6, water: 0.3 } },
+  { name: 'Deep focus', mix: { brown: 0.6, pink: 0.25 } }
+].map(m => ({ ...m, mix: { ...emptyMix(), ...m.mix } }))
+
+// A mix from a backup or an old build: known layers only, levels clamped to 0-1. null when empty.
+export function cleanMix(m) {
+  if (!m || typeof m !== 'object' || Array.isArray(m)) return null
+  const out = emptyMix()
+  for (const c of COLORS) { const v = +m[c]; out[c] = Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0 }
+  return activeLayers(out).length ? out : null
+}
+// Saved Wind down settings (S.winddown): the last mix, the master volume and named mixes
+export function cleanWindDown(w) {
+  const plain = o => o && typeof o === 'object' && !Array.isArray(o)
+  const vol = +w?.volume
+  return {
+    mix: cleanMix(w?.mix),
+    volume: w?.volume != null && Number.isFinite(vol) ? Math.min(1, Math.max(0, vol)) : 0.5,
+    mixes: (Array.isArray(w?.mixes) ? w.mixes : []).filter(plain)
+      .map(m => ({ name: typeof m.name === 'string' ? m.name.trim().slice(0, 30) : '', mix: cleanMix(m.mix) }))
+      .filter(m => m.name && m.mix).slice(0, MAX_MIXES)
+  }
+}
+
+// One player for the whole app, so the sound keeps playing after its sheet closes. Each layer is
+// its own looping source and gain; all of them feed one master gain (volume, fades, the sleep
+// timer) and a limiter, so stacking every layer at full volume bends instead of clipping.
 // `newContext` and the timer functions are injectable for tests.
 export function createNoisePlayer({
   newContext = () => new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'playback' }),
   setT = setTimeout, clearT = clearTimeout, now = Date.now
 } = {}) {
-  let ctx = null, gain = null, src = null, sleepTm = null, releaseTm = null
+  let ctx = null, master = null, sleepTm = null, releaseTm = null
+  const layers = {}    // colour -> { src, gain } while it plays
   let sleepAt = null   // audio-clock time the sleep fade starts; the backstop if JS timers are throttled
-  let st = { playing: false, color: 'brown', volume: 0.5, sleep: 0, endsAt: null }
+  let st = { playing: false, mix: { ...emptyMix(), brown: LAYER_DEFAULT }, volume: 0.5, sleep: 0, endsAt: null }
   const subs = new Set()
   const emit = patch => { st = { ...st, ...patch }; subs.forEach(f => f()) }
 
@@ -144,27 +187,42 @@ export function createNoisePlayer({
     const buf = ctx.createBuffer(1, n, ctx.sampleRate)
     buf.copyToChannel(loopNoise(color, n, Math.random, ctx.sampleRate), 0)
     const s = ctx.createBufferSource()
-    s.buffer = buf; s.loop = true; s.connect(gain)
+    s.buffer = buf; s.loop = true
     return s
+  }
+  const rampParam = (param, to, sec, at = ctx.currentTime) => {
+    param.cancelScheduledValues(at)
+    param.setValueAtTime(param.value, at)
+    param.linearRampToValueAtTime(to, at + sec)
+  }
+  // a layer starts silent and comes up to its level, so switching one on never clicks
+  const startLayer = (color, at = ctx.currentTime) => {
+    const gain = ctx.createGain(); gain.gain.value = 0; gain.connect(master)
+    const src = source(color); src.connect(gain); src.start(at)
+    gain.gain.setValueAtTime(0, at); gain.gain.linearRampToValueAtTime(st.mix[color], at + FADE)
+    if (sleepAt !== null) src.stop(sleepAt + SLEEP_FADE)
+    layers[color] = { src, gain }
+  }
+  const endLayer = (color, fade = FADE) => {
+    const l = layers[color]; if (!l) return
+    rampParam(l.gain.gain, 0, fade)
+    try { l.src.stop(ctx.currentTime + fade) } catch { /* already stopped */ }
+    delete layers[color]
   }
   // The audio itself fades and stops at sleepAt, whatever the JS timer does
   const backstop = () => {
     if (sleepAt === null) return
-    gain.gain.setValueAtTime(st.volume, sleepAt)
-    gain.gain.linearRampToValueAtTime(0, sleepAt + SLEEP_FADE)
-    src.stop(sleepAt + SLEEP_FADE)
+    master.gain.setValueAtTime(st.volume, sleepAt)
+    master.gain.linearRampToValueAtTime(0, sleepAt + SLEEP_FADE)
+    for (const l of Object.values(layers)) l.src.stop(sleepAt + SLEEP_FADE)
   }
-  const ramp = (to, sec, at = ctx.currentTime) => {
-    gain.gain.cancelScheduledValues(at)
-    gain.gain.setValueAtTime(gain.gain.value, at)
-    gain.gain.linearRampToValueAtTime(to, at + sec)
-  }
+  const ramp = (to, sec, at) => rampParam(master.gain, to, sec, at)
   const arm = () => {
     clearT(sleepTm); sleepTm = null
     if (sleepAt !== null && ctx) {   // drop the previous audio-clock stop
       sleepAt = null
       ramp(st.volume, 0.05)
-      src.stop(NEVER)
+      for (const l of Object.values(layers)) l.src.stop(NEVER)
     }
     if (!st.playing || !st.sleep) return emit({ endsAt: null })
     const ms = st.sleep * 60000
@@ -173,31 +231,38 @@ export function createNoisePlayer({
     sleepTm = setT(() => { p.stop(SLEEP_FADE); emit({ sleep: 0 }) }, ms)
     emit({ endsAt: now() + ms })
   }
-  const release = (c, s) => {
-    try { s.stop() } catch { /* already stopped */ }
+  const release = (c, ls) => {
+    for (const l of ls) { try { l.src.stop() } catch { /* already stopped */ } }
     close(c)
-    if (ctx === c) { ctx = gain = src = null }
+    if (ctx === c) { ctx = master = null; for (const k of Object.keys(layers)) delete layers[k] }
   }
 
   const p = {
     get: () => st,
     subscribe(f) { subs.add(f); return () => subs.delete(f) },
-    // true when playing; false when this device has no Web Audio
+    // true when playing; false when this device has no Web Audio. A mix with nothing on plays brown.
     play() {
       if (st.playing) return true
       clearT(releaseTm); releaseTm = null
-      if (ctx) release(ctx, src)
+      if (ctx) release(ctx, Object.values(layers))
+      if (!activeLayers(st.mix).length) emit({ mix: { ...st.mix, brown: LAYER_DEFAULT } })
       let c
       try { c = newContext() } catch { return false }
       ctx = c; sleepAt = null
-      gain = ctx.createGain(); gain.gain.value = 0; gain.connect(ctx.destination)
-      src = source(st.color); src.start()
+      master = ctx.createGain(); master.gain.value = 0
+      // the limiter is optional: without one (older WebViews, tests) the mix plays straight out
+      const lim = ctx.createDynamicsCompressor?.()
+      if (lim) {
+        lim.threshold.value = -6; lim.knee.value = 6; lim.ratio.value = 12; lim.attack.value = 0.003; lim.release.value = 0.25
+        master.connect(lim); lim.connect(ctx.destination)
+      } else master.connect(ctx.destination)
+      for (const color of activeLayers(st.mix)) startLayer(color)
       Promise.resolve(ctx.resume?.()).catch(() => {})   // WebViews may start a context suspended
       // The system can suspend or interrupt audio (call, focus loss): show it as paused, not playing
       ctx.onstatechange = () => {
         if (ctx === c && st.playing && c.state !== 'running') {
           clearT(sleepTm); sleepTm = null; sleepAt = null
-          release(c, src)
+          release(c, Object.values(layers))
           emit({ playing: false, endsAt: null })
         }
       }
@@ -205,30 +270,48 @@ export function createNoisePlayer({
       emit({ playing: true }); arm()
       return true
     },
-    // Fades out, then stops the source and releases the AudioContext.
+    // Fades out, then stops every layer and releases the AudioContext.
     stop(fade = FADE) {
       if (!st.playing) return
       clearT(sleepTm); sleepTm = null; sleepAt = null
       ramp(0, fade)
-      const c = ctx, s = src
-      releaseTm = setT(() => { release(c, s); releaseTm = null }, fade * 1000 + 50)
+      const c = ctx, ls = Object.values(layers)
+      releaseTm = setT(() => { release(c, ls); releaseTm = null }, fade * 1000 + 50)
       emit({ playing: false, endsAt: null })
     },
+    // master volume
     setVolume(v) {
       emit({ volume: v })
       if (st.playing) { ramp(v, 0.05); backstop() }
     },
-    setColor(color) {
-      if (color === st.color) return
-      emit({ color })
+    // one layer's level: 0 switches it off (and pauses when it was the last one playing)
+    setLevel(color, v) {
+      if (!COLORS.includes(color)) return
+      const level = Math.min(1, Math.max(0, +v || 0))
+      emit({ mix: { ...st.mix, [color]: level } })
       if (!st.playing) return
-      // dip to silence, swap sources at the bottom, come back up: no click
-      const at = ctx.currentTime + 0.1
-      ramp(0, 0.1)
-      gain.gain.linearRampToValueAtTime(st.volume, at + FADE)
-      src.stop(at)
-      src = source(color); src.start(at)
-      backstop()
+      if (!level) { endLayer(color); if (!Object.keys(layers).length) p.stop(); return }
+      if (layers[color]) rampParam(layers[color].gain.gain, level, 0.05)
+      else startLayer(color)
+    },
+    // switch a layer on (at its default level) or off
+    toggle(color) { p.setLevel(color, st.mix[color] > 0 ? 0 : LAYER_DEFAULT) },
+    // replace the whole mix (a starter or saved mix): layers cross-fade on the same context
+    setMix(mix) {
+      const m = cleanMix(mix); if (!m) return
+      emit({ mix: m })
+      if (!st.playing) return
+      for (const color of COLORS) {
+        if (!m[color]) endLayer(color)
+        else if (layers[color]) rampParam(layers[color].gain.gain, m[color], FADE)
+        else startLayer(color)
+      }
+    },
+    // the saved settings at app start (never while playing): the last mix and the volume
+    restore({ mix, volume } = {}) {
+      if (st.playing) return
+      const m = cleanMix(mix), v = +volume
+      emit({ ...(m ? { mix: m } : {}), ...(volume != null && Number.isFinite(v) ? { volume: Math.min(1, Math.max(0, v)) } : {}) })
     },
     setSleep(min) { emit({ sleep: min }); arm() }
   }
