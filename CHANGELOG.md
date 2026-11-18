@@ -1,12 +1,15 @@
 # Changelog
 
-## Unreleased (1.8.1)
+## 1.8.1
+
+Small fixes for the End-of-day check-in and Wind down.
 
 - 🌙 **Log today’s day end:** the Wind down button that starts the check-in now says so.
 - 🌃 **Night shifts:** a check-in saved before 4 am counts for the day before, so it no longer uses up the next day’s reminder or shows the wrong “Tomorrow”.
 - 😴 **Sleep timer on by default:** Wind down now fades out after 30 minutes unless you choose otherwise, so it can’t play all night by accident.
 - 💬 The note that suggests talking to someone after several very low days shows only in English until each translation has been reviewed.
 - 📝 New feedback form for the check-in on GitHub (Issues → New issue).
+- 🐛 **Fixed:** the app could close by itself when Wind down started while the app wasn’t in front, for example as the screen locked.
 
 ## 1.8.0
 
