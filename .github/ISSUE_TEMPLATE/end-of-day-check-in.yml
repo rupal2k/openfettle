@@ -1,0 +1,42 @@
+name: End-of-day check-in feedback
+description: Tell us how the End-of-day check-in works for you. Please don't paste your own check-in answers.
+title: "Check-in feedback: "
+labels: ["check-in", "feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping. Your check-ins stay on your phone and we never see them. Please describe your experience, not what you wrote in a check-in.
+  - type: dropdown
+    id: useful
+    attributes:
+      label: Is the check-in useful to you?
+      options:
+        - "Yes"
+        - "Sometimes"
+        - "Not really"
+    validations:
+      required: true
+  - type: dropdown
+    id: time
+    attributes:
+      label: How long does it usually take you?
+      options:
+        - "Under 1 minute (I skip most steps)"
+        - "1 to 3 minutes"
+        - "3 to 5 minutes"
+        - "More than 5 minutes"
+  - type: textarea
+    id: hard
+    attributes:
+      label: Was any step confusing, slow or uncomfortable?
+      description: For example a word that felt wrong in your language, or a rating that seemed to measure you.
+  - type: textarea
+    id: wish
+    attributes:
+      label: What would make it better for you?
+  - type: input
+    id: setup
+    attributes:
+      label: App version, phone and language
+      placeholder: "1.8.1, Samsung Galaxy S21, Deutsch"

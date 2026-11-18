@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  cleanEntry, cleanCheckins, cleanCheckinPrefs, PREFS_DEF, checkinSchedule, checkinDue, doneOn, carriedNote,
+  cleanEntry, cleanCheckins, cleanCheckinPrefs, PREFS_DEF, checkinSchedule, checkinDue, checkinDay, doneOn, carriedNote,
   followUpTarget, recentActivities, lowMoodDue, nudgeDue, usefulDue, mergeCheckins, breathPlan, breathAt,
   vibratePattern, MAX_CHECKINS, REMIND_ID0
 } from './checkin.js'
@@ -64,6 +64,16 @@ describe('reminder schedule (one-shots for the next 14 days)', () => {
     const s = checkinSchedule(prefs({ days: [0, 1, 2, 3, 4, 5, 6] }), [], new Date(2026, 2, 20, 9))
     expect(s.every(x => x.at.getHours() === 17 && x.at.getMinutes() === 30)).toBe(true)
   })
+  it('checkinDay: until 04:00 the moment still belongs to the previous workday (night shifts)', () => {
+    expect(checkinDay(new Date(2026, 10, 18, 3, 59))).toBe('2026-11-17')
+    expect(checkinDay(new Date(2026, 10, 18, 4, 0))).toBe('2026-11-18')
+    expect(checkinDay(new Date(2026, 11, 1, 1, 0))).toBe('2026-11-30')    // across a month end
+    // Tue 18 Nov 01:30: Monday's check-in is still due, and done once Monday has an entry
+    const S = { checkinPrefs: { ...PREFS_DEF, days: [1, 2, 3, 4, 5], end: '23:00' }, checkins: [] }
+    expect(checkinDue(S, new Date(2026, 10, 18, 1, 30))).toBe(true)
+    expect(checkinDue({ ...S, checkins: [on('2026-11-17')] }, new Date(2026, 10, 18, 1, 30))).toBe(false)
+  })
+
   it('checkinDue: a workday after the end time without a check-in', () => {
     const S = { checkinPrefs: prefs(), checkins: [] }
     expect(checkinDue(S, new Date(2026, 10, 18, 17, 0))).toBe(false)

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { fillNoise, loopNoise, createNoisePlayer, FADE, SLEEP_FADE, LAYER_DEFAULT, cleanMix, cleanWindDown, STARTER_MIXES, MAX_MIXES, COLORS } from './noise.js'
+import { fillNoise, loopNoise, createNoisePlayer, FADE, SLEEP_FADE, SLEEP_DEFAULT, LAYER_DEFAULT, cleanMix, cleanWindDown, STARTER_MIXES, MAX_MIXES, COLORS } from './noise.js'
 
 const rmsDb = x => { let e = 0; for (const v of x) e += v * v; return 10 * Math.log10(e / x.length) }
 
@@ -155,7 +155,7 @@ describe('noise player (mixer)', () => {
   afterEach(() => vi.useRealTimers())
 
   it('fades in on play: brown by default, master to the volume', () => {
-    p.setVolume(0.7); p.play()
+    p.setSleep(0); p.setVolume(0.7); p.play()   // no timer: this checks the fade-in only
     expect(p.get().playing).toBe(true)
     const c = ctxs[0]
     expect(c.sources).toHaveLength(1)
@@ -199,7 +199,7 @@ describe('noise player (mixer)', () => {
   })
 
   it('a new mix cross-fades on the same context: layers leave, stay or join', () => {
-    p.setMix({ brown: 0.6, fire: 0.5 }); p.play()
+    p.setSleep(0); p.setMix({ brown: 0.6, fire: 0.5 }); p.play()
     p.setMix(STARTER_MIXES[0].mix)       // campfire by a stream: fire + water
     const c = ctxs[0]
     expect(ctxs).toHaveLength(1)
@@ -270,10 +270,11 @@ describe('noise player (mixer)', () => {
     expect(s.stop.mock.calls.at(-1)[0]).toBeGreaterThan(1e8)
   })
 
-  it('after the sleep timer fires, it is reset to Off', () => {
+  it('the sleep timer starts at 30 min, and after it fires it is back to 30 min', () => {
+    expect(p.get().sleep).toBe(SLEEP_DEFAULT)
     p.setSleep(15); p.play()
     vi.advanceTimersByTime(15 * 60000)
-    expect(p.get().sleep).toBe(0)
+    expect(p.get().sleep).toBe(SLEEP_DEFAULT)
   })
 
   it('shows paused when the system interrupts the audio', () => {

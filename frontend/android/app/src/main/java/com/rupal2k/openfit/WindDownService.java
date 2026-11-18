@@ -31,11 +31,26 @@ public class WindDownService extends Service {
     private PowerManager.WakeLock wake;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable selfStop = this::stopNow;
+    private static volatile WindDownService running;
 
-    static void start(Context c, String title, String text, String stopLabel, long untilMs) {
+    /**
+     * Shows or updates the notification. Returns false when Android refuses to start the service,
+     * which it does (Android 12+) while the app is not in front, for example behind the lock screen.
+     * Updating the already running service needs no start, so it is allowed from the background.
+     */
+    static boolean start(Context c, String title, String text, String stopLabel, long untilMs) {
         Intent i = new Intent(c, WindDownService.class)
             .putExtra("title", title).putExtra("text", text).putExtra("stop", stopLabel).putExtra("until", untilMs);
-        if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i); else c.startService(i);
+        if (running != null) {   // plugin calls arrive off the main thread; the service works on it
+            new Handler(Looper.getMainLooper()).post(() -> { WindDownService s = running; if (s != null) s.apply(i); });
+            return true;
+        }
+        try {
+            if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i); else c.startService(i);
+            return true;
+        } catch (IllegalStateException | SecurityException e) {   // ForegroundServiceStartNotAllowedException is an IllegalStateException
+            return false;
+        }
     }
 
     static void stop(Context c) {
@@ -50,7 +65,12 @@ public class WindDownService extends Service {
             return START_NOT_STICKY;
         }
         if (intent == null) { stopSelf(); return START_NOT_STICKY; }   // restarted without the WebView: nothing to play
+        apply(intent);
+        return START_NOT_STICKY;
+    }
 
+    private void apply(Intent intent) {
+        running = this;
         Notification n = notification(intent.getStringExtra("title"), intent.getStringExtra("text"), intent.getStringExtra("stop"));
         if (Build.VERSION.SDK_INT >= 29) startForeground(ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
         else startForeground(ID, n);
@@ -67,7 +87,6 @@ public class WindDownService extends Service {
         // takes the notification and the wake lock away if the WebView's timer is throttled
         handler.removeCallbacks(selfStop);
         handler.postDelayed(selfStop, hold);
-        return START_NOT_STICKY;
     }
 
     private Notification notification(String title, String text, String stopLabel) {
@@ -104,6 +123,7 @@ public class WindDownService extends Service {
 
     @Override
     public void onDestroy() {
+        if (running == this) running = null;
         handler.removeCallbacks(selfStop);
         if (wake != null && wake.isHeld()) wake.release();
         super.onDestroy();

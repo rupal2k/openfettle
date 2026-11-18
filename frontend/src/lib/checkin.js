@@ -84,14 +84,18 @@ export function cleanCheckinPrefs(p) {
   }
 }
 
+// The workday a moment belongs to: until 04:00 it is still the previous day, so a check-in after a
+// late shift is dated the day the shift started and doesn't use up the next day's reminder (R6).
+export const DAY_ROLLOVER = 4
+export const checkinDay = (now = new Date()) => isoOf(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getHours() < DAY_ROLLOVER ? 1 : 0), 12))
 export const doneOn = (checkins, iso) => (checkins || []).some(c => c.d === iso)
 
 const endOn = (iso, end) => { const [y, m, d] = iso.split('-').map(Number), [hh, mm] = end.split(':').map(Number); return new Date(y, m - 1, d, hh, mm) }
 
 // Is today a workday whose end time has passed, with no check-in yet? (Home's Wind down card)
 export function checkinDue(S, now = new Date()) {
-  const p = S.checkinPrefs || PREFS_DEF, iso = isoOf(now)
-  return p.days.includes(now.getDay()) && now >= endOn(iso, p.end) && !doneOn(S.checkins, iso)
+  const p = S.checkinPrefs || PREFS_DEF, iso = checkinDay(now)
+  return p.days.includes(new Date(iso + 'T12:00:00').getDay()) && now >= endOn(iso, p.end) && !doneOn(S.checkins, iso)
 }
 
 // One-shot reminders for the next 14 days: workdays only, at the local end time (wall clock, so DST
