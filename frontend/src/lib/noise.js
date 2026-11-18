@@ -9,6 +9,7 @@
 export const COLORS = ['white', 'pink', 'brown', 'fire', 'water', 'night']
 export const SLEEP_OPTIONS = [0, 15, 30, 60]   // minutes, 0 = off
 export const FADE = 0.5                        // seconds, start/stop/pause
+export const SLEEP_DEFAULT = 30               // minutes; on by default so sound never plays all night with the phone held awake
 export const SLEEP_FADE = 10                   // seconds, the sleep timer fades out gently
 const LOOP_SEC = 12                            // long enough that the loop isn't noticed
 const XFADE = 4096                             // samples blended so the loop seam is continuous
@@ -191,7 +192,7 @@ export function createNoisePlayer({
   let ctx = null, master = null, sleepTm = null, releaseTm = null
   const layers = {}    // colour -> { src, gain } while it plays
   let sleepAt = null   // audio-clock time the sleep fade starts; the backstop if JS timers are throttled
-  let st = { playing: false, mix: { ...emptyMix(), brown: LAYER_DEFAULT }, volume: 0.5, sleep: 0, endsAt: null }
+  let st = { playing: false, mix: { ...emptyMix(), brown: LAYER_DEFAULT }, volume: 0.5, sleep: SLEEP_DEFAULT, endsAt: null }
   const subs = new Set()
   const emit = patch => { st = { ...st, ...patch }; subs.forEach(f => f()) }
 
@@ -241,7 +242,7 @@ export function createNoisePlayer({
     const ms = st.sleep * 60000
     sleepAt = ctx.currentTime + ms / 1000
     backstop()
-    sleepTm = setT(() => { p.stop(SLEEP_FADE); emit({ sleep: 0 }) }, ms)
+    sleepTm = setT(() => { p.stop(SLEEP_FADE); emit({ sleep: SLEEP_DEFAULT }) }, ms)
     emit({ endsAt: now() + ms })
   }
   const release = (c, ls) => {

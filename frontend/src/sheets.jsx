@@ -5,6 +5,7 @@ import { EXDB, EXIDX, BODYPARTS, isCardio, isBodyweightEq, allExercises, equipme
 import { fmtDate, fmtNum, fmtVol, fmtDur, durPart, todayISO, uid, exCount, DAYN, MONTHS_LONG, ACCENTS } from './lib/format.js'
 import { lastEntryFor, bestWeightFor, buildSets, sessionSets, effectiveRoutineId, setsDone, setsDoneActive, lastBW, supersetUnits, unitOf, setLabel, defaultConfig, cleanupSg, modeOf, effortOf, isBw, isPerSide, sideReps } from './lib/history.js'
 import { beep, vibrate } from './lib/sound.js'
+import { checkinDay, doneOn } from './lib/checkin.js'
 import { t, instrFor, loadInstr, getLang, INSTR_LANGS, dateLocale } from './lib/i18n.js'
 import { noisePlayer, COLORS, SLEEP_OPTIONS, STARTER_MIXES, MAX_MIXES, activeLayers } from './lib/noise.js'
 import { nav } from './lib/nav.js'
@@ -505,12 +506,12 @@ function SavedMixes({ p, mix }) {
 function WindDown() {
   const p = noisePlayer()
   const st = useSyncExternalStore(p.subscribe, p.get)
-  const done = useStore(s => (s.S.checkins || []).some(c => c.d === todayISO()))
+  const done = useStore(s => doneOn(s.S.checkins, checkinDay()))
   const busy = useStore(s => !!s.S.active)
   return <>
     <h3>{t('Wind down')}</h3>
     {/* the end-of-day check-in starts here (checkin-sheets.jsx, loaded on demand) */}
-    <Button variant={done ? 'tinted' : 'primary'} icon="checkCircle" disabled={busy} onClick={() => import('./checkin-sheets.jsx').then(m => { ui().closeSheet(ui().sheets.at(-1)?.id); setTimeout(m.openCheckin, 250) })}>{done ? t('Today’s check-in is done · Do it again') : t('Start my end-of-day check-in')}</Button>
+    <Button variant={done ? 'tinted' : 'primary'} icon="checkCircle" disabled={busy} onClick={() => import('./checkin-sheets.jsx').then(m => { ui().closeSheet(ui().sheets.at(-1)?.id); setTimeout(m.openCheckin, 250) })}>{done ? t('Today’s day end is logged · Log it again') : t('Log today’s day end')}</Button>
     <div style={{ height: 12 }} />
     <div className="muted small">{t('Sounds generated on this device. Nothing is downloaded.')}</div>
     <div style={{ height: 14 }} />

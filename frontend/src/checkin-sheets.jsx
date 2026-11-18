@@ -4,8 +4,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
-import { t } from './lib/i18n.js'
-import { fmtDate, todayISO, isoOf, DAYS } from './lib/format.js'
+import { t, getLang } from './lib/i18n.js'
+
+// The low-mood line shows only in languages a native speaker has reviewed (spec D3); add each one once checked.
+const LOW_MOOD_LANGS = ['en']
+import { fmtDate, isoOf, DAYS } from './lib/format.js'
 import { effectiveRoutine } from './lib/history.js'
 import { beep, vibrate, cancelBeeps } from './lib/sound.js'
 import { requestWakeLock, releaseWakeLock } from './lib/wakelock.js'
@@ -14,7 +17,7 @@ import { noisePlayer } from './lib/noise.js'
 import { nav } from './lib/nav.js'
 import {
   MOODS, STRESSORS, ACT_GROUPS, CUES, NOTE_MAX, OWN_MAX, cleanEntry, doneOn, carriedNote, followUpTarget,
-  recentActivities, lowMoodDue, nudgeDue, usefulDue, breathPlan, breathAt, vibratePattern
+  recentActivities, checkinDay, lowMoodDue, nudgeDue, usefulDue, breathPlan, breathAt, vibratePattern
 } from './lib/checkin.js'
 import { confirmSheet, keepWindDown, bridgeWindDown } from './sheets.jsx'
 import Icon from './components/Icon.jsx'
@@ -113,7 +116,7 @@ function Breathing({ cue, onDone }) {
 /* ------------------------------------------------------------------ flow -- */
 function Flow({ close, lockSheet }) {
   const st = useStore(s => s.S)
-  const today = todayISO()
+  const today = checkinDay()
   const carried = carriedNote(st.checkins, today), prev = followUpTarget(st.checkins, today)
   const [step, setStep] = useState(0)
   const [a, setA] = useState({})                 // the answers; only chosen fields ever appear
@@ -158,7 +161,7 @@ function Flow({ close, lockSheet }) {
       s.checkinPrefs = { ...s.checkinPrefs, skip: null }
     })
     const all = S().checkins, prefs = S().checkinPrefs
-    const line = lowMoodDue(all, prefs, today) ? 'low' : nudgeDue(all, prefs, today) ? 'nudge' : usefulDue(all, prefs) ? 'useful' : null
+    const line = LOW_MOOD_LANGS.includes(getLang()) && lowMoodDue(all, prefs, today) ? 'low' : nudgeDue(all, prefs, today) ? 'nudge' : usefulDue(all, prefs) ? 'useful' : null
     if (line === 'low') update(s => { s.checkinPrefs.lowShown = today })
     if (line === 'nudge') update(s => { s.checkinPrefs.nudged = today.slice(0, 7) })
     if (line === 'useful') update(s => { s.checkinPrefs.askedUseful = all.length })
@@ -167,7 +170,7 @@ function Flow({ close, lockSheet }) {
 
   const tomorrow = (() => {
     if (!(st.routines || []).length) return null
-    const d = new Date(); d.setDate(d.getDate() + 1)
+    const d = new Date(today + 'T12:00:00'); d.setDate(d.getDate() + 1)
     const r = effectiveRoutine(st, isoOf(d))
     return r ? t('Tomorrow: {0}', r.name) : t('Tomorrow: rest day')
   })()
@@ -277,7 +280,7 @@ export function openCheckin() {
     let h = null
     h = ui().openSheet(close => <Flow close={close} lockSheet={v => h?.lock(v)} />)
   }
-  if (doneOn(S().checkins, todayISO())) confirmSheet({ title: t('Replace today’s check-in?'), message: t('Your new answers replace the ones you saved today.'), confirmText: t('Replace'), onConfirm: go })
+  if (doneOn(S().checkins, checkinDay())) confirmSheet({ title: t('Replace today’s check-in?'), message: t('Your new answers replace the ones you saved today.'), confirmText: t('Replace'), onConfirm: go })
   else go()
 }
 // From a tapped reminder: wait for the saved state to load, show Home, then open
