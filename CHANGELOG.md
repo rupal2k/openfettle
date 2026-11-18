@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.8.0
+
+The End-of-day check-in: a few minutes to close your workday, all on your phone.
+
+- 🌙 **End-of-day check-in:** look away and breathe for a minute (box breathing or just breathing, guided by sound or vibration), say how you feel and how much energy you have left, note what weighed on you most, and pick one thing to do tonight. Then **Finish my workday**. Every step can be skipped, and nothing is saved until you finish.
+- 📝 **Leave something for tomorrow:** one concern and a first step, shown at your next check-in. The next check-in also asks whether last night’s plan happened.
+- 🏋️ **Tomorrow at a glance:** the check-in shows tomorrow’s planned workout from your week.
+- 🔔 **Optional reminder** at your usual end time on the workdays you choose (off until you turn it on). Tap it to start; no reminder once you’ve checked in.
+- 🔒 **Private:** check-ins stay on this phone, are kept out of screenshots, are included in your backup and can be deleted one by one or all at once. Your ratings are how you rate yourself, not a measurement.
+- 🎚️ Start in Wind down, or under Settings → End-of-day check-in, where your history is.
+
 ## 1.7.2
 
 Wind down is now a sound mixer, with calmer fire, water and night sounds.
