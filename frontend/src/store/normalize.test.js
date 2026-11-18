@@ -35,3 +35,14 @@ describe('normalizeState repairs a hostile backup', () => {
     expect(ok.bodyweight).toEqual([{ d: '2026-01-02', w: 70 }])
   })
 })
+
+describe('Wind down settings from a backup', () => {
+  it('keeps a valid mix and saved mixes, and repairs a broken value', () => {
+    const s = normalizeState({ winddown: { mix: { fire: 0.7, night: 2 }, volume: 0.4, mixes: [{ name: 'Rain-ish', mix: { water: 0.5 } }, { name: 'x', mix: 'all' }] } })
+    expect(s.winddown.mix).toMatchObject({ fire: 0.7, night: 1, brown: 0 })
+    expect(s.winddown.volume).toBe(0.4)
+    expect(s.winddown.mixes).toEqual([{ name: 'Rain-ish', mix: expect.objectContaining({ water: 0.5 }) }])
+    expect(normalizeState({ winddown: 'loud' }).winddown).toEqual({ mix: null, volume: 0.5, mixes: [] })
+    expect(normalizeState({}).winddown).toEqual({ mix: null, volume: 0.5, mixes: [] })   // backups from 1.7.1 and older
+  })
+})

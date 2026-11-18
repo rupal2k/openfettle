@@ -8,6 +8,7 @@ import { mergeState } from '../lib/sync.js'
 import { cleanReports } from '../lib/labs/reports.js'
 import { cleanRoutine, cleanWeek } from '../lib/clean.js'
 import { cleanRest } from '../lib/workout.js'
+import { cleanWindDown } from '../lib/noise.js'
 
 const KEY = 'gym_state_v1'
 const BASE_KEY = 'gym_base'
@@ -28,7 +29,9 @@ export const DEF = {
   // food diary — see lib/nutrition.js for the shapes
   nutrition: { profile: null, days: {}, foods: [] },
   // blood test reports — see lib/labs/reports.js for the shapes; units: 'si' | 'us' | null (not chosen yet)
-  labs: { reports: [], units: null }
+  labs: { reports: [], units: null },
+  // Wind down: the last sound mix and volume, and up to 5 saved mixes - see lib/noise.js cleanWindDown
+  winddown: { mix: null, volume: 0.5, mixes: [] }
 }
 const clone = o => JSON.parse(JSON.stringify(o))
 
@@ -56,6 +59,7 @@ export function normalizeState(raw) {
   s.week = cleanWeek(s.week, id => rids.has(id))
   if (s.active && (typeof s.active !== 'object' || !Array.isArray(s.active.entries))) s.active = null
   if (s.active) { s.active.rest = cleanRest(s.active.rest) || undefined; if (!s.active.rest) delete s.active.rest }
+  s.winddown = cleanWindDown(s.winddown)
   s.labs = {
     reports: cleanReports(s.labs?.reports),
     units: s.labs?.units === 'us' || s.labs?.units === 'si' ? s.labs.units : null

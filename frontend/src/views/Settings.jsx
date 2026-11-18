@@ -135,7 +135,7 @@ export default function Settings() {
       </Row>
       {(S.lang || 'en') !== 'en' && <Row icon="globe" iconTint="var(--grey)" title={t('Report a translation error')} subtitle={t('Translations are new and not yet checked by native speakers.')} accessory="chevron"
         onClick={() => window.open(REPO + '/issues/new?labels=translation&title=' + encodeURIComponent('Translation (' + S.lang + '): '), '_blank', 'noopener')} />}
-      <Row icon="moon" iconTint="var(--indigo)" title={t('Wind down')} subtitle={t('Noise, fire, water or night sounds to help you rest')} accessory="chevron" onClick={windDownSheet} />
+      <Row icon="moon" iconTint="var(--indigo)" title={t('Wind down')} subtitle={t('Mix noise, fire, water and night sounds to help you rest')} accessory="chevron" onClick={windDownSheet} />
       <Row icon="person" iconTint="var(--indigo)" title={t('Your profile')} subtitle={t('Sex, birth year and height, for calorie targets and blood test scores')} accessory="chevron" onClick={nutritionProfileSheet} />
     </Section>
     <VisionSettings />
