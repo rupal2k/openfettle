@@ -49,7 +49,8 @@ export async function notificationsAllowed() {
   } catch { return true }
 }
 // Asks once per press (Android stops showing the prompt after two refusals). Wind down calls it on
-// Play, so its notification and Pause button are visible; the sound plays either way.
+// Play before the sound starts (the dialog interrupts playing audio), so its notification and Pause
+// button are visible; the sound plays either way.
 export async function askNotifications() {
   if (!MOBILE) return
   try {

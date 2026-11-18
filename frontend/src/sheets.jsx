@@ -475,7 +475,7 @@ function WindDown() {
       {st.endsAt ? t('Fades out at {0}', new Date(st.endsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })) : ''}
     </div>
     <div style={{ height: 10 }} />
-    <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : p.play() ? askNotifications() : toast(t('Sound can’t play on this device.'))}>{st.playing ? t('Pause') : t('Play')}</Button>
+    <Button variant="primary" icon={st.playing ? 'pause' : 'play'} onClick={() => st.playing ? p.stop() : askNotifications().then(() => p.play() || toast(t('Sound can’t play on this device.')))}>{st.playing ? t('Pause') : t('Play')}</Button>
     {/* a sleep timer suggests a locked phone: say where the sound can be stopped once the app is gone */}
     {MOBILE && <div className="small dim" style={{ marginTop: 8 }}>{t('Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.')}</div>}
     <div style={{ height: 8 }} />
