@@ -13,7 +13,8 @@ dump() { adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 || true; adb 
 bounds() { local m="$1[^\"]*"; [ "${2:-}" = exact ] && m="$1"; dump | grep -oE "(text|content-desc)=\"$m\"[^>]*bounds=\"\[[0-9]+,[0-9]+\]\[[0-9]+,[0-9]+\]\"" | head -1 \
   | grep -oE '\[[0-9]+,[0-9]+\]\[[0-9]+,[0-9]+\]' | sed -E 's/\[([0-9]+),([0-9]+)\]\[([0-9]+),([0-9]+)\]/\1 \2 \3 \4/'; }
 tap() {
-  local b; for i in $(seq 1 20); do b=$(bounds "$1" "${2:-}"); [ -n "$b" ] && break; sleep 1; done
+  # "|| true": a label not on screen yet must be retried, not end the script (set -e + pipefail)
+  local b; for i in $(seq 1 20); do b=$(bounds "$1" "${2:-}" || true); [ -n "$b" ] && break; sleep 1; done
   [ -n "$b" ] || fail "no '$1' on screen"
   set -- $b; adb shell input tap $(( ($1 + $3) / 2 )) $(( ($2 + $4) / 2 )); sleep 2
 }
