@@ -31,9 +31,9 @@ public class WindDownPlugin extends Plugin {
     @PluginMethod
     public void start(PluginCall call) {
         Long until = call.getLong("until", 0L);
-        WindDownService.start(getContext(), call.getString("title", "Wind down"), call.getString("text", ""),
+        boolean ok = WindDownService.start(getContext(), call.getString("title", "Wind down"), call.getString("text", ""),
             call.getString("stop", "Stop"), until == null ? 0 : until);
-        call.resolve();
+        if (ok) call.resolve(); else call.reject("Android did not allow the background service right now");
     }
 
     @PluginMethod

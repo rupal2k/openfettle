@@ -447,9 +447,10 @@ export function bridgeWindDown(p) {
       if (!st.playing) return wd.stop().catch(() => {})
       const fade = fadeLabel(st.endsAt)
       wd.start({ title: t('Wind down'), text: mixLabel(st.mix) + (fade ? ' · ' + fade : ''), stop: t('Pause'),
-        until: st.endsAt ? st.endsAt + 15000 : 0 }).catch(() => {})
+        until: st.endsAt ? st.endsAt + 15000 : 0 }).catch(() => { last = '' })   // refused while not in front: try again
     }
     p.subscribe(sync); sync()
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) sync() })
   }).catch(() => {})
 }
 
