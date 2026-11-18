@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.1
+
+Wind down keeps playing in the background, and shows up on the evenings after training.
+
+- 🌙 **Wind down plays on** when you leave the app or lock the screen. A notification shows the sound and when it fades out, with a **Pause** button. The first time you press Play, OpenFettle asks to show notifications; the sound plays whatever you answer.
+- 🏠 **Wind down on Home after training:** the card now also shows on a training day once today's workout is logged, or from 6 pm. It still shows on rest days, never during a workout, and is always in Settings.
+- 👆 **The round Start button gets out of the way:** it hides while you scroll down and comes back when you scroll up, so it no longer covers switches, the Download button or the Plan buttons.
+
 ## 1.7.0
 
 OPENFIT is now **OpenFettle**. Same app, same data, new name.
