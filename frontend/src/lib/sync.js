@@ -1,6 +1,9 @@
+import { mergeCheckins } from './checkin.js'
 // Two-way merge of this device's state with a newer server copy saved by another device.
 // Records are unioned so neither side's workouts, meals or weigh-ins are lost; settings and the
 // weekly plan come from this device, the one the user is acting on.
+// Check-ins are the exception to the shortcut below: deletes are recorded (checkinPrefs.deleted,
+// .cleared) and honoured from either device, so a deleted private note never comes back.
 // shortcut: no common ancestor, so a record deleted on one device comes back if the other still
 // has it — upgrade to a three-way merge (keep the last-synced copy) if that proves annoying.
 
@@ -12,6 +15,9 @@ const byId = (mine = [], theirs = []) => {
 export function mergeState(local, remote) {
   if (!remote) return local
   const out = { ...local }
+  const lp = local.checkinPrefs || {}, rp = remote.checkinPrefs || {}
+  out.checkins = mergeCheckins(local.checkins, remote.checkins, lp, rp)
+  out.checkinPrefs = { ...lp, deleted: [...new Set([...(lp.deleted || []), ...(rp.deleted || [])])], cleared: Math.max(lp.cleared || 0, rp.cleared || 0) || null }
   out.workouts = byId(local.workouts, remote.workouts).sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : 0))
   out.routines = byId(local.routines, remote.routines)
   out.customEx = byId(local.customEx, remote.customEx)

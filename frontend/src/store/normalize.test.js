@@ -46,3 +46,14 @@ describe('Wind down settings from a backup', () => {
     expect(normalizeState({}).winddown).toEqual({ mix: null, volume: 0.5, mixes: [] })   // backups from 1.7.1 and older
   })
 })
+
+describe('End-of-day check-ins from a backup', () => {
+  it('older backups load with the defaults; entries and prefs are cleaned', () => {
+    const s = normalizeState({})
+    expect(s.checkins).toEqual([])
+    expect(s.checkinPrefs).toMatchObject({ days: [1, 2, 3, 4, 5], end: '17:30', remind: false })
+    const t = normalizeState({ checkins: [{ d: '2026-11-18', mood: 'calm', energy: 99, evil: 1 }], checkinPrefs: { end: 'late', remind: true } })
+    expect(t.checkins).toEqual([{ id: '2026-11-18', d: '2026-11-18', at: expect.any(Number), mood: 'calm' }])
+    expect(t.checkinPrefs).toMatchObject({ end: '17:30', remind: true })
+  })
+})

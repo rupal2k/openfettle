@@ -254,6 +254,11 @@ Weekly repeats (`schedule.on.weekday`, as `syncReminder` uses) can't skip a sing
 - Language: action titles are registered at boot in the current language. Re-register when the language changes.
 
 ### 6.4 Must be proven on a device before building UI on it
+
+**Outcomes so far (2026-11-18):**
+- **P2 fails by design** (plugin source): every action button is a `PendingIntent.getActivity` (`LocalNotificationManager.createActionIntents`), so Snooze/Skip would open the app. Per D7, **1.8.0 ships tap-to-open only, with no action buttons**; Snooze/Skip move to 1.8.x with a native receiver.
+- **P1 is expected to pass** (source): `BridgeActivity.onCreate` passes the launch intent to `onNewIntent`, and the plugin emits `localNotificationActionPerformed` with `retainUntilConsumed = true`, so a cold-start tap is held until the JS listener registers. Still to confirm on a device.
+- **P5 passes:** the 1.7.1 regression on the S21 logged app vibrations from `navigator.vibrate` (EMOM minute cue) in `dumpsys vibrator_manager`.
 | # | Question | Fallback if it fails |
 |---|---|---|
 | P1 | Does `localNotificationActionPerformed` fire on a **cold start** (app killed) from a body tap and from an action button, and is it delivered after the listener registers? | Read the launch intent in a tiny native plugin method (`getLaunchExtra`). |
