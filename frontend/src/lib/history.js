@@ -2,6 +2,7 @@
 import { todayISO, isoOf, weekKey, fmtNum } from './format.js'
 import { isCardio, isBodyweightEq } from './exercises.js'
 import { t } from './i18n.js'
+import { checkinDue } from './checkin.js'
 
 // How an exercise is logged (issue #16). This used to be derived from the body part alone,
 // which meant a plank or a farmer's carry could only be timed by filing it under cardio.
@@ -175,7 +176,7 @@ export const WIND_DOWN_HOUR = 18
 export function showWindDown(S, now = new Date()) {
   if (S.active) return false
   const iso = isoOf(now)
-  return !effectiveRoutineId(S, iso) || S.workouts.some(w => w.d === iso) || now.getHours() >= WIND_DOWN_HOUR
+  return !effectiveRoutineId(S, iso) || S.workouts.some(w => w.d === iso) || now.getHours() >= WIND_DOWN_HOUR || checkinDue(S, now)
 }
 // The floating Start button tucks away while the page scrolls down (so it never sits on a row
 // you are reading or tapping) and comes back on the way up or near the top.

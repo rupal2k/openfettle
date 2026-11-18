@@ -14,4 +14,10 @@ export function beep(enabled, freq, dur, when) {
     o.start(t0); o.stop(t0 + (dur || 0.18) + 0.05)
   } catch (e) { /* */ }
 }
+// Stop every beep already scheduled ahead (the check-in schedules a minute of breathing cues at
+// once on the audio clock): closing the context drops them; the next beep makes a fresh one.
+export function cancelBeeps() {
+  try { audioCtx && audioCtx.close() } catch (e) { /* */ }
+  audioCtx = null
+}
 export function vibrate(p) { try { navigator.vibrate && navigator.vibrate(p) } catch (e) { /* */ } }

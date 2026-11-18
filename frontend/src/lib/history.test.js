@@ -429,3 +429,14 @@ describe('fabTucked (floating Start button)', () => {
     expect(fabTucked(false, 300, 305)).toBe(false)
   })
 })
+
+describe('showWindDown with an end-of-day check-in due', () => {
+  it('shows on a training day once the workday end time has passed', () => {
+    const S = { active: null, dayPlan: {}, week: { 3: 'r1' }, routines: [{ id: 'r1', ex: [] }], workouts: [], checkins: [],
+      checkinPrefs: { days: [1, 2, 3, 4, 5], end: '16:00', remind: false } }
+    expect(showWindDown(S, new Date(2026, 10, 18, 15, 0))).toBe(false)
+    expect(showWindDown(S, new Date(2026, 10, 18, 16, 5))).toBe(true)
+    expect(showWindDown({ ...S, checkins: [{ d: '2026-11-18' }] }, new Date(2026, 10, 18, 16, 5))).toBe(false)
+    expect(showWindDown({ ...S, active: { name: 'x' } }, new Date(2026, 10, 18, 16, 5))).toBe(false)
+  })
+})

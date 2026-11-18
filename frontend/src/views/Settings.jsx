@@ -13,6 +13,7 @@ import { MOBILE, shareExport, syncReminder, tooBig, clearExports, notificationsA
 import { convertWeights, hasWeights } from '../lib/units-convert.js'
 import { nutritionProfileSheet } from '../nutrition-sheets.jsx'
 import { loadStarterPlan, confirmSheet, importFromApp, planCatalogSheet, planUploadSheet, runUpdateCheck, windDownSheet } from '../sheets.jsx'
+import { checkinSettingsSheet } from '../checkin-sheets.jsx'
 import { VisionSettings } from '../vision-sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
@@ -62,7 +63,7 @@ export default function Settings() {
     rd.onload = () => {
       try {
         const data = JSON.parse(rd.result)
-        if (!data || (!data.workouts && !data.routines && !data.nutrition)) throw new Error('not an OpenFettle backup')
+        if (!data || (!data.workouts && !data.routines && !data.nutrition && !data.checkins)) throw new Error('not an OpenFettle backup')
         confirmSheet({ title: t('Import backup?'), message: t('This replaces all current data with the backup file.'), confirmText: t('Import'), danger: true, onConfirm: () => { replaceState(normalizeState(data), true); toast(t('Backup imported')) } })
       } catch { toast(t('Import failed: {0}', t('That file isn’t an OpenFettle backup.'))) }   // not the parser's message: it quotes the file
     }
@@ -136,6 +137,7 @@ export default function Settings() {
       {(S.lang || 'en') !== 'en' && <Row icon="globe" iconTint="var(--grey)" title={t('Report a translation error')} subtitle={t('Translations are new and not yet checked by native speakers.')} accessory="chevron"
         onClick={() => window.open(REPO + '/issues/new?labels=translation&title=' + encodeURIComponent('Translation (' + S.lang + '): '), '_blank', 'noopener')} />}
       <Row icon="moon" iconTint="var(--indigo)" title={t('Wind down')} subtitle={t('Mix noise, fire, water and night sounds to help you rest')} accessory="chevron" onClick={windDownSheet} />
+      <Row icon="checkCircle" iconTint="var(--indigo)" title={t('End-of-day check-in')} subtitle={t('A few minutes to close your workday')} accessory="chevron" onClick={checkinSettingsSheet} />
       <Row icon="person" iconTint="var(--indigo)" title={t('Your profile')} subtitle={t('Sex, birth year and height, for calorie targets and blood test scores')} accessory="chevron" onClick={nutritionProfileSheet} />
     </Section>
     <VisionSettings />
@@ -208,14 +210,14 @@ export default function Settings() {
         subtitle={t('FitNotes, Strong, Hevy — or body weight from Apple Health')}
         accessory="chevron" onClick={() => importRef.current.click()} />
       <Row icon="upload" iconTint="var(--blue)" title={t('Import backup')} accessory="chevron" onClick={() => fileRef.current.click()} />
-      <Row icon="download" iconTint="var(--blue)" title={t('Export backup (JSON)')} subtitle={t('Includes your blood test results. Keep the file private.')} accessory="chevron" onClick={doExport} />
+      <Row icon="download" iconTint="var(--blue)" title={t('Export backup (JSON)')} subtitle={t('Includes your blood test results and check-ins. Keep the file private.')} accessory="chevron" onClick={doExport} />
       {MOBILE && <>
         <Row icon="download" iconTint="var(--teal)" title={t('Check for updates')} subtitle={t('Asks GitHub for the latest version. Nothing about you is sent.')} accessory="chevron" onClick={() => runUpdateCheck(true)} />
         <Row icon="bell" iconTint="var(--teal)" title={t('Tell me about new versions')}>
           <Switch aria-label={t('Tell me about new versions')} checked={!!S.updateCheck} onChange={v => update(s => { s.updateCheck = v })} />
         </Row>
       </>}
-      <Row icon="trash" iconTint="var(--red)" title={t('Reset everything')} danger onClick={() => confirmSheet({ title: t('Reset everything?'), message: t('Deletes everything on this device: plan, workouts, body weight, meals and foods, blood tests and settings. This cannot be undone.'), confirmText: t('Delete everything'), danger: true, onConfirm: () => { replaceState(JSON.parse(JSON.stringify(DEF)), true); clearExports(); nav('/home'); toast(t('All data reset')) } })} />
+      <Row icon="trash" iconTint="var(--red)" title={t('Reset everything')} danger onClick={() => confirmSheet({ title: t('Reset everything?'), message: t('Deletes everything on this device: plan, workouts, body weight, meals and foods, blood tests, check-ins and settings. This cannot be undone.'), confirmText: t('Delete everything'), danger: true, onConfirm: () => { replaceState(JSON.parse(JSON.stringify(DEF)), true); clearExports(); nav('/home'); toast(t('All data reset')) } })} />
     </Section>
     <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: 'none' }} aria-label={t('Import backup file')} onChange={doImport} />
     {/* Reset after reading so picking the same file twice still fires onChange. */}
@@ -306,6 +308,7 @@ function MobileReminderCard({ S, update, toast }) {
       {S.reminder?.on && !allowed && (
         <Row icon="bell" iconTint="var(--red)" title={t('Notifications are off for OpenFettle')} subtitle={t('Allow them in Android settings, or no reminder will arrive.')} />
       )}
+      <Row icon="checkCircle" iconTint="var(--indigo)" title={t('End-of-day check-in')} subtitle={S.checkinPrefs?.remind ? t('On') : t('Off')} accessory="chevron" onClick={checkinSettingsSheet} />
       {S.reminder?.on && (
         <Row icon="clock" iconTint="var(--purple)" title={t('Reminder time')}>
           <input type="time" className="timef" aria-label={t('Reminder time')} value={S.reminder?.time || DEF.reminder.time}

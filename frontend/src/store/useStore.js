@@ -3,12 +3,13 @@ import { api } from '../lib/api.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
-import { MOBILE, nativeLoad, nativeSave, syncReminder, clearCaptures } from '../lib/mobile.js'
+import { MOBILE, nativeLoad, nativeSave, syncReminder, syncCheckinReminder, clearCaptures } from '../lib/mobile.js'
 import { mergeState } from '../lib/sync.js'
 import { cleanReports } from '../lib/labs/reports.js'
 import { cleanRoutine, cleanWeek } from '../lib/clean.js'
 import { cleanRest } from '../lib/workout.js'
 import { cleanWindDown } from '../lib/noise.js'
+import { cleanCheckins, cleanCheckinPrefs, PREFS_DEF } from '../lib/checkin.js'
 
 const KEY = 'gym_state_v1'
 const BASE_KEY = 'gym_base'
@@ -31,7 +32,9 @@ export const DEF = {
   // blood test reports — see lib/labs/reports.js for the shapes; units: 'si' | 'us' | null (not chosen yet)
   labs: { reports: [], units: null },
   // Wind down: the last sound mix and volume, and up to 5 saved mixes - see lib/noise.js cleanWindDown
-  winddown: { mix: null, volume: 0.5, mixes: [] }
+  winddown: { mix: null, volume: 0.5, mixes: [] },
+  // End-of-day check-ins and their settings - see lib/checkin.js (cleanCheckins, PREFS_DEF)
+  checkins: [], checkinPrefs: { ...PREFS_DEF, days: [...PREFS_DEF.days], deleted: [] }
 }
 const clone = o => JSON.parse(JSON.stringify(o))
 
@@ -60,6 +63,8 @@ export function normalizeState(raw) {
   if (s.active && (typeof s.active !== 'object' || !Array.isArray(s.active.entries))) s.active = null
   if (s.active) { s.active.rest = cleanRest(s.active.rest) || undefined; if (!s.active.rest) delete s.active.rest }
   s.winddown = cleanWindDown(s.winddown)
+  s.checkins = cleanCheckins(s.checkins)
+  s.checkinPrefs = cleanCheckinPrefs(s.checkinPrefs)
   s.labs = {
     reports: cleanReports(s.labs?.reports),
     units: s.labs?.units === 'us' || s.labs?.units === 'si' ? s.labs.units : null
@@ -96,7 +101,7 @@ function warnStorageFull() {
 }
 
 const hasData = st => !!((st.workouts || []).length || (st.routines || []).length || (st.bodyweight || []).length
-  || Object.keys(st.nutrition?.days || {}).length || (st.labs?.reports || []).length)
+  || Object.keys(st.nutrition?.days || {}).length || (st.labs?.reports || []).length || (st.checkins || []).length)
 
 export const useStore = create((set, get) => {
   let pushTm = null
@@ -109,6 +114,9 @@ export const useStore = create((set, get) => {
   // was wasted bridge traffic (performance audit 1.6.2)
   let reminderKey = null
   const reminderInputs = S => JSON.stringify([S.reminder, S.week, (S.routines || []).map(r => [r.id, r.name])])
+  // the check-in reminder depends on its prefs and on whether today is already done
+  let checkinKey = null
+  const checkinInputs = S => JSON.stringify([S.checkinPrefs, (S.checkins || []).at(-1)?.d, S.lang])
   const nativePersist = () => {
     clearTimeout(saveTm)
     saveTm = setTimeout(() => {
@@ -117,6 +125,8 @@ export const useStore = create((set, get) => {
       nativeSave(S)
       const k = reminderInputs(S)
       if (k !== reminderKey) { reminderKey = k; syncReminder(S) }
+      const c = checkinInputs(S)
+      if (c !== checkinKey) { checkinKey = c; syncCheckinReminder(S) }
     }, 800)
   }
 
@@ -148,6 +158,8 @@ export const useStore = create((set, get) => {
   // same applies to the file mirror — backgrounding is often the last thing before the OS
   // kills the app.
   document.addEventListener('visibilitychange', () => {
+    // back in the app: the 14-day window of check-in reminders moves on with the calendar
+    if (document.visibilityState === 'visible') { if (MOBILE && get().ready) syncCheckinReminder(get().S); return }
     if (document.visibilityState !== 'hidden') return
     if (lsTm) flushLocal()
     if (MOBILE && saveTm) {
@@ -292,6 +304,7 @@ export const useStore = create((set, get) => {
         }
         get().setGuest(true)
         syncReminder(get().S)
+        syncCheckinReminder(get().S)
         clearCaptures()   // camera photos left by a cancelled or killed capture
         set({ ready: true })
         return

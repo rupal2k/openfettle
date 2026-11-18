@@ -10,6 +10,7 @@
 // Like the demo build, MOBILE is replaced at build time, so all of this folds away in
 // web bundles; the Capacitor plugins are only ever imported behind it.
 import { t } from './i18n.js'
+import { checkinSchedule, REMIND_ID0, REMIND_DAYS } from './checkin.js'
 
 export const MOBILE = import.meta.env.VITE_MOBILE === '1'
 
@@ -82,15 +83,46 @@ export async function syncReminder(S, interactive = false) {
   } catch (e) { return false }
 }
 
+// End-of-day check-in reminder: one-shot notifications for the next 14 days (lib/checkin.js
+// checkinSchedule), so a day that is already checked in or skipped simply has none. Re-run when the
+// prefs or today's check-in change and whenever the app comes back, so the window rolls forward.
+// Tapping one opens the check-in (listener in main.jsx). No action buttons in 1.8.0: the plugin
+// opens the app for every action, so Snooze/Skip would not stay in the shade (spec 6.4, P2).
+export async function syncCheckinReminder(S, interactive = false) {
+  if (!MOBILE) return true
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications')
+    await LocalNotifications.cancel({ notifications: Array.from({ length: REMIND_DAYS }, (_, k) => ({ id: REMIND_ID0 + k })) }).catch(() => {})
+    const list = checkinSchedule(S.checkinPrefs, S.checkins)
+    if (!list.length) return true
+    let perm = await LocalNotifications.checkPermissions()
+    if (perm.display !== 'granted' && interactive) perm = await LocalNotifications.requestPermissions()
+    if (perm.display !== 'granted') return false
+    await LocalNotifications.schedule({ notifications: list.map(n => ({
+      id: n.id, title: t('End-of-day check-in'), body: t('Your workday is ending. A few minutes to close it?'),
+      schedule: { at: n.at, allowWhileIdle: true }, extra: { kind: 'checkin', day: n.day }
+    })) })
+    return true
+  } catch (e) { return false }
+}
+
 // WKWebView can't do blob-URL downloads, so the backup goes out through the OS share sheet
 // (Files, AirDrop, mail, …) from a temp file instead.
 // Imported text files above this are refused before they are read: a plan or a backup is a
 // few hundred KB, and reading a huge file can take the WebView down.
 // Android app: keep a screen out of screenshots and the recent-apps preview while it shows
 // health results (native PrivacyScreen plugin, MainActivity). A no-op on the web.
+// Counted: each screen that needs it turns it on and off again, and the block stays on while any
+// still does. (Opening the check-in from its settings sheet unmounts that sheet after the check-in
+// has turned the block on; without the count, the older sheet's "off" lifted it.)
+let secureScreens = 0
 export function privacyScreen(on) {
   if (!MOBILE) return
-  import('@capacitor/core').then(({ registerPlugin }) => registerPlugin('PrivacyScreen').set({ on })).catch(() => {})
+  const before = secureScreens > 0
+  secureScreens = Math.max(0, secureScreens + (on ? 1 : -1))
+  const now = secureScreens > 0
+  if (now === before) return
+  import('@capacitor/core').then(({ registerPlugin }) => registerPlugin('PrivacyScreen').set({ on: now })).catch(() => {})
 }
 
 export const MAX_IMPORT_BYTES = 20 * 1024 * 1024

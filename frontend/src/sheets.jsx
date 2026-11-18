@@ -431,7 +431,7 @@ const fadeLabel = endsAt => endsAt && t('Fades out at {0}', new Date(endsAt).toL
 // Android app: while Wind down plays, the native WindDownService keeps it going with the app
 // minimised or the screen off, and shows a notification (the layers, fade-out time, Pause).
 let windDownBridged = false
-function bridgeWindDown(p) {
+export function bridgeWindDown(p) {
   if (!MOBILE || windDownBridged) return
   windDownBridged = true
   import('@capacitor/core').then(({ registerPlugin }) => {
@@ -455,7 +455,7 @@ function bridgeWindDown(p) {
 // The last mix and volume are kept (S.winddown, so they are in backups too): restored once when
 // Wind down first opens, saved shortly after they change (not on every step of a slider drag).
 let windDownRestored = false
-function keepWindDown(p) {
+export function keepWindDown(p) {
   if (windDownRestored) return
   windDownRestored = true
   p.restore(S().winddown || {})
@@ -505,8 +505,13 @@ function SavedMixes({ p, mix }) {
 function WindDown() {
   const p = noisePlayer()
   const st = useSyncExternalStore(p.subscribe, p.get)
+  const done = useStore(s => (s.S.checkins || []).some(c => c.d === todayISO()))
+  const busy = useStore(s => !!s.S.active)
   return <>
     <h3>{t('Wind down')}</h3>
+    {/* the end-of-day check-in starts here (checkin-sheets.jsx, loaded on demand) */}
+    <Button variant={done ? 'tinted' : 'primary'} icon="checkCircle" disabled={busy} onClick={() => import('./checkin-sheets.jsx').then(m => { ui().closeSheet(ui().sheets.at(-1)?.id); setTimeout(m.openCheckin, 250) })}>{done ? t('Today’s check-in is done · Do it again') : t('Start my end-of-day check-in')}</Button>
+    <div style={{ height: 12 }} />
     <div className="muted small">{t('Sounds generated on this device. Nothing is downloaded.')}</div>
     <div style={{ height: 14 }} />
     <div className="small muted" id="wd-layers" style={{ marginBottom: 6 }}>{t('Switch on any sounds you like and set each one’s volume.')}</div>
