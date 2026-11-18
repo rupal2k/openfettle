@@ -258,6 +258,8 @@ Weekly repeats (`schedule.on.weekday`, as `syncReminder` uses) can't skip a sing
 **Outcomes so far (2026-11-18):**
 - **P2 fails by design** (plugin source): every action button is a `PendingIntent.getActivity` (`LocalNotificationManager.createActionIntents`), so Snooze/Skip would open the app. Per D7, **1.8.0 ships tap-to-open only, with no action buttons**; Snooze/Skip move to 1.8.x with a native receiver.
 - **P1 is expected to pass** (source): `BridgeActivity.onCreate` passes the launch intent to `onNewIntent`, and the plugin emits `localNotificationActionPerformed` with `retainUntilConsumed = true`, so a cold-start tap is held until the JS listener registers. Still to confirm on a device.
+- **P1 passes on the S21 (Android 15, debug 1.8.0):** reminder scheduled for 2 min ahead, app sent to the background and killed (`am kill`), the notification arrived on time, and a tap cold-started the app straight into the check-in. Turning the reminder off left 0 pending alarms.
+- **P6 passes on the S21:** box breathing ran 64 s with the phase text on the 4 s steps, beeps on the audio clock, the screen kept on, the vibration cues fired, and the flow moved on by itself; Stop cancelled the cues. FLAG_SECURE held across the history sheet and the flow (after making `privacyScreen` reference-counted).
 - **P5 passes:** the 1.7.1 regression on the S21 logged app vibrations from `navigator.vibrate` (EMOM minute cue) in `dumpsys vibrator_manager`.
 | # | Question | Fallback if it fails |
 |---|---|---|
