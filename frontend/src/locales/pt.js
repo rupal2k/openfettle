@@ -1250,5 +1250,6 @@ export default {
   'Play': 'Tocar',
   'Noise, fire, water or night sounds to help you rest': 'Ruído, fogo, água ou sons da noite para descansar',
   'Sounds generated on this device. Nothing is downloaded.': 'Sons gerados neste dispositivo. Nada é baixado.',
+  'Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.': 'Continua tocando quando você sai do app ou bloqueia a tela. Pause aqui ou pela notificação.',
   'Sound can’t play on this device.': 'Não é possível reproduzir som neste dispositivo.',
 }

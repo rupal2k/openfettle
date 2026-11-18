@@ -1250,5 +1250,6 @@ export default {
   'Play': '播放',
   'Noise, fire, water or night sounds to help you rest': '噪声、火焰、流水或夜晚的声音，帮助休息',
   'Sounds generated on this device. Nothing is downloaded.': '在本设备上生成的声音，无需下载。',
+  'Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.': '离开应用或锁屏后仍会继续播放。可在这里或通知中暂停。',
   'Sound can’t play on this device.': '此设备无法播放声音。',
 }

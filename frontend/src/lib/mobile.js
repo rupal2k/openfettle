@@ -48,6 +48,16 @@ export async function notificationsAllowed() {
     return (await LocalNotifications.checkPermissions()).display === 'granted'
   } catch { return true }
 }
+// Asks once per press (Android stops showing the prompt after two refusals). Wind down calls it on
+// Play before the sound starts (the dialog interrupts playing audio), so its notification and Pause
+// button are visible; the sound plays either way.
+export async function askNotifications() {
+  if (!MOBILE) return
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications')
+    if ((await LocalNotifications.checkPermissions()).display !== 'granted') await LocalNotifications.requestPermissions()
+  } catch { /* no prompt on this device */ }
+}
 export async function syncReminder(S, interactive = false) {
   try {
     const { LocalNotifications } = await import('@capacitor/local-notifications')

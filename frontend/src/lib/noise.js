@@ -2,9 +2,9 @@
 // Nothing is downloaded: a few seconds of sound are computed into an AudioBuffer that loops, so it
 // works offline.
 //
-// Playback keeps going while the WebView runs (app in the background included). With the screen
-// off, Android may suspend the WebView; staying audible then needs a native foreground media
-// service, which is out of scope for v1.
+// In the Android app, the native WindDownService (a media-playback foreground service with a
+// notification and a partial wake lock, see sheets.jsx bridgeWindDown) keeps this playing with
+// the app minimised or the screen off.
 
 export const COLORS = ['white', 'pink', 'brown', 'fire', 'water', 'night']
 export const SLEEP_OPTIONS = [0, 15, 30, 60]   // minutes, 0 = off

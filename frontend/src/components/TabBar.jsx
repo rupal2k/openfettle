@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
-import { effectiveRoutine } from '../lib/history.js'
+import { effectiveRoutine, fabTucked } from '../lib/history.js'
 import { todayISO } from '../lib/format.js'
 import { t } from '../lib/i18n.js'
 import Icon from './Icon.jsx'
@@ -13,6 +14,17 @@ export default function TabBar({ onStart }) {
   const isGuest = useStore(s => s.isGuest())
   const cur = loc.pathname.split('/')[1] || 'home'
   const fab = (user || isGuest) && cur !== 'workout'
+  const [tucked, setTucked] = useState(false)
+  useEffect(() => {
+    let lastY = window.scrollY
+    const onScroll = () => {
+      const y = window.scrollY
+      setTucked(was => { const next = fabTucked(was, lastY, y); if (next !== was || Math.abs(y - lastY) >= 8) lastY = y; return next })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  useEffect(() => setTucked(false), [loc.pathname])
   if (!user && !isGuest) return null
   const on = k => cur === k || ((cur === 'history' || cur === 'labs') && k === 'stats') || (cur === 'settings' && k === 'home')
 
@@ -37,7 +49,7 @@ export default function TabBar({ onStart }) {
         <stop offset="0" style={{ stopColor: 'var(--acc)' }} /><stop offset="1" style={{ stopColor: 'var(--acc-2)' }} />
       </linearGradient>
     </svg>
-    {fab && <button id="startfab" className={S.active ? 'rec' : ''} onClick={startWorkout} aria-label={S.active ? t('Resume') : t('Start')}>
+    {fab && <button id="startfab" className={(S.active ? 'rec' : '') + (tucked ? ' tuck' : '')} onClick={startWorkout} aria-label={S.active ? t('Resume') : t('Start')}>
       <Icon name={S.active ? 'play' : 'dumbbell'} />
     </button>}
     <nav id="tabbar">

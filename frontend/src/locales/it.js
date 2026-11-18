@@ -1250,5 +1250,6 @@ export default {
   'Play': 'Riproduci',
   'Noise, fire, water or night sounds to help you rest': 'Rumore, fuoco, acqua o suoni notturni per riposare',
   'Sounds generated on this device. Nothing is downloaded.': 'Suoni generati su questo dispositivo. Non viene scaricato nulla.',
+  'Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.': 'Continua a suonare quando esci dall’app o blocchi lo schermo. Mettilo in pausa qui o dalla notifica.',
   'Sound can’t play on this device.': 'Su questo dispositivo non è possibile riprodurre audio.',
 }

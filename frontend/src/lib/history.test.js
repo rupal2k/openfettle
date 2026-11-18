@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { modeOf, isTimed, fmtSec, setLabel, defaultConfig, buildSets, exLine, workoutVolume, effortOf, stepEffort, capEffort, isBw, isPerSide, sideReps, repStep } from './history.js'
+import { modeOf, isTimed, fmtSec, setLabel, defaultConfig, buildSets, exLine, workoutVolume, effortOf, stepEffort, capEffort, isBw, isPerSide, sideReps, repStep, showWindDown, WIND_DOWN_HOUR, fabTucked } from './history.js'
 import { EXDB } from './exercises.js'
 
 // Real ids out of the shipped catalogue, so the body-part fallback is exercised for real.
@@ -394,5 +394,38 @@ describe('workoutVolume', () => {
   it('leaves an unloaded bodyweight set at zero volume rather than inventing a number', () => {
     const w = { entries: [{ id: BW, target: { bodyweight: true }, sets: [{ w: 0, r: 20, done: true }] }] }
     expect(workoutVolume(w)).toBe(0)
+  })
+})
+
+describe('showWindDown (Home card)', () => {
+  const S = (over = {}) => ({ active: null, dayPlan: {}, week: { 3: 'r1' }, routines: [{ id: 'r1', ex: [] }], workouts: [], ...over })
+  const wed = h => new Date(2026, 10, 18, h, 0)   // a Wednesday, the plan's training day
+  const tue = h => new Date(2026, 10, 17, h, 0)   // a rest day
+  it('shows on rest days at any hour', () => {
+    expect(showWindDown(S(), tue(9))).toBe(true)
+  })
+  it('hides on a training day before the session, until the evening', () => {
+    expect(showWindDown(S(), wed(9))).toBe(false)
+    expect(showWindDown(S(), wed(WIND_DOWN_HOUR - 1))).toBe(false)
+    expect(showWindDown(S(), wed(WIND_DOWN_HOUR))).toBe(true)
+  })
+  it('shows on a training day once today is logged', () => {
+    expect(showWindDown(S({ workouts: [{ d: '2026-11-18' }] }), wed(10))).toBe(true)
+  })
+  it('shows when today is moved to rest, never during a workout', () => {
+    expect(showWindDown(S({ dayPlan: { '2026-11-18': 'rest' } }), wed(9))).toBe(true)
+    expect(showWindDown(S({ active: { name: 'x' } }), tue(21))).toBe(false)
+  })
+})
+
+describe('fabTucked (floating Start button)', () => {
+  it('tucks scrolling down, returns scrolling up and near the top', () => {
+    expect(fabTucked(false, 200, 260)).toBe(true)
+    expect(fabTucked(true, 260, 200)).toBe(false)
+    expect(fabTucked(true, 300, 60)).toBe(false)
+  })
+  it('ignores jitter under 8 px', () => {
+    expect(fabTucked(true, 300, 296)).toBe(true)
+    expect(fabTucked(false, 300, 305)).toBe(false)
   })
 })

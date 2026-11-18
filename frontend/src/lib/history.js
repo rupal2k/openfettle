@@ -169,6 +169,21 @@ export function effectiveRoutine(S, iso) {
   const id = effectiveRoutineId(S, iso)
   return id ? S.routines.find(r => r.id === id) || null : null
 }
+// Home's Wind down card: on rest days, and on training days once today's session is logged or
+// it is evening, because the nights after training are when people reach for it. Never mid-workout.
+export const WIND_DOWN_HOUR = 18
+export function showWindDown(S, now = new Date()) {
+  if (S.active) return false
+  const iso = isoOf(now)
+  return !effectiveRoutineId(S, iso) || S.workouts.some(w => w.d === iso) || now.getHours() >= WIND_DOWN_HOUR
+}
+// The floating Start button tucks away while the page scrolls down (so it never sits on a row
+// you are reading or tapping) and comes back on the way up or near the top.
+export function fabTucked(wasTucked, lastY, y) {
+  if (y < 80) return false
+  if (Math.abs(y - lastY) < 8) return wasTucked // ignore jitter
+  return y > lastY
+}
 export function buildSets(S, cfg) {
   const last = lastEntryFor(S, cfg.id)
   // Capped like cleanConfig: a plan saved before the bounds existed must not build a million rows.

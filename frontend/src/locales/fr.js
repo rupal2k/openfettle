@@ -1250,5 +1250,6 @@ export default {
   'Play': 'Lecture',
   'Noise, fire, water or night sounds to help you rest': 'Bruit, feu, eau ou sons de la nuit pour vous reposer',
   'Sounds generated on this device. Nothing is downloaded.': 'Sons générés sur cet appareil. Rien n’est téléchargé.',
+  'Keeps playing when you leave the app or lock the screen. Pause it here or from the notification.': 'Continue de jouer quand vous quittez l’app ou verrouillez l’écran. Mettez en pause ici ou depuis la notification.',
   'Sound can’t play on this device.': 'Impossible de lire du son sur cet appareil.',
 }
