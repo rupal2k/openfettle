@@ -81,19 +81,26 @@ function Breathing({ cue, onDone }) {
   const mix = useStore(s => s.S.winddown?.mix)
   const [sounds, setSounds] = useState(false)
   const plan = kind ? breathPlan(kind) : null
-  const stop = () => { cancelBeeps(); vibrate(0); releaseWakeLock(); setStart(null) }
-  useEffect(() => () => { cancelBeeps(); vibrate(0); releaseWakeLock() }, [])
+  // the Wind down sounds belong to the exercise only when it started them (a mix already playing is left alone)
+  // Pausing it, or changing the mix or volume, hands the sound back to the user (own = the unsubscribe).
+  const own = useRef(null)
+  const disown = () => { own.current?.(); own.current = null }
+  const endSound = () => { if (own.current) { disown(); noisePlayer().stop() } }
+  const stop = () => { cancelBeeps(); vibrate(0); releaseWakeLock(); endSound(); setStart(null) }
+  useEffect(() => () => { cancelBeeps(); vibrate(0); releaseWakeLock(); endSound() }, [])
   useEffect(() => { if (!start) return; const id = setInterval(() => tick(x => x + 1), 250); return () => clearInterval(id) }, [start])
   const begin = () => {
     const sound = cue === 'both' || cue === 'sound', buzz = cue === 'both' || cue === 'vibrate'
     const tone = { in: 523, hold: 440, out: 392, hold2: 440, natural: 523, end: 660 }
     if (sound) for (const s of plan) beep(true, tone[s.phase], s.phase === 'end' ? 0.5 : 0.25, s.at)
     if (buzz) vibrate(vibratePattern(plan))
-    if (sounds && mix) { const p = noisePlayer(); keepWindDown(p); bridgeWindDown(p); p.play() }
+    if (sounds && mix) { const p = noisePlayer(); keepWindDown(p); bridgeWindDown(p)
+      if (!p.get().playing && p.play()) { const s0 = p.get(); own.current = p.subscribe(() => { const s = p.get(); if (!s.playing || s.mix !== s0.mix || s.volume !== s0.volume) disown() }) }
+    }
     requestWakeLock(); setStart(Date.now())
   }
   const at = start && breathAt(plan, (Date.now() - start) / 1000)
-  useEffect(() => { if (at?.done) { releaseWakeLock(); setStart(null); onDone(kind) } }, [at?.done])
+  useEffect(() => { if (at?.done) { releaseWakeLock(); endSound(); setStart(null); onDone(kind) } }, [at?.done])
   if (start) return <div style={{ padding: '18px 0', textAlign: 'center' }}>
     <div aria-live="polite" style={{ fontSize: 28, fontWeight: 600 }}>{phaseLabel(at.phase)}</div>
     <div className="muted" style={{ fontSize: 22, margin: '6px 0' }} aria-hidden="true">{at.left}</div>

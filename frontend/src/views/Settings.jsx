@@ -14,6 +14,7 @@ import { convertWeights, hasWeights } from '../lib/units-convert.js'
 import { nutritionProfileSheet } from '../nutrition-sheets.jsx'
 import { loadStarterPlan, confirmSheet, importFromApp, planCatalogSheet, planUploadSheet, runUpdateCheck, windDownSheet } from '../sheets.jsx'
 import { checkinSettingsSheet } from '../checkin-sheets.jsx'
+import { selfChecksSheet } from '../selfcheck-sheets.jsx'
 import { VisionSettings } from '../vision-sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
@@ -63,7 +64,7 @@ export default function Settings() {
     rd.onload = () => {
       try {
         const data = JSON.parse(rd.result)
-        if (!data || (!data.workouts && !data.routines && !data.nutrition && !data.checkins)) throw new Error('not an OpenFettle backup')
+        if (!data || (!data.workouts && !data.routines && !data.nutrition && !data.checkins && !data.selfchecks)) throw new Error('not an OpenFettle backup')
         confirmSheet({ title: t('Import backup?'), message: t('This replaces all current data with the backup file.'), confirmText: t('Import'), danger: true, onConfirm: () => { replaceState(normalizeState(data), true); toast(t('Backup imported')) } })
       } catch { toast(t('Import failed: {0}', t('That file isn’t an OpenFettle backup.'))) }   // not the parser's message: it quotes the file
     }
@@ -138,6 +139,7 @@ export default function Settings() {
         onClick={() => window.open(REPO + '/issues/new?labels=translation&title=' + encodeURIComponent('Translation (' + S.lang + '): '), '_blank', 'noopener')} />}
       <Row icon="moon" iconTint="var(--indigo)" title={t('Wind down')} subtitle={t('Mix noise, fire, water and night sounds to help you rest')} accessory="chevron" onClick={windDownSheet} />
       <Row icon="checkCircle" iconTint="var(--indigo)" title={t('End-of-day check-in')} subtitle={t('A few minutes to close your workday')} accessory="chevron" onClick={checkinSettingsSheet} />
+      <Row icon="clipboard" iconTint="var(--indigo)" title={t('Self-checks')} subtitle={t('Wellbeing, mood, anxiety, alcohol and diabetes risk questionnaires')} accessory="chevron" onClick={selfChecksSheet} />
       <Row icon="person" iconTint="var(--indigo)" title={t('Your profile')} subtitle={t('Sex, birth year and height, for calorie targets and blood test scores')} accessory="chevron" onClick={nutritionProfileSheet} />
     </Section>
     <VisionSettings />
@@ -210,7 +212,7 @@ export default function Settings() {
         subtitle={t('FitNotes, Strong, Hevy — or body weight from Apple Health')}
         accessory="chevron" onClick={() => importRef.current.click()} />
       <Row icon="upload" iconTint="var(--blue)" title={t('Import backup')} accessory="chevron" onClick={() => fileRef.current.click()} />
-      <Row icon="download" iconTint="var(--blue)" title={t('Export backup (JSON)')} subtitle={t('Includes your blood test results and check-ins. Keep the file private.')} accessory="chevron" onClick={doExport} />
+      <Row icon="download" iconTint="var(--blue)" title={t('Export backup (JSON)')} subtitle={t('Includes your blood test results, check-ins and self-check results. Keep the file private.')} accessory="chevron" onClick={doExport} />
       {MOBILE && <>
         <Row icon="download" iconTint="var(--teal)" title={t('Check for updates')} subtitle={t('Asks GitHub for the latest version. Nothing about you is sent.')} accessory="chevron" onClick={() => runUpdateCheck(true)} />
         <Row icon="bell" iconTint="var(--teal)" title={t('Tell me about new versions')}>

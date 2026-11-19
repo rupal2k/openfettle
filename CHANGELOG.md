@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.2
+
+Self-checks, and a fix for Wind down sounds in the breathing exercise.
+
+- 📋 **Self-checks** (Settings → Self-checks): short questionnaires that doctors and researchers use — WHO-5 wellbeing, PHQ-9 mood, GAD-7 anxiety, AUDIT-C alcohol and the Indian Diabetes Risk Score — with links to the ADA diabetes test and WHO’s hearWHO and WHOeyes apps. They can point to something worth checking; they can’t diagnose. Answers stay on the phone.
+- 📞 **Help where you live:** India shows Tele-MANAS 14416 and 112; other countries show findahelpline.com and the local emergency number. A PHQ-9 answer about self-harm shows support straight away.
+- 🌬️ **Fixed:** Wind down sounds started by a breathing exercise kept playing after Stop or after leaving the exercise.
+- ⌨️ Escape now closes only the top sheet.
+
 ## 1.8.1
 
 Small fixes for the End-of-day check-in and Wind down.
