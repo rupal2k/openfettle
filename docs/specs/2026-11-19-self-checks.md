@@ -21,7 +21,16 @@ Short, published health questionnaires that point to something worth checking, w
 
 **Region:** India when the time zone is `Asia/Kolkata`, otherwise international. The user can change it in the sheet ("Where you live"). The region sets only the helplines and the drink sizes, never which checks exist.
 
-**Where:** Settings → Self-checks. There's no Home card or reminder in phase 1.
+**Where:** Settings → Self-checks. There's no Home card or reminder.
+
+**Behaviour added after the audit (2026-11-20):**
+- The two-weekly checks show "Due" only 14 days after the last result, never before the first one.
+- Unfinished answers are kept in memory (never saved) when the sheet is closed, with "Start again"; they go when the result is shown, on Delete all, or when the app is closed.
+- Escape closes only the top sheet (app-wide, components/Modals.jsx).
+- Switching cm/in converts the waist already typed. The age is filled in from the birth year only when both possible ages fall in one band.
+- "Change since last time" says which way is better (WHO-5 higher, PHQ-9/GAD-7 lower).
+- The self-harm card is a live alert when it first appears, not when an old result is reopened.
+- PRIVACY.md lists self-check results, the outside links and the delete path.
 
 ## Scoring (lib/selfcheck.js, tested in selfcheck.test.js)
 
@@ -87,3 +96,7 @@ WHO-5, PHQ-9, GAD-7 and AUDIT-C stay in English in every language, with the note
   - answers stored as indices; the card shown again in the history;
   - Hindi: verbatim English items, translated card.
 - Not yet: a real phone, TalkBack reading the card (it is a `role="alert"`).
+
+## Audit re-run (2026-11-20)
+
+All 10 findings fixed, plus one more found on the re-run: the questionnaire sheet lost its dialog name when it turned into the result (axe `aria-dialog-name`); the sheet now keeps one heading. Unit tests: 704 pass. E2E: 23 fix checks + 32 phase-1 + 21 phase-2 checks pass; axe finds no violations on the hub, the questionnaires, the PHQ-9 card and the results; 320 px and light theme checked.

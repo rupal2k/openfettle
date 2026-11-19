@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { INSTRUMENTS, score, band, shown, selfHarm, waistIndex, ageIndex, regionOf, dueOn, cleanEntry, cleanSelfchecks, cleanSelfcheckPrefs, mergeSelfchecks } from './selfcheck.js'
+import { INSTRUMENTS, score, band, shown, selfHarm, waistIndex, ageIndex, ageFromYear, regionOf, dueOn, cleanEntry, cleanSelfchecks, cleanSelfcheckPrefs, mergeSelfchecks } from './selfcheck.js'
 
 const e = (inst, a, extra = {}) => ({ id: inst + '-1', inst, d: '2026-11-19', at: 1, a, ...extra })
 
@@ -60,7 +60,7 @@ describe('region, due, cleaning, sync', () => {
   })
   it('WHO-5 is due again after 14 days; one-off checks never nag', () => {
     const list = [e('who5', [0, 0, 0, 0, 0], { d: '2026-11-01' })]
-    expect(dueOn([], 'who5', '2026-11-19')).toBe(true)
+    expect(dueOn([], 'who5', '2026-11-19')).toBe(false)              // not before the first one
     expect(dueOn(list, 'who5', '2026-11-14')).toBe(false)
     expect(dueOn(list, 'who5', '2026-11-15')).toBe(true)
     expect(dueOn([], 'idrs', '2026-11-19')).toBe(false)
@@ -108,5 +108,15 @@ describe('PHQ-9 and GAD-7 (Pfizer manual cut points)', () => {
     expect(cleanEntry(e('phq9', z(9)))).toMatchObject({ inst: 'phq9', a: z(9) })
     expect(cleanEntry(e('gad7', z(6)))).toBe(null)
     expect(cleanEntry(e('gad7', [...z(6), 4]))).toBe(null)
+  })
+})
+
+describe('age from the profile birth year', () => {
+  it('prefills only when the age band is certain', () => {
+    expect(ageFromYear(1990, 2026)).toBe(1)      // 35 or 36 -> 35-49
+    expect(ageFromYear(1991, 2026)).toBe(null)   // 34 or 35: either band
+    expect(ageFromYear(1976, 2026)).toBe(null)   // 49 or 50
+    expect(ageFromYear(1960, 2026)).toBe(2)
+    expect(ageFromYear(null, 2026)).toBe(null)
   })
 })

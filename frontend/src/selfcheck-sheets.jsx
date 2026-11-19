@@ -1,13 +1,13 @@
 // Self-checks (docs/specs/2026-11-19-self-checks.md): the list, taking a questionnaire, the result
 // and the private history. Pure logic and the questionnaires are in lib/selfcheck.js.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
 import { t, getLang } from './lib/i18n.js'
 import { fmtDate, todayISO } from './lib/format.js'
 import { privacyScreen } from './lib/mobile.js'
 import { latestByMarker } from './lib/labs/reports.js'
-import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, selfHarm, waistIndex, ageIndex, regionOf, lastOf, dueOn } from './lib/selfcheck.js'
+import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, selfHarm, waistIndex, ageIndex, ageFromYear, regionOf, lastOf, dueOn } from './lib/selfcheck.js'
 import { confirmSheet } from './sheets.jsx'
 import { Button, Segmented, Section, Row, NumberField } from './components/ui.jsx'
 
@@ -16,6 +16,8 @@ const update = (...a) => useStore.getState().update(...a)
 const ui = () => useUI.getState()
 const toast = m => ui().toast(m)
 const openUrl = url => window.open(url, '_blank', 'noopener')
+// Unfinished answers, kept in memory only (never saved) so closing a questionnaire by mistake loses nothing
+const drafts = {}
 const usePrivate = () => useEffect(() => { privacyScreen(true); return () => privacyScreen(false) }, [])
 
 const ABOUT = { who5: () => t('Wellbeing over the last two weeks · 2 min'), phq9: () => t('Low mood over the last two weeks · 2 min'), gad7: () => t('Anxiety over the last two weeks · 1 min'), auditc: () => t('Alcohol · 1 min'), idrs: () => t('Type 2 diabetes risk · 1 min · made for people of Indian origin') }
@@ -32,14 +34,15 @@ const LINKS = {
 function Support({ region, footer }) {
   return <Section title={t('Talk to someone')} footer={footer || (region === 'in' ? t('In an emergency, call 112.') : t('In an emergency, call your local emergency number.'))}>
     {region === 'in'
-      ? <Row icon="bell" iconTint="var(--indigo)" title={t('Tele-MANAS 14416')} subtitle={t('Free mental health helpline from the Government of India, 24 hours, in many Indian languages')} accessory="chevron" onClick={() => { window.location.href = 'tel:14416' }} />
+      ? <Row icon="phone" iconTint="var(--indigo)" title={t('Tele-MANAS 14416')} subtitle={t('Free mental health helpline from the Government of India, 24 hours, in many Indian languages')} accessory="chevron" onClick={() => { window.location.href = 'tel:14416' }} />
       : <Row icon="globe" iconTint="var(--indigo)" title={t('Find a helpline')} subtitle={t('Free helplines in over 130 countries (findahelpline.com)')} accessory="chevron" onClick={() => openUrl(LINKS.helpline)} />}
   </Section>
 }
 
 // PHQ-9 item 9 above "Not at all": shown under the question as soon as it is answered, and first on the result
-function SafetyCard({ region }) {
-  return <div role="alert" style={{ marginTop: 10 }}>
+// announce: read out by screen readers as it appears (not when an old result is reopened)
+function SafetyCard({ region, announce }) {
+  return <div role={announce ? 'alert' : undefined} style={{ marginTop: 10 }}>
     <div className="card" style={{ borderLeft: '3px solid var(--orange)', marginBottom: 8 }}>
       <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('You said you have had thoughts of being better off dead or of hurting yourself.')}</div>
       <div className="small">{t('Thank you for answering honestly. You don’t have to handle these thoughts alone. Please talk to someone today: a helpline, a doctor, or someone you trust.')}</div>
@@ -57,7 +60,7 @@ function SelfChecks() {
   const list = st.selfchecks || [], region = regionOf(st.selfcheckPrefs), today = todayISO()
   const results = [...list].reverse()
   const removeAll = () => confirmSheet({ title: t('Delete all results?'), message: t('Deletes every self-check result on this device. This cannot be undone.'), confirmText: t('Delete all results'), danger: true, onConfirm: () => {
-    update(s => { s.selfchecks = []; s.selfcheckPrefs = { ...s.selfcheckPrefs, cleared: Date.now(), deleted: [] } }); toast(t('All results deleted'))
+    update(s => { s.selfchecks = []; s.selfcheckPrefs = { ...s.selfcheckPrefs, cleared: Date.now(), deleted: [] } }); for (const k in drafts) delete drafts[k]; toast(t('All results deleted'))
   } })
   return <>
     <h3>{t('Self-checks')}</h3>
@@ -93,15 +96,26 @@ function SelfChecks() {
 
 /* -------------------------------------------------------- one check -- */
 const profileSex = () => ({ female: 'f', male: 'm' }[S().nutrition?.profile?.sex] || null)
-const profileAge = () => { const y = S().nutrition?.profile?.birthYear; return y ? new Date().getFullYear() - y : null }
+const profileAgeIndex = () => ageFromYear(S().nutrition?.profile?.birthYear, new Date().getFullYear())
 
 function Take({ inst }) {
   usePrivate()
-  const I = INSTRUMENTS[inst], region = regionOf(S().selfcheckPrefs)
-  const [a, setA] = useState(() => I.items.map((_, i) => inst === 'idrs' && i === 0 && profileAge() != null ? ageIndex(profileAge()) : null))
-  const [sex, setSex] = useState(profileSex)
-  const [waist, setWaist] = useState(null), [inch, setInch] = useState(false)
+  const [n, setN] = useState(0)
+  // one heading for the sheet's life: the dialog is named after it when it opens (Modals.jsx)
+  return <><h3>{nameOf(inst)}</h3><TakeForm key={n} inst={inst} restart={() => { delete drafts[inst]; setN(n + 1) }} /></>
+}
+
+function TakeForm({ inst, restart }) {
+  const I = INSTRUMENTS[inst], region = regionOf(S().selfcheckPrefs), d = drafts[inst]
+  const [a, setA] = useState(() => d?.a || I.items.map((_, i) => (inst === 'idrs' && i === 0 ? profileAgeIndex() : null)))
+  const [sex, setSex] = useState(() => (d ? d.sex : profileSex()))
+  const [waist, setWaist] = useState(d?.waist ?? null), [inch, setInch] = useState(d?.inch ?? false)
   const [saved, setSaved] = useState(null)
+  const resumed = !!d && !saved
+  const start = useRef(JSON.stringify([a, sex, waist, inch]))   // prefilled answers alone aren't a draft
+  useEffect(() => { if (!saved && JSON.stringify([a, sex, waist, inch]) !== start.current) drafts[inst] = { a, sex, waist, inch } }, [a, sex, waist, inch, saved])
+  // switching units converts what was typed, so 86 cm doesn't become 86 in
+  const setUnit = v => { if (v !== inch) setWaist(w => (w == null ? w : Math.round((v ? w / 2.54 : w * 2.54) * 10) / 10)); setInch(v) }
   const cm = waist && (inch ? waist * 2.54 : waist), cmOk = cm >= 40 && cm <= 200   // a typo can't set the band
   const answers = inst === 'idrs' ? a.map((v, i) => (i === 1 ? (cmOk && sex ? waistIndex(cm, sex) : null) : v)) : a
   const done = answers.every((v, i) => v != null || skipped(inst, answers, i)) && (!I.needsSex || sex)
@@ -110,12 +124,15 @@ function Take({ inst }) {
     const at = Date.now(), e = { id: inst + '-' + at, inst, d: todayISO(), at, a: answers.map(v => v ?? 0) }
     if (I.needsSex) e.sex = sex
     update(s => { s.selfchecks = [...(s.selfchecks || []), e] })
-    setSaved(e)
+    delete drafts[inst]; setSaved(e)
   }
-  if (saved) return <Result e={saved} />
+  if (saved) return <Result e={saved} noTitle />
   const label = s => (I.verbatim ? s : t(s))
   return <>
-    <h3>{nameOf(inst)}</h3>
+    {resumed && <div className="card small row" style={{ marginBottom: 8, gap: 8, justifyContent: 'space-between', alignItems: 'center' }}>
+      <span>{t('Your earlier answers are kept until you see your result.')}</span>
+      <Button variant="plain" size="sm" onClick={restart}>{t('Start again')}</Button>
+    </div>}
     {I.verbatim && getLang() !== 'en' && <div className="small dim" style={{ marginBottom: 8 }}>{t('Shown in English, the wording it was tested in.')}</div>}
     {I.intro && <div className="muted small" style={{ marginBottom: 8 }}>{I.intro}</div>}
     {inst === 'auditc' && <div className="card small" style={{ marginBottom: 8 }}>{region === 'in'
@@ -132,7 +149,7 @@ function Take({ inst }) {
           <div className="small dim" style={{ marginBottom: 6 }}>{t('Measure around your bare waist, midway between your lowest rib and the top of your hip bone, after breathing out.')}</div>
           <div className="row" style={{ gap: 8 }}>
             <NumberField nullable className="input" value={waist} onChange={setWaist} placeholder={inch ? '34' : '86'} aria-labelledby={'sc-q' + i} style={{ maxWidth: 110 }} />
-            <Segmented className="seg-inline" options={[{ value: false, label: 'cm' }, { value: true, label: 'in' }]} value={inch} onChange={setInch} />
+            <Segmented className="seg-inline" options={[{ value: false, label: 'cm' }, { value: true, label: 'in' }]} value={inch} onChange={setUnit} />
           </div>
           {waist != null && !cmOk && <div className="small" style={{ color: 'var(--red)', marginTop: 6 }}>{t('Enter a waist between 40 and 200 cm (16 and 79 in)')}</div>}
         </>
@@ -141,7 +158,7 @@ function Take({ inst }) {
             style={{ flex: '0 1 auto', maxWidth: '100%', whiteSpace: 'normal', textAlign: 'left' }}
             onClick={() => pick(i, a[i] === j ? null : j)}>{label(o.label)}</button>)}
         </div>}
-      {i === 8 && selfHarm(inst, a) && <SafetyCard region={region} />}
+      {i === 8 && selfHarm(inst, a) && <SafetyCard region={region} announce />}
     </div>)}
     <div style={{ height: 16 }} />
     <Button variant="primary" disabled={!done} onClick={save}>{t('See my result')}</Button>
@@ -174,18 +191,18 @@ function resultText(e) {
       : t('High risk (60 or more). Ask a doctor for a blood sugar test (HbA1c or fasting glucose). Only a blood test can show diabetes.')
 }
 
-function Result({ e, onDelete }) {
+function Result({ e, onDelete, noTitle }) {
   const st = useStore(s => s.S)
   const I = INSTRUMENTS[e.inst], b = band(e), region = regionOf(st.selfcheckPrefs)
   const prev = (st.selfchecks || []).filter(x => x.inst === e.inst && x.at < e.at).sort((x, y) => x.at - y.at).at(-1)
-  const harm = selfHarm(e.inst, e.a)
+  const harm = selfHarm(e.inst, e.a), diff = prev ? (shown(e) > shown(prev) ? '+' : '') + (shown(e) - shown(prev)) : ''
   const a1c = e.inst === 'idrs' && latestByMarker(st.labs?.reports || []).find(x => x.key === 'diabetes.hba1c')
   return <>
-    <h3>{nameOf(e.inst)}</h3>
+    {!noTitle && <h3>{nameOf(e.inst)}</h3>}
     <div className="small muted">{fmtDate(e.d, true)}</div>
-    {harm && <SafetyCard region={region} />}
+    {harm && <SafetyCard region={region} announce={!onDelete} />}
     <div style={{ fontSize: 28, fontWeight: 600, margin: '8px 0', color: b.level === 'high' ? 'var(--orange)' : undefined }}>{scoreLine(e)}</div>
-    {I.everyDays > 0 && prev && <div className="small muted" style={{ marginBottom: 6 }}>{t('Change since last time: {0}', (shown(e) - shown(prev) > 0 ? '+' : '') + (shown(e) - shown(prev)))}</div>}
+    {I.everyDays > 0 && prev && <div className="small muted" style={{ marginBottom: 6 }}>{e.inst === 'who5' ? t('Change since last time: {0} (higher is better)', diff) : t('Change since last time: {0} (lower is better)', diff)}</div>}
     <div style={{ marginBottom: 10 }}>{resultText(e)}</div>
     {a1c && <div className="card small" style={{ marginBottom: 10 }}>{t('Your latest HbA1c in Labs: {0}% ({1}). A measured value tells you more than a risk score.', a1c.m.v, fmtDate(a1c.report.d))}</div>}
     {b.level === 'high' && I.mental && !harm && <Support region={region} />}

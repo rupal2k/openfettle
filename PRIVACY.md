@@ -6,7 +6,7 @@ OpenFettle is open source (AGPL v3); everything below can be checked in the code
 ## The short version
 
 - **Your data stays on your phone.** Workouts, body weight, meals, blood test results,
-  end-of-day check-ins and settings are stored only on the device. There is no account and no OpenFettle cloud.
+  end-of-day check-ins, self-check results and settings are stored only on the device. There is no account and no OpenFettle cloud.
 - **No analytics, no ads, no tracking.** The app contains no analytics or advertising SDK and
   sends no usage data anywhere.
 - **Photos and lab reports are read on the device.** Food photos and blood test reports (PDF,
@@ -18,6 +18,7 @@ OpenFettle is open source (AGPL v3); everything below can be checked in the code
 |---|---|---|
 | Workouts, routines, body weight, meals, custom foods, blood test results, settings | App storage on the phone | No (see "Sync" for self-hosted servers) |
 | End-of-day check-ins: how you rated your energy and mood, what weighed on you, your notes and plans | App storage on the phone | No (see "Sync") |
+| Self-check results (WHO-5, PHQ-9, GAD-7, AUDIT-C, Indian Diabetes Risk Score): which answer you picked for each question, the date, and for the alcohol and diabetes checks whether you answered as a woman or a man. Your waist and age are turned into an answer band; the numbers you type are not kept | App storage on the phone | No (see "Sync") |
 | Blood test reports | Only the values you confirm, plus the sample date and your birth year (never the file name or full date of birth) | No |
 | Camera photos (food, lab reports) | Copied into memory to be read, then the photo file is deleted | No |
 | Downloaded food-recognition model and exercise pictures | App cache, to work offline | No |
@@ -40,10 +41,15 @@ your health data.
 These services see your IP address, like any website you visit; their own privacy policies
 apply.
 
+Self-checks also link to other websites and apps (findahelpline.com, the American Diabetes
+Association risk test, WHO's hearWHO and WHOeyes pages and the questionnaires' sources), and the
+Tele-MANAS row opens your phone's dialer. They open only when you tap them, in your browser or
+dialer; OpenFettle sends them none of your answers.
+
 ## Sharing
 
 - **Backups and plan files** are created only when you tap Export or Share plan, and go only
-  where you send them. A backup contains your blood test results and check-ins, so keep it private.
+  where you send them. A backup contains your blood test results, check-ins and self-check results, so keep it private.
 - **Error reports** are created only when you tap "Share error report" after a crash. They
   contain the error message and app version, none of your data, and go only where you send them.
 
@@ -62,7 +68,9 @@ to the OpenFettle project or anyone else.
 
 ## Deleting your data
 
-Delete check-ins one at a time or all at once under Settings → End-of-day check-in. Check-in screens are kept out of screenshots and the recent-apps preview, like blood tests; your phone’s screen lock is what protects them on a lost phone. Settings → Reset everything deletes all OpenFettle data on the phone, including cached backup files
+Delete check-ins one at a time or all at once under Settings → End-of-day check-in, and self-check
+results under Settings → Self-checks. A delete is also honoured by sync, so a deleted result doesn't
+come back from your other devices. Check-in and self-check screens are kept out of screenshots and the recent-apps preview, like blood tests; your phone’s screen lock is what protects them on a lost phone. Settings → Reset everything deletes all OpenFettle data on the phone, including cached backup files
 and photos. Uninstalling the app also removes it. Delete the food model separately under
 Settings → On-device food recognition.
 

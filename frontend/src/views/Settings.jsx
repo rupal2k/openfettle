@@ -212,7 +212,7 @@ export default function Settings() {
         subtitle={t('FitNotes, Strong, Hevy — or body weight from Apple Health')}
         accessory="chevron" onClick={() => importRef.current.click()} />
       <Row icon="upload" iconTint="var(--blue)" title={t('Import backup')} accessory="chevron" onClick={() => fileRef.current.click()} />
-      <Row icon="download" iconTint="var(--blue)" title={t('Export backup (JSON)')} subtitle={t('Includes your blood test results and check-ins. Keep the file private.')} accessory="chevron" onClick={doExport} />
+      <Row icon="download" iconTint="var(--blue)" title={t('Export backup (JSON)')} subtitle={t('Includes your blood test results, check-ins and self-check results. Keep the file private.')} accessory="chevron" onClick={doExport} />
       {MOBILE && <>
         <Row icon="download" iconTint="var(--teal)" title={t('Check for updates')} subtitle={t('Asks GitHub for the latest version. Nothing about you is sent.')} accessory="chevron" onClick={() => runUpdateCheck(true)} />
         <Row icon="bell" iconTint="var(--teal)" title={t('Tell me about new versions')}>

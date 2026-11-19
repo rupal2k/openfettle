@@ -89,6 +89,8 @@ export const INST_IDS = Object.keys(INSTRUMENTS)
 export const WAIST_BANDS = { f: [80, 90], m: [90, 100] }
 export const waistIndex = (cm, sex) => { const [lo, hi] = WAIST_BANDS[sex] || WAIST_BANDS.f; return cm < lo ? 0 : cm < hi ? 1 : 2 }
 export const ageIndex = age => age < 35 ? 0 : age < 50 ? 1 : 2
+// The profile has only a birth year, so the age is this or one less: prefill only when both fall in one band
+export const ageFromYear = (birthYear, year) => { const a = year - birthYear; return birthYear && ageIndex(a) === ageIndex(a - 1) ? ageIndex(a) : null }
 // AUDIT-C: someone who never drinks skips questions 2 and 3 (they score 0)
 export const skipped = (inst, answers, i) => inst === 'auditc' && i > 0 && answers[0] === 0
 
@@ -124,10 +126,10 @@ export function regionOf(prefs, tz = Intl.DateTimeFormat().resolvedOptions().tim
 
 export const lastOf = (list, inst) => (list || []).filter(e => e.inst === inst).sort((a, b) => a.at - b.at).at(-1) || null
 const days = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5)
-// WHO-5 asks about the last two weeks, so it is offered again 14 days after the last one
+// The two-weekly checks are offered again 14 days after the last one (never before the first: no nagging)
 export function dueOn(list, inst, today) {
   const n = INSTRUMENTS[inst].everyDays, last = lastOf(list, inst)
-  return !!n && (!last || days(last.d, today) >= n)
+  return !!n && !!last && days(last.d, today) >= n
 }
 
 /* ------------------------------------------------ backup and sync -- */
