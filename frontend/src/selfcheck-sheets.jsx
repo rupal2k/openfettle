@@ -7,7 +7,7 @@ import { t, getLang } from './lib/i18n.js'
 import { fmtDate, todayISO } from './lib/format.js'
 import { privacyScreen } from './lib/mobile.js'
 import { latestByMarker } from './lib/labs/reports.js'
-import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, waistIndex, ageIndex, regionOf, lastOf, dueOn } from './lib/selfcheck.js'
+import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, selfHarm, waistIndex, ageIndex, regionOf, lastOf, dueOn } from './lib/selfcheck.js'
 import { confirmSheet } from './sheets.jsx'
 import { Button, Segmented, Section, Row, NumberField } from './components/ui.jsx'
 
@@ -18,7 +18,7 @@ const toast = m => ui().toast(m)
 const openUrl = url => window.open(url, '_blank', 'noopener')
 const usePrivate = () => useEffect(() => { privacyScreen(true); return () => privacyScreen(false) }, [])
 
-const ABOUT = { who5: () => t('Wellbeing over the last two weeks · 2 min'), auditc: () => t('Alcohol · 1 min'), idrs: () => t('Type 2 diabetes risk · 1 min · made for people of Indian origin') }
+const ABOUT = { who5: () => t('Wellbeing over the last two weeks · 2 min'), phq9: () => t('Low mood over the last two weeks · 2 min'), gad7: () => t('Anxiety over the last two weeks · 1 min'), auditc: () => t('Alcohol · 1 min'), idrs: () => t('Type 2 diabetes risk · 1 min · made for people of Indian origin') }
 const nameOf = inst => INSTRUMENTS[inst].verbatim ? INSTRUMENTS[inst].name : t(INSTRUMENTS[inst].name)
 const scoreLine = e => t('{0} out of {1}', shown(e), e.inst === 'who5' ? 100 : INSTRUMENTS[e.inst].max)
 const LINKS = {
@@ -29,12 +29,25 @@ const LINKS = {
 }
 
 // Helplines for where the user lives: India's national line, else the free global directory
-function Support({ region }) {
-  return <Section title={t('Talk to someone')} footer={region === 'in' ? t('In an emergency, call 112.') : t('In an emergency, call your local emergency number.')}>
+function Support({ region, footer }) {
+  return <Section title={t('Talk to someone')} footer={footer || (region === 'in' ? t('In an emergency, call 112.') : t('In an emergency, call your local emergency number.'))}>
     {region === 'in'
       ? <Row icon="bell" iconTint="var(--indigo)" title={t('Tele-MANAS 14416')} subtitle={t('Free mental health helpline from the Government of India, 24 hours, in many Indian languages')} accessory="chevron" onClick={() => { window.location.href = 'tel:14416' }} />
       : <Row icon="globe" iconTint="var(--indigo)" title={t('Find a helpline')} subtitle={t('Free helplines in over 130 countries (findahelpline.com)')} accessory="chevron" onClick={() => openUrl(LINKS.helpline)} />}
   </Section>
+}
+
+// PHQ-9 item 9 above "Not at all": shown under the question as soon as it is answered, and first on the result
+function SafetyCard({ region }) {
+  return <div role="alert" style={{ marginTop: 10 }}>
+    <div className="card" style={{ borderLeft: '3px solid var(--orange)', marginBottom: 8 }}>
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('You said you have had thoughts of being better off dead or of hurting yourself.')}</div>
+      <div className="small">{t('Thank you for answering honestly. You don’t have to handle these thoughts alone. Please talk to someone today: a helpline, a doctor, or someone you trust.')}</div>
+    </div>
+    <Support region={region} footer={region === 'in'
+      ? t('If you might act on these thoughts, call 112 now or go to the nearest hospital emergency department.')
+      : t('If you might act on these thoughts, call your local emergency number now or go to the nearest emergency department.')} />
+  </div>
 }
 
 /* ---------------------------------------------------------------- hub -- */
@@ -128,6 +141,7 @@ function Take({ inst }) {
             style={{ flex: '0 1 auto', maxWidth: '100%', whiteSpace: 'normal', textAlign: 'left' }}
             onClick={() => pick(i, a[i] === j ? null : j)}>{label(o.label)}</button>)}
         </div>}
+      {i === 8 && selfHarm(inst, a) && <SafetyCard region={region} />}
     </div>)}
     <div style={{ height: 16 }} />
     <Button variant="primary" disabled={!done} onClick={save}>{t('See my result')}</Button>
@@ -144,6 +158,17 @@ function resultText(e) {
   if (e.inst === 'auditc') return b === 'none' ? t('You don’t drink alcohol.')
     : b === 'over' ? t('At or above the usual cut-off ({0} or more). Your drinking may be harming your health. A doctor can help you look at it, and cutting down helps at any point.', AUDIT_CUT[e.sex])
       : t('Below the usual cut-off for risky drinking ({0} or more).', AUDIT_CUT[e.sex])
+  if (e.inst === 'phq9' || e.inst === 'gad7') return {
+    minimal: t('Minimal (0 to 4). Take it again in two weeks to see how it changes.'),
+    mild: t('Mild (5 to 9). Keep an eye on it and take it again in two weeks. If it doesn’t ease, talk it over with a doctor or counsellor.'),
+    moderate: e.inst === 'phq9'
+      ? t('Moderate (10 to 14). 10 or more is the usual sign of depression worth looking at. Please talk it over with a doctor or counsellor. It is not a diagnosis.')
+      : t('Moderate (10 to 14). 10 or more is the usual sign of anxiety worth looking at. Please talk it over with a doctor or counsellor. It is not a diagnosis.'),
+    modsevere: t('Moderately severe (15 to 19). Please see a doctor or counsellor soon. Depression can be treated, and help works. It is not a diagnosis.'),
+    severe: e.inst === 'phq9'
+      ? t('Severe (20 to 27). Please see a doctor or counsellor soon. Depression can be treated, and help works. It is not a diagnosis.')
+      : t('Severe (15 to 21). Please see a doctor or counsellor soon. Anxiety can be treated, and help works. It is not a diagnosis.')
+  }[b]
   return b === 'low' ? t('Low risk (under 30). Staying active keeps it that way.')
     : b === 'moderate' ? t('Moderate risk (30 to 50). More activity and a smaller waist lower it. Ask a doctor whether a blood sugar test makes sense for you.')
       : t('High risk (60 or more). Ask a doctor for a blood sugar test (HbA1c or fasting glucose). Only a blood test can show diabetes.')
@@ -153,15 +178,17 @@ function Result({ e, onDelete }) {
   const st = useStore(s => s.S)
   const I = INSTRUMENTS[e.inst], b = band(e), region = regionOf(st.selfcheckPrefs)
   const prev = (st.selfchecks || []).filter(x => x.inst === e.inst && x.at < e.at).sort((x, y) => x.at - y.at).at(-1)
+  const harm = selfHarm(e.inst, e.a)
   const a1c = e.inst === 'idrs' && latestByMarker(st.labs?.reports || []).find(x => x.key === 'diabetes.hba1c')
   return <>
     <h3>{nameOf(e.inst)}</h3>
     <div className="small muted">{fmtDate(e.d, true)}</div>
+    {harm && <SafetyCard region={region} />}
     <div style={{ fontSize: 28, fontWeight: 600, margin: '8px 0', color: b.level === 'high' ? 'var(--orange)' : undefined }}>{scoreLine(e)}</div>
-    {e.inst === 'who5' && prev && <div className="small muted" style={{ marginBottom: 6 }}>{t('Change since last time: {0}', (shown(e) - shown(prev) > 0 ? '+' : '') + (shown(e) - shown(prev)))}</div>}
+    {I.everyDays > 0 && prev && <div className="small muted" style={{ marginBottom: 6 }}>{t('Change since last time: {0}', (shown(e) - shown(prev) > 0 ? '+' : '') + (shown(e) - shown(prev)))}</div>}
     <div style={{ marginBottom: 10 }}>{resultText(e)}</div>
     {a1c && <div className="card small" style={{ marginBottom: 10 }}>{t('Your latest HbA1c in Labs: {0}% ({1}). A measured value tells you more than a risk score.', a1c.m.v, fmtDate(a1c.report.d))}</div>}
-    {b.level === 'high' && e.inst === 'who5' && <Support region={region} />}
+    {b.level === 'high' && I.mental && !harm && <Support region={region} />}
     <div className="small dim" style={{ margin: '10px 0' }}>{t('Source: {0}', I.source)}</div>
     <Button variant="plain" size="sm" icon="link" onClick={() => openUrl(I.url)}>{t('About this questionnaire')}</Button>
     {onDelete && <><div style={{ height: 8 }} /><Button variant="ghost" className="danger" icon="trash" onClick={onDelete}>{t('Delete result')}</Button></>}

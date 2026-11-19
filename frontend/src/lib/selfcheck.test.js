@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { INSTRUMENTS, score, band, shown, waistIndex, ageIndex, regionOf, dueOn, cleanEntry, cleanSelfchecks, cleanSelfcheckPrefs, mergeSelfchecks } from './selfcheck.js'
+import { INSTRUMENTS, score, band, shown, selfHarm, waistIndex, ageIndex, regionOf, dueOn, cleanEntry, cleanSelfchecks, cleanSelfcheckPrefs, mergeSelfchecks } from './selfcheck.js'
 
 const e = (inst, a, extra = {}) => ({ id: inst + '-1', inst, d: '2026-11-19', at: 1, a, ...extra })
 
@@ -80,5 +80,33 @@ describe('region, due, cleaning, sync', () => {
     expect(mergeSelfchecks([a], [b]).map(x => x.id)).toEqual(['a', 'b'])
     expect(mergeSelfchecks([a], [a, b], {}, { deleted: ['a'] }).map(x => x.id)).toEqual(['b'])
     expect(mergeSelfchecks([a], [b], { cleared: 15 }).map(x => x.id)).toEqual(['b'])
+  })
+})
+
+describe('PHQ-9 and GAD-7 (Pfizer manual cut points)', () => {
+  const z = n => Array(n).fill(0)
+  it('scores 0..3 per item; PHQ-9 bands at 5, 10, 15, 20', () => {
+    expect(score('phq9', Array(9).fill(3))).toBe(27)
+    const at = s => band(e('phq9', Array.from({ length: 9 }, (_, i) => Math.max(0, Math.min(3, s - 3 * i))))).code   // a total of s
+    expect([4, 5, 9, 10, 14, 15, 19, 20, 27].map(at)).toEqual(['minimal', 'mild', 'mild', 'moderate', 'moderate', 'modsevere', 'modsevere', 'severe', 'severe'])
+    expect(band(e('phq9', [3, 3, 3, 1, 0, 0, 0, 0, 0])).level).toBe('high')   // 10 = the yellow flag
+  })
+  it('GAD-7 bands at 5, 10, 15 (no moderately severe)', () => {
+    expect(score('gad7', Array(7).fill(3))).toBe(21)
+    expect(band(e('gad7', [3, 3, 3, 3, 3, 0, 0])).code).toBe('severe')       // 15
+    expect(band(e('gad7', [3, 3, 3, 0, 0, 0, 0])).code).toBe('mild')         // 9
+    expect(band(e('gad7', [3, 3, 3, 1, 0, 0, 0])).code).toBe('moderate')     // 10
+  })
+  it('item 9 above "Not at all" is flagged whatever the total', () => {
+    expect(selfHarm('phq9', [...z(8), 1])).toBe(true)
+    expect(band(e('phq9', [...z(8), 1])).code).toBe('minimal')
+    expect(selfHarm('phq9', [...Array(8).fill(3), 0])).toBe(false)
+    expect(selfHarm('gad7', Array(7).fill(3))).toBe(false)
+    expect(INSTRUMENTS.phq9.items[8].q).toBe('Thoughts that you would be better off dead or of hurting yourself in some way')
+  })
+  it('cleaning keeps them without sex and drops a wrong length', () => {
+    expect(cleanEntry(e('phq9', z(9)))).toMatchObject({ inst: 'phq9', a: z(9) })
+    expect(cleanEntry(e('gad7', z(6)))).toBe(null)
+    expect(cleanEntry(e('gad7', [...z(6), 4]))).toBe(null)
   })
 })

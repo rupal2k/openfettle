@@ -7,11 +7,13 @@ import { isoOf } from './format.js'
 const EVERY = ['All of the time', 'Most of the time', 'More than half of the time', 'Less than half of the time', 'Some of the time', 'At no time']
 const desc = labels => labels.map((label, i) => ({ label, pts: labels.length - 1 - i }))   // first option scores highest
 const asc = labels => labels.map((label, i) => ({ label, pts: i }))
+const FREQ = asc(['Not at all', 'Several days', 'More than half the days', 'Nearly every day'])
+const PFIZER = 'Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.'
 
 export const INSTRUMENTS = {
   // World Health Organization. The WHO-5. Geneva: WHO; 2024. CC BY-NC-SA 3.0 IGO.
   who5: {
-    name: 'WHO-5 Well-Being Index', verbatim: true, everyDays: 14, max: 25,
+    name: 'WHO-5 Well-Being Index', verbatim: true, everyDays: 14, max: 25, mental: true,
     intro: 'Please indicate for each of the five statements which is closest to how you have been feeling over the last two weeks. Notice that higher numbers mean better well-being.',
     items: [
       'I have felt cheerful and in good spirits',
@@ -22,6 +24,40 @@ export const INSTRUMENTS = {
     ].map(q => ({ q, opts: desc(EVERY) })),
     source: 'World Health Organization. The World Health Organization-Five Well-Being Index (WHO-5). Geneva: WHO; 2024. Licence: CC BY-NC-SA 3.0 IGO.',
     url: 'https://cdn.who.int/media/docs/default-source/mental-health/who-5_english-original4da539d6ed4b49389e3afe47cda2326a.pdf'
+  },
+  // PHQ-9 wording from the Pfizer form. Its unscored 10th (difficulty) question is left out.
+  // Item 9 is about self-harm: any answer above "Not at all" shows support first (selfHarm below).
+  phq9: {
+    name: 'PHQ-9', verbatim: true, everyDays: 14, max: 27, mental: true,
+    intro: 'Over the last 2 weeks, how often have you been bothered by any of the following problems?',
+    items: [
+      'Little interest or pleasure in doing things',
+      'Feeling down, depressed, or hopeless',
+      'Trouble falling or staying asleep, or sleeping too much',
+      'Feeling tired or having little energy',
+      'Poor appetite or overeating',
+      'Feeling bad about yourself — or that you are a failure or have let yourself or your family down',
+      'Trouble concentrating on things, such as reading the newspaper or watching television',
+      'Moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual',
+      'Thoughts that you would be better off dead or of hurting yourself in some way'
+    ].map(q => ({ q, opts: FREQ })),
+    source: 'Kroenke K, Spitzer RL, Williams JB. The PHQ-9. J Gen Intern Med. 2001;16(9):606-13. ' + PFIZER,
+    url: 'https://www.phqscreeners.com/select-screener'
+  },
+  gad7: {
+    name: 'GAD-7', verbatim: true, everyDays: 14, max: 21, mental: true,
+    intro: 'Over the last two weeks, how often have you been bothered by the following problems?',
+    items: [
+      'Feeling nervous, anxious, or on edge',
+      'Not being able to stop or control worrying',
+      'Worrying too much about different things',
+      'Trouble relaxing',
+      'Being so restless that it’s hard to sit still',
+      'Becoming easily annoyed or irritable',
+      'Feeling afraid as if something awful might happen'
+    ].map(q => ({ q, opts: FREQ })),
+    source: 'Spitzer RL, Kroenke K, Williams JB, Löwe B. The GAD-7. Arch Intern Med. 2006;166(10):1092-7. ' + PFIZER,
+    url: 'https://www.phqscreeners.com/select-screener'
   },
   // AUDIT questions 1-3 (WHO AUDIT manual, 2001). WHO: free to reproduce, not for sale.
   auditc: {
@@ -67,9 +103,16 @@ export const AUDIT_CUT = { m: 4, f: 3 }
 export function band(e) {
   const s = score(e.inst, e.a)
   if (e.inst === 'who5') return s * 4 < 50 ? { code: 'low', level: 'high' } : { code: 'ok', level: 'good' }
+  // PHQ-9 / GAD-7: cut points 5, 10, 15 (and 20 for PHQ-9); 10+ is the manual's "yellow flag"
+  if (e.inst === 'phq9' || e.inst === 'gad7') {
+    const code = s < 5 ? 'minimal' : s < 10 ? 'mild' : s < 15 ? 'moderate' : e.inst === 'phq9' && s < 20 ? 'modsevere' : 'severe'
+    return { code, level: s < 5 ? 'good' : s < 10 ? 'mid' : 'high' }
+  }
   if (e.inst === 'auditc') return e.a[0] === 0 ? { code: 'none', level: 'good' } : s >= AUDIT_CUT[e.sex || 'f'] ? { code: 'over', level: 'high' } : { code: 'under', level: 'good' }
   return s < 30 ? { code: 'low', level: 'good' } : s < 60 ? { code: 'moderate', level: 'mid' } : { code: 'high', level: 'high' }
 }
+// PHQ-9 item 9 (thoughts of being better off dead or of self-harm) answered above "Not at all"
+export const selfHarm = (inst, answers) => inst === 'phq9' && answers[8] > 0
 // What the result screen shows as the number: WHO-5 as a percentage (raw x 4, 0-100)
 export const shown = e => e.inst === 'who5' ? score(e.inst, e.a) * 4 : score(e.inst, e.a)
 

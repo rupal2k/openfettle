@@ -139,7 +139,7 @@ export default function Settings() {
         onClick={() => window.open(REPO + '/issues/new?labels=translation&title=' + encodeURIComponent('Translation (' + S.lang + '): '), '_blank', 'noopener')} />}
       <Row icon="moon" iconTint="var(--indigo)" title={t('Wind down')} subtitle={t('Mix noise, fire, water and night sounds to help you rest')} accessory="chevron" onClick={windDownSheet} />
       <Row icon="checkCircle" iconTint="var(--indigo)" title={t('End-of-day check-in')} subtitle={t('A few minutes to close your workday')} accessory="chevron" onClick={checkinSettingsSheet} />
-      <Row icon="clipboard" iconTint="var(--indigo)" title={t('Self-checks')} subtitle={t('Wellbeing, alcohol and diabetes risk questionnaires')} accessory="chevron" onClick={selfChecksSheet} />
+      <Row icon="clipboard" iconTint="var(--indigo)" title={t('Self-checks')} subtitle={t('Wellbeing, mood, anxiety, alcohol and diabetes risk questionnaires')} accessory="chevron" onClick={selfChecksSheet} />
       <Row icon="person" iconTint="var(--indigo)" title={t('Your profile')} subtitle={t('Sex, birth year and height, for calorie targets and blood test scores')} accessory="chevron" onClick={nutritionProfileSheet} />
     </Section>
     <VisionSettings />

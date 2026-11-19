@@ -1,4 +1,4 @@
-# Self-checks (phase 1)
+# Self-checks (phases 1 and 2)
 
 Status: built on `feat/self-checks`, not released. Items marked **Decision** need sign-off before a release.
 
@@ -11,6 +11,8 @@ Short, published health questionnaires that point to something worth checking, w
 | Check | What it is | Region | Wording |
 |---|---|---|---|
 | WHO-5 Well-Being Index | Wellbeing over the last two weeks; due again after 14 days | Everyone | Verbatim English (WHO 2024 edition) |
+| PHQ-9 (phase 2) | Low mood over the last two weeks; due again after 14 days | Everyone | Verbatim English (Pfizer form) |
+| GAD-7 (phase 2) | Anxiety over the last two weeks; due again after 14 days | Everyone | Verbatim English |
 | AUDIT-C | Alcohol use, questions 1-3 of the WHO AUDIT | Everyone; the drink-size note differs (India: small/large peg) | Verbatim English (WHO AUDIT manual, 2001) |
 | Indian Diabetes Risk Score | Type 2 diabetes risk (age, waist, activity, parents) | Shown to everyone, labelled "made for people of Indian origin" | Translated (a risk score, not a fixed-wording questionnaire) |
 | American Diabetes Association risk test | Link out (no reuse terms found, so not embedded) | Everyone ("for other populations") | Their website |
@@ -24,6 +26,9 @@ Short, published health questionnaires that point to something worth checking, w
 ## Scoring (lib/selfcheck.js, tested in selfcheck.test.js)
 
 - **WHO-5:** items score 5 ("All of the time") to 0 ("At no time"). Raw 0-25, shown ×4 as 0-100. Below 50 (raw below 13) is the WHO's suggested cut-off for poor wellbeing and further assessment. A low result shows the helplines straight away. The change since the last WHO-5 is shown as a number with no interpretation.
+- **PHQ-9:** items score 0-3, 0-27 in all. Cut points 5 / 10 / 15 / 20 for mild, moderate, moderately severe and severe (instruction manual); 10+ is the manual's "yellow flag", and then the helplines show. The unscored 10th question (how difficult the problems made things) is left out.
+- **Self-harm (PHQ-9 item 9):** any answer above "Not at all" shows a support card straight under the question, before the user reaches the result, and again at the top of the result, above the score, whatever the total. The card has the region's helpline and an emergency line (India: call 112 or go to the nearest hospital emergency department; elsewhere: the local emergency number). It shows again whenever that result is reopened.
+- **GAD-7:** items score 0-3, 0-21 in all. Cut points 5 / 10 / 15 for mild, moderate and severe; 10+ shows the helplines.
 - **AUDIT-C:** 0-4 per question, 0-12 in all. "Never" skips questions 2-3 (scored 0). A positive screen is 4+ for men and 3+ for women (Bradley 2007). Asks woman/man, prefilled from the profile.
 - **IDRS (Mohan 2005):**
   - age <35 / 35-49 / 50+ scores 0/20/30;
@@ -46,16 +51,15 @@ Entries store answer indices, the date, the time and (for AUDIT-C/IDRS) `sex`, n
 | IDRS | Published method (J Assoc Physicians India 2005;53:759-63, PMID 16334618); no licence terms found | The scoring method is cited, and the wording is our own. **To verify before release:** the category table against the original paper (the PMC copy was behind a captcha; values here agree across several later studies). |
 | ADA risk test | No reuse terms found | Link only |
 | FINDRISC | No reuse terms found (Finnish Diabetes Association) | Not used; ask the association if an embedded international diabetes score is wanted |
-| PHQ-9 / GAD-7 | Pfizer: no permission needed to reproduce, translate, display or distribute | Phase 2 |
+| PHQ-9 / GAD-7 | Pfizer form: "No permission required to reproduce, translate, display or distribute." | Built in phase 2, verbatim, with the Pfizer line in the source. PHQ-9 wording from the Pfizer form (APA copy); GAD-7 wording from the ADAA copy of the form; cut points from the PHQ/GAD-7 instruction manual. **To check:** GAD-7 punctuation against the phqscreeners.com form (copies differ slightly, e.g. "it's" / "it is"). |
 | PSS-10, ISI, ESS, STOP-Bang | Licensed (Mapi and others) | Not used unless a licence is granted |
 
 ## Translations
 
-WHO-5 and AUDIT-C stay in English in every language, with the note "Shown in English, the wording it was tested in." Official translations exist (the WHO AUDIT manual lists Hindi, and WHO-5 has many), but phase 1 adds one only from a verified official text. **Decision:** source the Hindi AUDIT and the official WHO-5 translations for the app's languages. All other strings are in the 11 locale files (machine-assisted, like the rest of the app, and not yet checked by native speakers).
+WHO-5, PHQ-9, GAD-7 and AUDIT-C stay in English in every language, with the note "Shown in English, the wording it was tested in." Official translations exist (the WHO AUDIT manual lists Hindi, and WHO-5 has many), but phase 1 adds one only from a verified official text. **Decision:** source the Hindi AUDIT and the official WHO-5, PHQ-9 and GAD-7 translations (the PHQ/GAD-7 ones are on phqscreeners.com, including Hindi) for the app's languages. All other strings are in the 11 locale files (machine-assisted, like the rest of the app, and not yet checked by native speakers).
 
 ## Not in phase 1
 
-- PHQ-9 and GAD-7 (phase 2). They need the self-harm pathway: any answer above 0 on item 9 shows support before the score.
 - Reminders, a Home card and a trend chart.
 - Camera, hearing or vision tests built into OpenFettle: only the WHO apps are linked.
 
@@ -71,3 +75,15 @@ WHO-5 and AUDIT-C stay in English in every language, with the note "Shown in Eng
   - results saved as indices only, kept after reload, and one deleted with its tombstone;
   - Hindi: the UI translated, and WHO-5 verbatim English with the note.
 - Not yet: a real phone (the `tel:` link to 14416, links opening outside the app, TalkBack).
+
+## Test record, phase 2 (2026-11-19, web demo build, 360 px)
+
+- Unit: 4 new tests (PHQ-9 band edges at 4/5/9/10/14/15/19/20/27, GAD-7 edges, item 9 flagged even at a minimal total, cleaning). The full suite passes: 700.
+- E2E (Edge, `Asia/Kolkata` and `Europe/London`): 21 checks passed, with no console errors. They covered:
+  - the verbatim PHQ-9 stem;
+  - no card for "Not at all" on item 9; the card under item 9 as soon as it's answered above that, with Tele-MANAS and 112 (India) or findahelpline.com and the local emergency number;
+  - the card above the score on the result (9 → mild), with one helpline section;
+  - GAD-7 14 → moderate, with helplines and no self-harm card;
+  - answers stored as indices; the card shown again in the history;
+  - Hindi: verbatim English items, translated card.
+- Not yet: a real phone, TalkBack reading the card (it is a `role="alert"`).
