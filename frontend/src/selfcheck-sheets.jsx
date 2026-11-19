@@ -131,7 +131,7 @@ function TakeForm({ inst, restart }) {
   return <>
     {resumed && <div className="card small row" style={{ marginBottom: 8, gap: 8, justifyContent: 'space-between', alignItems: 'center' }}>
       <span>{t('Your earlier answers are kept until you see your result.')}</span>
-      <Button variant="plain" size="sm" onClick={restart}>{t('Start again')}</Button>
+      <Button variant="plain" size="sm" style={{ flex: 'none', whiteSpace: 'nowrap' }} onClick={restart}>{t('Start again')}</Button>
     </div>}
     {I.verbatim && getLang() !== 'en' && <div className="small dim" style={{ marginBottom: 8 }}>{t('Shown in English, the wording it was tested in.')}</div>}
     {I.intro && <div className="muted small" style={{ marginBottom: 8 }}>{I.intro}</div>}

@@ -1476,9 +1476,6 @@ export default {
   'Between the bands': '두 기준 사이',
   'At or above the upper band': '상한 이상',
   'How active are you?': '얼마나 활동적인가요?',
-  'Regular vigorous exercise, or strenuous (manual) work': '규칙적인 격렬한 운동 또는 힘든 육체노동',
-  'Regular moderate exercise, or moderately active work': '규칙적인 중간 강도 운동 또는 적당히 활동적인 일',
-  'Mild exercise, or mildly active work': '가벼운 운동 또는 활동이 적은 일',
   'No exercise and sitting (sedentary) work': '운동 안 함, 앉아서 하는 일',
   'Do your parents have diabetes?': '부모님이 당뇨병이 있나요?',
   'Neither parent': '둘 다 없음',
@@ -1503,4 +1500,6 @@ export default {
   'Change since last time: {0} (lower is better)': '지난번 대비 변화: {0} (낮을수록 좋음)',
   'Your earlier answers are kept until you see your result.': '결과를 볼 때까지 이전 답변이 유지됩니다.',
   'Start again': '다시 시작',
+  'Regular exercise and strenuous (manual) work': '규칙적인 운동과 힘든 육체노동',
+  'Regular exercise or strenuous (manual) work, not both': '규칙적인 운동이나 힘든 육체노동 중 하나만',
 }

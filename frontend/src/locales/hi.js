@@ -1476,9 +1476,6 @@ export default {
   'Between the bands': 'दोनों सीमाओं के बीच',
   'At or above the upper band': 'ऊपरी सीमा पर या उससे ज़्यादा',
   'How active are you?': 'आप कितने सक्रिय हैं?',
-  'Regular vigorous exercise, or strenuous (manual) work': 'नियमित ज़ोरदार कसरत, या मेहनत वाला (शारीरिक) काम',
-  'Regular moderate exercise, or moderately active work': 'नियमित मध्यम कसरत, या थोड़ा सक्रिय काम',
-  'Mild exercise, or mildly active work': 'हल्की कसरत, या कम सक्रिय काम',
   'No exercise and sitting (sedentary) work': 'कोई कसरत नहीं और बैठकर (सुस्त) काम',
   'Do your parents have diabetes?': 'क्या आपके माता-पिता को डायबिटीज़ है?',
   'Neither parent': 'किसी को नहीं',
@@ -1503,4 +1500,6 @@ export default {
   'Change since last time: {0} (lower is better)': 'पिछली बार से बदलाव: {0} (कम बेहतर है)',
   'Your earlier answers are kept until you see your result.': 'नतीजा देखने तक आपके पिछले जवाब रखे जाते हैं।',
   'Start again': 'फिर से शुरू करें',
+  'Regular exercise and strenuous (manual) work': 'नियमित कसरत और मेहनत वाला (शारीरिक) काम',
+  'Regular exercise or strenuous (manual) work, not both': 'नियमित कसरत या मेहनत वाला (शारीरिक) काम, दोनों नहीं',
 }

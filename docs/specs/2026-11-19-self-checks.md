@@ -42,7 +42,7 @@ Short, published health questionnaires that point to something worth checking, w
 - **IDRS (Mohan 2005):**
   - age <35 / 35-49 / 50+ scores 0/20/30;
   - waist, women <80 / 80-89 / 90+ cm and men <90 / 90-99 / 100+ cm, scores 0/10/20;
-  - activity vigorous / moderate / mild / none scores 0/10/20/30;
+  - activity: regular exercise and strenuous work / one of the two / no exercise and sedentary work scores 0/20/30 (the original three levels; a four-level 0/10/20/30 version in some later studies is a modification, and phase 1 had used it by mistake — fixed 2026-11-20);
   - parents with diabetes none / one / both scores 0/10/20;
   - bands: under 30 low, 30-50 moderate, 60+ high.
 
@@ -57,10 +57,10 @@ Entries store answer indices, the date, the time and (for AUDIT-C/IDRS) `sex`, n
 |---|---|---|
 | WHO-5 | © WHO 2024, CC BY-NC-SA 3.0 IGO: non-commercial copying allowed with citation; no WHO logo; no implied endorsement | OpenFettle is free and non-commercial: shown verbatim, cited, no logo. **Decision:** CC-NC text inside an AGPL app. The instrument stays under its own licence (noted in the source line); a commercial fork would need WHO permission. |
 | AUDIT / AUDIT-C | WHO: may be reproduced and translated, not for sale; widely described as public domain for non-commercial use | Same as WHO-5 |
-| IDRS | Published method (J Assoc Physicians India 2005;53:759-63, PMID 16334618); no licence terms found | The scoring method is cited, and the wording is our own. **To verify before release:** the category table against the original paper (the PMC copy was behind a captcha; values here agree across several later studies). |
+| IDRS | Published method (J Assoc Physicians India 2005;53:759-63, PMID 16334618); no licence terms found | The scoring method is cited, and the wording is our own. Checked 2026-11-20 against two studies that quote the original table (Cureus 2023;15(7):e41880 and others): age 0/20/30, waist 0/10/20, activity 0/20/30, parents 0/10/20; bands <30, 30-50, ≥60 (totals are multiples of 10, so nothing falls between 50 and 60). The original paper itself was not readable. |
 | ADA risk test | No reuse terms found | Link only |
 | FINDRISC | No reuse terms found (Finnish Diabetes Association) | Not used; ask the association if an embedded international diabetes score is wanted |
-| PHQ-9 / GAD-7 | Pfizer form: "No permission required to reproduce, translate, display or distribute." | Built in phase 2, verbatim, with the Pfizer line in the source. PHQ-9 wording from the Pfizer form (APA copy); GAD-7 wording from the ADAA copy of the form; cut points from the PHQ/GAD-7 instruction manual. **To check:** GAD-7 punctuation against the phqscreeners.com form (copies differ slightly, e.g. "it's" / "it is"). |
+| PHQ-9 / GAD-7 | Pfizer form: "No permission required to reproduce, translate, display or distribute." | Built in phase 2, verbatim, with the Pfizer line in the source. PHQ-9 wording from the Pfizer form (APA copy); GAD-7 wording from the Pfizer form (checked 2026-11-20 against the Health PEI copy; the ADAA copy differs slightly, e.g. "it's"); cut points from the PHQ/GAD-7 instruction manual. |
 | PSS-10, ISI, ESS, STOP-Bang | Licensed (Mapi and others) | Not used unless a licence is granted |
 
 ## Translations
@@ -100,3 +100,10 @@ WHO-5, PHQ-9, GAD-7 and AUDIT-C stay in English in every language, with the note
 ## Audit re-run (2026-11-20)
 
 All 10 findings fixed, plus one more found on the re-run: the questionnaire sheet lost its dialog name when it turned into the result (axe `aria-dialog-name`); the sheet now keeps one heading. Unit tests: 704 pass. E2E: 23 fix checks + 32 phase-1 + 21 phase-2 checks pass; axe finds no violations on the hub, the questionnaires, the PHQ-9 card and the results; 320 px and light theme checked.
+
+## Open items worked (2026-11-20)
+
+- GAD-7 wording now follows the Pfizer form (the "No permission required" one, like the PHQ-9): "Over the last 2 weeks", "anxious or on edge", "it is hard to sit still".
+- IDRS activity corrected to the original three levels (0/20/30); see Scoring.
+- Large text: every font size in the sheets scaled ×1.3 and ×2.0 (an approximation of Android text zoom): nothing clipped or off-screen.
+- Official translations: not added. phqscreeners.com says the translations are free to use, but they need copying from the official PDFs and a native speaker's check, which can't be done reliably from extracted PDF text.

@@ -1476,9 +1476,6 @@ export default {
   'Between the bands': 'Aralıklar arasında',
   'At or above the upper band': 'Üst aralıkta veya üstünde',
   'How active are you?': 'Ne kadar aktifsin?',
-  'Regular vigorous exercise, or strenuous (manual) work': 'Düzenli yoğun egzersiz veya ağır bedensel iş',
-  'Regular moderate exercise, or moderately active work': 'Düzenli orta düzey egzersiz veya orta derecede aktif iş',
-  'Mild exercise, or mildly active work': 'Hafif egzersiz veya az aktif iş',
   'No exercise and sitting (sedentary) work': 'Egzersiz yok ve oturarak (masa başı) iş',
   'Do your parents have diabetes?': 'Ebeveynlerinde diyabet var mı?',
   'Neither parent': 'Hiçbiri',
@@ -1503,4 +1500,6 @@ export default {
   'Change since last time: {0} (lower is better)': 'Geçen seferden bu yana değişim: {0} (düşük olması daha iyi)',
   'Your earlier answers are kept until you see your result.': 'Önceki yanıtların, sonucunu görene kadar saklanır.',
   'Start again': 'Baştan başla',
+  'Regular exercise and strenuous (manual) work': 'Düzenli egzersiz ve ağır (bedensel) iş',
+  'Regular exercise or strenuous (manual) work, not both': 'Düzenli egzersiz ya da ağır (bedensel) iş, ikisi birden değil',
 }

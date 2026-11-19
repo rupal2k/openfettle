@@ -1476,9 +1476,6 @@ export default {
   'Between the bands': 'Entre as faixas',
   'At or above the upper band': 'Na faixa superior ou acima',
   'How active are you?': 'Quão ativo és?',
-  'Regular vigorous exercise, or strenuous (manual) work': 'Exercício intenso regular ou trabalho físico pesado',
-  'Regular moderate exercise, or moderately active work': 'Exercício moderado regular ou trabalho moderadamente ativo',
-  'Mild exercise, or mildly active work': 'Exercício leve ou trabalho pouco ativo',
   'No exercise and sitting (sedentary) work': 'Sem exercício e trabalho sentado',
   'Do your parents have diabetes?': 'Os teus pais têm diabetes?',
   'Neither parent': 'Nenhum',
@@ -1503,4 +1500,6 @@ export default {
   'Change since last time: {0} (lower is better)': 'Mudança desde a última vez: {0} (mais baixo é melhor)',
   'Your earlier answers are kept until you see your result.': 'As tuas respostas anteriores ficam guardadas até veres o resultado.',
   'Start again': 'Recomeçar',
+  'Regular exercise and strenuous (manual) work': 'Exercício regular e trabalho físico pesado',
+  'Regular exercise or strenuous (manual) work, not both': 'Exercício regular ou trabalho físico pesado, não os dois',
 }

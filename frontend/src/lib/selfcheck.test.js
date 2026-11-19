@@ -43,12 +43,13 @@ describe('Indian Diabetes Risk Score (Mohan 2005)', () => {
     expect([89, 90, 99, 100].map(c => waistIndex(c, 'm'))).toEqual([0, 1, 1, 2])
   })
   it('scores 0-100 with low <30, moderate 30-50, high 60+', () => {
-    expect(score('idrs', [2, 2, 3, 2])).toBe(100)
+    expect(score('idrs', [2, 2, 2, 2])).toBe(100)
+    expect(INSTRUMENTS.idrs.items[2].opts.map(o => o.pts)).toEqual([0, 20, 30])   // Mohan 2005 activity levels
     expect(score('idrs', [0, 0, 0, 0])).toBe(0)
     expect(band(e('idrs', [1, 0, 0, 0], { sex: 'm' })).code).toBe('low')       // 20
     expect(band(e('idrs', [1, 1, 0, 0], { sex: 'm' })).code).toBe('moderate')  // 30
-    expect(band(e('idrs', [1, 1, 2, 0], { sex: 'm' })).code).toBe('moderate')  // 50
-    expect(band(e('idrs', [2, 0, 3, 0], { sex: 'm' })).code).toBe('high')      // 60
+    expect(band(e('idrs', [1, 1, 1, 0], { sex: 'm' })).code).toBe('moderate')  // 20 + 10 + 20 = 50
+    expect(band(e('idrs', [2, 0, 2, 0], { sex: 'm' })).code).toBe('high')      // 30 + 30 = 60
   })
 })
 

@@ -1476,9 +1476,6 @@ export default {
   'Between the bands': 'Между границами',
   'At or above the upper band': 'На верхней границе или выше',
   'How active are you?': 'Насколько вы активны?',
-  'Regular vigorous exercise, or strenuous (manual) work': 'Регулярные интенсивные тренировки или тяжёлый физический труд',
-  'Regular moderate exercise, or moderately active work': 'Регулярные умеренные нагрузки или умеренно активная работа',
-  'Mild exercise, or mildly active work': 'Лёгкие нагрузки или малоактивная работа',
   'No exercise and sitting (sedentary) work': 'Нет нагрузок и сидячая работа',
   'Do your parents have diabetes?': 'Есть ли диабет у ваших родителей?',
   'Neither parent': 'Ни у кого',
@@ -1503,4 +1500,6 @@ export default {
   'Change since last time: {0} (lower is better)': 'Изменение с прошлого раза: {0} (чем ниже, тем лучше)',
   'Your earlier answers are kept until you see your result.': 'Ваши прежние ответы сохраняются, пока вы не увидите результат.',
   'Start again': 'Начать заново',
+  'Regular exercise and strenuous (manual) work': 'Регулярные тренировки и тяжёлый физический труд',
+  'Regular exercise or strenuous (manual) work, not both': 'Регулярные тренировки или тяжёлый физический труд, но не то и другое',
 }

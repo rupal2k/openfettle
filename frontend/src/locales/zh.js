@@ -1476,9 +1476,6 @@ export default {
   'Between the bands': '介于两者之间',
   'At or above the upper band': '达到或超过上限',
   'How active are you?': '你的活动量如何?',
-  'Regular vigorous exercise, or strenuous (manual) work': '经常剧烈运动,或从事繁重体力劳动',
-  'Regular moderate exercise, or moderately active work': '经常中等强度运动,或中等活动量的工作',
-  'Mild exercise, or mildly active work': '轻度运动,或活动量较少的工作',
   'No exercise and sitting (sedentary) work': '不运动,且工作久坐',
   'Do your parents have diabetes?': '你的父母有糖尿病吗?',
   'Neither parent': '都没有',
@@ -1503,4 +1500,6 @@ export default {
   'Change since last time: {0} (lower is better)': '与上次相比:{0}(越低越好)',
   'Your earlier answers are kept until you see your result.': '在你查看结果之前,之前的回答会保留。',
   'Start again': '重新开始',
+  'Regular exercise and strenuous (manual) work': '规律运动,并且从事繁重体力劳动',
+  'Regular exercise or strenuous (manual) work, not both': '规律运动或繁重体力劳动,只有其一',
 }

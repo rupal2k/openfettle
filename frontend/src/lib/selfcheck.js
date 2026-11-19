@@ -25,7 +25,7 @@ export const INSTRUMENTS = {
     source: 'World Health Organization. The World Health Organization-Five Well-Being Index (WHO-5). Geneva: WHO; 2024. Licence: CC BY-NC-SA 3.0 IGO.',
     url: 'https://cdn.who.int/media/docs/default-source/mental-health/who-5_english-original4da539d6ed4b49389e3afe47cda2326a.pdf'
   },
-  // PHQ-9 wording from the Pfizer form. Its unscored 10th (difficulty) question is left out.
+  // PHQ-9 and GAD-7 wording from the Pfizer forms ("No permission required..."). Its unscored 10th (difficulty) question is left out.
   // Item 9 is about self-harm: any answer above "Not at all" shows support first (selfHarm below).
   phq9: {
     name: 'PHQ-9', verbatim: true, everyDays: 14, max: 27, mental: true,
@@ -46,13 +46,13 @@ export const INSTRUMENTS = {
   },
   gad7: {
     name: 'GAD-7', verbatim: true, everyDays: 14, max: 21, mental: true,
-    intro: 'Over the last two weeks, how often have you been bothered by the following problems?',
+    intro: 'Over the last 2 weeks, how often have you been bothered by the following problems?',
     items: [
-      'Feeling nervous, anxious, or on edge',
+      'Feeling nervous, anxious or on edge',
       'Not being able to stop or control worrying',
       'Worrying too much about different things',
       'Trouble relaxing',
-      'Being so restless that it’s hard to sit still',
+      'Being so restless that it is hard to sit still',
       'Becoming easily annoyed or irritable',
       'Feeling afraid as if something awful might happen'
     ].map(q => ({ q, opts: FREQ })),
@@ -76,7 +76,8 @@ export const INSTRUMENTS = {
     items: [
       { q: 'Your age', opts: [['Under 35', 0], ['35 to 49', 20], ['50 or older', 30]] },
       { q: 'Your waist', waist: true, opts: [['Below the lower band', 0], ['Between the bands', 10], ['At or above the upper band', 20]] },
-      { q: 'How active are you?', opts: [['Regular vigorous exercise, or strenuous (manual) work', 0], ['Regular moderate exercise, or moderately active work', 10], ['Mild exercise, or mildly active work', 20], ['No exercise and sitting (sedentary) work', 30]] },
+      // the original three levels (0/20/30); some later studies split it into four, which is not this score
+      { q: 'How active are you?', opts: [['Regular exercise and strenuous (manual) work', 0], ['Regular exercise or strenuous (manual) work, not both', 20], ['No exercise and sitting (sedentary) work', 30]] },
       { q: 'Do your parents have diabetes?', opts: [['Neither parent', 0], ['One parent', 10], ['Both parents', 20]] }
     ].map(it => ({ ...it, opts: it.opts.map(([label, pts]) => ({ label, pts })) })),
     source: 'Mohan V, Deepa R, Deepa M, Somannavar S, Datta M. A simplified Indian Diabetes Risk Score for screening for undiagnosed diabetic subjects. J Assoc Physicians India. 2005;53:759-63.',
