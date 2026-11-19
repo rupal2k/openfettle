@@ -106,7 +106,8 @@ function Take({ inst }) {
 }
 
 function TakeForm({ inst, restart }) {
-  const I = INSTRUMENTS[inst], region = regionOf(S().selfcheckPrefs), d = drafts[inst]
+  const I = INSTRUMENTS[inst], region = regionOf(S().selfcheckPrefs)
+  const [d] = useState(() => drafts[inst])   // the draft as it was when the form opened (the effect below keeps updating drafts)
   const [a, setA] = useState(() => d?.a || I.items.map((_, i) => (inst === 'idrs' && i === 0 ? profileAgeIndex() : null)))
   const [sex, setSex] = useState(() => (d ? d.sex : profileSex()))
   const [waist, setWaist] = useState(d?.waist ?? null), [inch, setInch] = useState(d?.inch ?? false)
