@@ -49,7 +49,7 @@ function Sheet({ sheet }) {
   // Accessible dialog: handle Escape key (unless locked)
   useEffect(() => {
     const onKeyDown = e => {
-      if (e.key === 'Escape' && !sheet.locked) {
+      if (e.key === 'Escape' && !sheet.locked && useUI.getState().sheets.at(-1)?.id === sheet.id) {
         e.preventDefault()
         close()
       }
