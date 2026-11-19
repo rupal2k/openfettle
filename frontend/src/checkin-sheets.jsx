@@ -82,8 +82,10 @@ function Breathing({ cue, onDone }) {
   const [sounds, setSounds] = useState(false)
   const plan = kind ? breathPlan(kind) : null
   // the Wind down sounds belong to the exercise only when it started them (a mix already playing is left alone)
-  const ownSound = useRef(false)
-  const endSound = () => { if (ownSound.current) { ownSound.current = false; noisePlayer().stop() } }
+  // Pausing it, or changing the mix or volume, hands the sound back to the user (own = the unsubscribe).
+  const own = useRef(null)
+  const disown = () => { own.current?.(); own.current = null }
+  const endSound = () => { if (own.current) { disown(); noisePlayer().stop() } }
   const stop = () => { cancelBeeps(); vibrate(0); releaseWakeLock(); endSound(); setStart(null) }
   useEffect(() => () => { cancelBeeps(); vibrate(0); releaseWakeLock(); endSound() }, [])
   useEffect(() => { if (!start) return; const id = setInterval(() => tick(x => x + 1), 250); return () => clearInterval(id) }, [start])
@@ -92,7 +94,9 @@ function Breathing({ cue, onDone }) {
     const tone = { in: 523, hold: 440, out: 392, hold2: 440, natural: 523, end: 660 }
     if (sound) for (const s of plan) beep(true, tone[s.phase], s.phase === 'end' ? 0.5 : 0.25, s.at)
     if (buzz) vibrate(vibratePattern(plan))
-    if (sounds && mix) { const p = noisePlayer(); keepWindDown(p); bridgeWindDown(p); if (!p.get().playing) ownSound.current = p.play() }
+    if (sounds && mix) { const p = noisePlayer(); keepWindDown(p); bridgeWindDown(p)
+      if (!p.get().playing && p.play()) { const s0 = p.get(); own.current = p.subscribe(() => { const s = p.get(); if (!s.playing || s.mix !== s0.mix || s.volume !== s0.volume) disown() }) }
+    }
     requestWakeLock(); setStart(Date.now())
   }
   const at = start && breathAt(plan, (Date.now() - start) / 1000)
