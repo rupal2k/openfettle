@@ -13,6 +13,7 @@ import { MODELS } from './vision/catalog.js'
 import { EXIDX } from './exercises.js'
 import { MARKERS, CATEGORIES } from './labs/catalog.js'
 import { SCORES } from './labs/scores.js'
+import { INSTRUMENTS } from './selfcheck.js'
 import DISHES from '../data/food101-foods.json'
 import { PLAN_WHERE, PLAN_TEMPLATES } from './starter.js'
 
@@ -33,6 +34,8 @@ export function dynamicKeys() {
   add(Object.values(CATEGORIES).map(c => (typeof c === 'string' ? c : c.name || c.label)))
   add(Object.values(MARKERS).map(m => m.name))
   for (const s of SCORES) add([s.name, s.what, s.formula, s.note])
+  // self-checks whose wording is not fixed (WHO-5 and AUDIT-C stay in their validated English)
+  for (const I of Object.values(INSTRUMENTS)) if (!I.verbatim) add([I.name, ...I.items.flatMap(it => [it.q, ...it.opts.map(o => o.label)])])
   // band labels live inside each score's band() function
   add([...read('lib/labs/scores.js').matchAll(/band\('((?:\\'|[^'])*)'/g)].map(m => m[1].replace(/\\'/g, "'")))
   add(Object.values(DISHES).map(d => d.name))   // t(o.food.name) on the photo review

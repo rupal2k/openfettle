@@ -10,6 +10,7 @@ import { cleanRoutine, cleanWeek } from '../lib/clean.js'
 import { cleanRest } from '../lib/workout.js'
 import { cleanWindDown } from '../lib/noise.js'
 import { cleanCheckins, cleanCheckinPrefs, PREFS_DEF } from '../lib/checkin.js'
+import { cleanSelfchecks, cleanSelfcheckPrefs } from '../lib/selfcheck.js'
 
 const KEY = 'gym_state_v1'
 const BASE_KEY = 'gym_base'
@@ -34,7 +35,9 @@ export const DEF = {
   // Wind down: the last sound mix and volume, and up to 5 saved mixes - see lib/noise.js cleanWindDown
   winddown: { mix: null, volume: 0.5, mixes: [] },
   // End-of-day check-ins and their settings - see lib/checkin.js (cleanCheckins, PREFS_DEF)
-  checkins: [], checkinPrefs: { ...PREFS_DEF, days: [...PREFS_DEF.days], deleted: [] }
+  checkins: [], checkinPrefs: { ...PREFS_DEF, days: [...PREFS_DEF.days], deleted: [] },
+  // Self-checks (questionnaire results) and their settings - see lib/selfcheck.js
+  selfchecks: [], selfcheckPrefs: { region: null, deleted: [], cleared: null }
 }
 const clone = o => JSON.parse(JSON.stringify(o))
 
@@ -65,6 +68,8 @@ export function normalizeState(raw) {
   s.winddown = cleanWindDown(s.winddown)
   s.checkins = cleanCheckins(s.checkins)
   s.checkinPrefs = cleanCheckinPrefs(s.checkinPrefs)
+  s.selfchecks = cleanSelfchecks(s.selfchecks)
+  s.selfcheckPrefs = cleanSelfcheckPrefs(s.selfcheckPrefs)
   s.labs = {
     reports: cleanReports(s.labs?.reports),
     units: s.labs?.units === 'us' || s.labs?.units === 'si' ? s.labs.units : null
@@ -101,7 +106,7 @@ function warnStorageFull() {
 }
 
 const hasData = st => !!((st.workouts || []).length || (st.routines || []).length || (st.bodyweight || []).length
-  || Object.keys(st.nutrition?.days || {}).length || (st.labs?.reports || []).length || (st.checkins || []).length)
+  || Object.keys(st.nutrition?.days || {}).length || (st.labs?.reports || []).length || (st.checkins || []).length || (st.selfchecks || []).length)
 
 export const useStore = create((set, get) => {
   let pushTm = null

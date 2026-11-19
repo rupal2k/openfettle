@@ -1,0 +1,180 @@
+// Self-checks (docs/specs/2026-11-19-self-checks.md): the list, taking a questionnaire, the result
+// and the private history. Pure logic and the questionnaires are in lib/selfcheck.js.
+import { useEffect, useState } from 'react'
+import { useStore } from './store/useStore.js'
+import { useUI } from './store/useUI.js'
+import { t, getLang } from './lib/i18n.js'
+import { fmtDate, todayISO } from './lib/format.js'
+import { privacyScreen } from './lib/mobile.js'
+import { latestByMarker } from './lib/labs/reports.js'
+import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, waistIndex, ageIndex, regionOf, lastOf, dueOn } from './lib/selfcheck.js'
+import { confirmSheet } from './sheets.jsx'
+import { Button, Segmented, Section, Row, NumberField } from './components/ui.jsx'
+
+const S = () => useStore.getState().S
+const update = (...a) => useStore.getState().update(...a)
+const ui = () => useUI.getState()
+const toast = m => ui().toast(m)
+const openUrl = url => window.open(url, '_blank', 'noopener')
+const usePrivate = () => useEffect(() => { privacyScreen(true); return () => privacyScreen(false) }, [])
+
+const ABOUT = { who5: () => t('Wellbeing over the last two weeks · 2 min'), auditc: () => t('Alcohol · 1 min'), idrs: () => t('Type 2 diabetes risk · 1 min · made for people of Indian origin') }
+const nameOf = inst => INSTRUMENTS[inst].verbatim ? INSTRUMENTS[inst].name : t(INSTRUMENTS[inst].name)
+const scoreLine = e => t('{0} out of {1}', shown(e), e.inst === 'who5' ? 100 : INSTRUMENTS[e.inst].max)
+const LINKS = {
+  ada: 'https://diabetes.org/risk-test',
+  hearwho: 'https://www.who.int/teams/noncommunicable-diseases/sensory-functions-disability-and-rehabilitation/hearwho',
+  whoeyes: 'https://www.who.int/teams/noncommunicable-diseases/sensory-functions-disability-and-rehabilitation/whoeyes',
+  helpline: 'https://findahelpline.com'
+}
+
+// Helplines for where the user lives: India's national line, else the free global directory
+function Support({ region }) {
+  return <Section title={t('Talk to someone')} footer={region === 'in' ? t('In an emergency, call 112.') : t('In an emergency, call your local emergency number.')}>
+    {region === 'in'
+      ? <Row icon="bell" iconTint="var(--indigo)" title={t('Tele-MANAS 14416')} subtitle={t('Free mental health helpline from the Government of India, 24 hours, in many Indian languages')} accessory="chevron" onClick={() => { window.location.href = 'tel:14416' }} />
+      : <Row icon="globe" iconTint="var(--indigo)" title={t('Find a helpline')} subtitle={t('Free helplines in over 130 countries (findahelpline.com)')} accessory="chevron" onClick={() => openUrl(LINKS.helpline)} />}
+  </Section>
+}
+
+/* ---------------------------------------------------------------- hub -- */
+function SelfChecks() {
+  usePrivate()
+  const st = useStore(s => s.S)
+  const list = st.selfchecks || [], region = regionOf(st.selfcheckPrefs), today = todayISO()
+  const results = [...list].reverse()
+  const removeAll = () => confirmSheet({ title: t('Delete all results?'), message: t('Deletes every self-check result on this device. This cannot be undone.'), confirmText: t('Delete all results'), danger: true, onConfirm: () => {
+    update(s => { s.selfchecks = []; s.selfcheckPrefs = { ...s.selfcheckPrefs, cleared: Date.now(), deleted: [] } }); toast(t('All results deleted'))
+  } })
+  return <>
+    <h3>{t('Self-checks')}</h3>
+    <div className="muted small" style={{ marginBottom: 12 }}>{t('Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.')}</div>
+    <Section title={t('Questionnaires')}>
+      {INST_IDS.map(inst => {
+        const last = lastOf(list, inst), due = dueOn(list, inst, today)
+        return <Row key={inst} title={nameOf(inst)} subtitle={(due ? t('Due') + ' · ' : '') + (last ? t('Last: {0} · {1}', fmtDate(last.d), scoreLine(last)) : ABOUT[inst]())}
+          accessory="chevron" onClick={() => takeSheet(inst)} />
+      })}
+    </Section>
+    <Section title={t('More checks')} footer={t('These open other websites and apps.')}>
+      <Row icon="globe" iconTint="var(--teal)" title={t('American Diabetes Association risk test')} subtitle={t('Type 2 diabetes risk for other populations')} accessory="chevron" onClick={() => openUrl(LINKS.ada)} />
+      <Row icon="globe" iconTint="var(--teal)" title={t('hearWHO (hearing)')} subtitle={t('Free WHO app · needs earphones')} accessory="chevron" onClick={() => openUrl(LINKS.hearwho)} />
+      <Row icon="globe" iconTint="var(--teal)" title={t('WHOeyes (vision)')} subtitle={t('Free WHO app · near and distance vision')} accessory="chevron" onClick={() => openUrl(LINKS.whoeyes)} />
+    </Section>
+    <Support region={region} />
+    <Section title={t('Where you live')} footer={t('Sets the helplines and drink sizes shown.')}>
+      <div style={{ padding: '10px 14px' }}>
+        <Segmented options={[{ value: 'in', label: t('India') }, { value: 'intl', label: t('Another country') }]} value={region}
+          onChange={v => update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, region: v } })} />
+      </div>
+    </Section>
+    <Section title={t('Your results')} footer={t('Results stay on this phone. They are included in Export backup.')}>
+      {!results.length && <div className="small muted" style={{ padding: '12px 14px' }}>{t('No results yet.')}</div>}
+      {results.map(e => <Row key={e.id} title={nameOf(e.inst)} subtitle={fmtDate(e.d, true) + ' · ' + scoreLine(e)} accessory="chevron"
+        onClick={() => ui().openSheet(close => <Detail e={e} close={close} />)} />)}
+    </Section>
+    {results.length > 0 && <Button variant="ghost" className="danger" onClick={removeAll}>{t('Delete all results')}</Button>}
+    <div style={{ height: 8 }} />
+  </>
+}
+
+/* -------------------------------------------------------- one check -- */
+const profileSex = () => ({ female: 'f', male: 'm' }[S().nutrition?.profile?.sex] || null)
+const profileAge = () => { const y = S().nutrition?.profile?.birthYear; return y ? new Date().getFullYear() - y : null }
+
+function Take({ inst }) {
+  usePrivate()
+  const I = INSTRUMENTS[inst], region = regionOf(S().selfcheckPrefs)
+  const [a, setA] = useState(() => I.items.map((_, i) => inst === 'idrs' && i === 0 && profileAge() != null ? ageIndex(profileAge()) : null))
+  const [sex, setSex] = useState(profileSex)
+  const [waist, setWaist] = useState(null), [inch, setInch] = useState(false)
+  const [saved, setSaved] = useState(null)
+  const cm = waist && (inch ? waist * 2.54 : waist), cmOk = cm >= 40 && cm <= 200   // a typo can't set the band
+  const answers = inst === 'idrs' ? a.map((v, i) => (i === 1 ? (cmOk && sex ? waistIndex(cm, sex) : null) : v)) : a
+  const done = answers.every((v, i) => v != null || skipped(inst, answers, i)) && (!I.needsSex || sex)
+  const pick = (i, v) => setA(x => x.map((y, j) => (j === i ? v : y)))
+  const save = () => {
+    const at = Date.now(), e = { id: inst + '-' + at, inst, d: todayISO(), at, a: answers.map(v => v ?? 0) }
+    if (I.needsSex) e.sex = sex
+    update(s => { s.selfchecks = [...(s.selfchecks || []), e] })
+    setSaved(e)
+  }
+  if (saved) return <Result e={saved} />
+  const label = s => (I.verbatim ? s : t(s))
+  return <>
+    <h3>{nameOf(inst)}</h3>
+    {I.verbatim && getLang() !== 'en' && <div className="small dim" style={{ marginBottom: 8 }}>{t('Shown in English, the wording it was tested in.')}</div>}
+    {I.intro && <div className="muted small" style={{ marginBottom: 8 }}>{I.intro}</div>}
+    {inst === 'auditc' && <div className="card small" style={{ marginBottom: 8 }}>{region === 'in'
+      ? t('One drink is 10 g of alcohol: a small peg (30 ml) of whisky, rum or vodka, a 100 ml glass of wine, or a 250 ml glass of beer. A large peg (60 ml) is two drinks.')
+      : t('One drink is 10 g of alcohol: a 30 ml shot of spirits, a 100 ml glass of wine, or a 250 ml glass of beer. Your country may count drinks differently.')}</div>}
+    {I.needsSex && <>
+      <div className="small muted" id="sc-sex" style={{ margin: '14px 0 6px' }}>{t('The cut-offs differ for women and men')}</div>
+      <div role="group" aria-labelledby="sc-sex"><Segmented noneOk options={[{ value: 'f', label: t('Woman') }, { value: 'm', label: t('Man') }]} value={sex} onChange={setSex} /></div>
+    </>}
+    {I.items.map((it, i) => skipped(inst, answers, i) ? null : <div key={i}>
+      <div className="small" id={'sc-q' + i} style={{ margin: '16px 0 6px', fontWeight: 600 }}>{(i + 1) + '. ' + label(it.q)}</div>
+      {it.waist
+        ? <>
+          <div className="small dim" style={{ marginBottom: 6 }}>{t('Measure around your bare waist, midway between your lowest rib and the top of your hip bone, after breathing out.')}</div>
+          <div className="row" style={{ gap: 8 }}>
+            <NumberField nullable className="input" value={waist} onChange={setWaist} placeholder={inch ? '34' : '86'} aria-labelledby={'sc-q' + i} style={{ maxWidth: 110 }} />
+            <Segmented className="seg-inline" options={[{ value: false, label: 'cm' }, { value: true, label: 'in' }]} value={inch} onChange={setInch} />
+          </div>
+          {waist != null && !cmOk && <div className="small" style={{ color: 'var(--red)', marginTop: 6 }}>{t('Enter a waist between 40 and 200 cm (16 and 79 in)')}</div>}
+        </>
+        : <div className="chips" role="group" aria-labelledby={'sc-q' + i} style={{ flexWrap: 'wrap', overflowX: 'visible' }}>
+          {it.opts.map((o, j) => <button key={j} type="button" className={'chip nocap' + (a[i] === j ? ' on' : '')} aria-pressed={a[i] === j}
+            style={{ flex: '0 1 auto', maxWidth: '100%', whiteSpace: 'normal', textAlign: 'left' }}
+            onClick={() => pick(i, a[i] === j ? null : j)}>{label(o.label)}</button>)}
+        </div>}
+    </div>)}
+    <div style={{ height: 16 }} />
+    <Button variant="primary" disabled={!done} onClick={save}>{t('See my result')}</Button>
+    {!done && <div className="small dim" style={{ marginTop: 6 }}>{t('Answer every question to see your result.')}</div>}
+  </>
+}
+
+/* ----------------------------------------------------------- result -- */
+function resultText(e) {
+  const b = band(e).code
+  if (e.inst === 'who5') return b === 'low'
+    ? t('Below 50. That has been suggested as a sign of low wellbeing, and a reason to talk it over with a doctor or counsellor. It is not a diagnosis.')
+    : t('50 or above. Higher scores mean better wellbeing. Take it again in two weeks to see how it changes.')
+  if (e.inst === 'auditc') return b === 'none' ? t('You don’t drink alcohol.')
+    : b === 'over' ? t('At or above the usual cut-off ({0} or more). Your drinking may be harming your health. A doctor can help you look at it, and cutting down helps at any point.', AUDIT_CUT[e.sex])
+      : t('Below the usual cut-off for risky drinking ({0} or more).', AUDIT_CUT[e.sex])
+  return b === 'low' ? t('Low risk (under 30). Staying active keeps it that way.')
+    : b === 'moderate' ? t('Moderate risk (30 to 50). More activity and a smaller waist lower it. Ask a doctor whether a blood sugar test makes sense for you.')
+      : t('High risk (60 or more). Ask a doctor for a blood sugar test (HbA1c or fasting glucose). Only a blood test can show diabetes.')
+}
+
+function Result({ e, onDelete }) {
+  const st = useStore(s => s.S)
+  const I = INSTRUMENTS[e.inst], b = band(e), region = regionOf(st.selfcheckPrefs)
+  const prev = (st.selfchecks || []).filter(x => x.inst === e.inst && x.at < e.at).sort((x, y) => x.at - y.at).at(-1)
+  const a1c = e.inst === 'idrs' && latestByMarker(st.labs?.reports || []).find(x => x.key === 'diabetes.hba1c')
+  return <>
+    <h3>{nameOf(e.inst)}</h3>
+    <div className="small muted">{fmtDate(e.d, true)}</div>
+    <div style={{ fontSize: 28, fontWeight: 600, margin: '8px 0', color: b.level === 'high' ? 'var(--orange)' : undefined }}>{scoreLine(e)}</div>
+    {e.inst === 'who5' && prev && <div className="small muted" style={{ marginBottom: 6 }}>{t('Change since last time: {0}', (shown(e) - shown(prev) > 0 ? '+' : '') + (shown(e) - shown(prev)))}</div>}
+    <div style={{ marginBottom: 10 }}>{resultText(e)}</div>
+    {a1c && <div className="card small" style={{ marginBottom: 10 }}>{t('Your latest HbA1c in Labs: {0}% ({1}). A measured value tells you more than a risk score.', a1c.m.v, fmtDate(a1c.report.d))}</div>}
+    {b.level === 'high' && e.inst === 'who5' && <Support region={region} />}
+    <div className="small dim" style={{ margin: '10px 0' }}>{t('Source: {0}', I.source)}</div>
+    <Button variant="plain" size="sm" icon="link" onClick={() => openUrl(I.url)}>{t('About this questionnaire')}</Button>
+    {onDelete && <><div style={{ height: 8 }} /><Button variant="ghost" className="danger" icon="trash" onClick={onDelete}>{t('Delete result')}</Button></>}
+  </>
+}
+
+function Detail({ e, close }) {
+  usePrivate()
+  const remove = () => { close(); confirmSheet({ title: t('Delete this result?'), message: nameOf(e.inst) + ' · ' + fmtDate(e.d, true), confirmText: t('Delete'), danger: true, onConfirm: () => {
+    update(s => { s.selfchecks = s.selfchecks.filter(x => x.id !== e.id); s.selfcheckPrefs = { ...s.selfcheckPrefs, deleted: [...(s.selfcheckPrefs.deleted || []), e.id] } }); toast(t('Result deleted'))
+  } }) }
+  return <Result e={e} onDelete={remove} />
+}
+
+const takeSheet = inst => ui().openSheet(() => <Take inst={inst} />)
+export const selfChecksSheet = () => ui().openSheet(() => <SelfChecks />)

@@ -1,0 +1,84 @@
+import { describe, it, expect } from 'vitest'
+import { INSTRUMENTS, score, band, shown, waistIndex, ageIndex, regionOf, dueOn, cleanEntry, cleanSelfchecks, cleanSelfcheckPrefs, mergeSelfchecks } from './selfcheck.js'
+
+const e = (inst, a, extra = {}) => ({ id: inst + '-1', inst, d: '2026-11-19', at: 1, a, ...extra })
+
+describe('WHO-5 (WHO 2024 scoring)', () => {
+  it('scores 5..0 per item, shown as raw x 4', () => {
+    expect(score('who5', [0, 0, 0, 0, 0])).toBe(25)          // "All of the time" everywhere
+    expect(shown(e('who5', [5, 5, 5, 5, 5]))).toBe(0)
+    expect(shown(e('who5', [2, 2, 2, 2, 2]))).toBe(60)       // "more than half of the time" = 3 each
+  })
+  it('below 50% (raw below 13) is the published cut-off', () => {
+    expect(score('who5', [2, 2, 3, 3, 3])).toBe(12)            // 3+3+2+2+2 -> 48%
+    expect(band(e('who5', [2, 2, 3, 3, 3])).code).toBe('low')
+    expect(score('who5', [2, 2, 2, 3, 3])).toBe(13)            // -> 52%
+    expect(band(e('who5', [2, 2, 2, 3, 3])).code).toBe('ok')
+  })
+  it('keeps the WHO wording verbatim', () => {
+    expect(INSTRUMENTS.who5.items.map(i => i.q)[3]).toBe('I woke up feeling fresh and rested')
+    expect(INSTRUMENTS.who5.items[0].opts.map(o => o.pts)).toEqual([5, 4, 3, 2, 1, 0])
+  })
+})
+
+describe('AUDIT-C', () => {
+  it('never drinking scores 0 and skips questions 2 and 3', () => {
+    expect(score('auditc', [0, 4, 4])).toBe(0)
+    expect(band(e('auditc', [0, 4, 4], { sex: 'm' })).code).toBe('none')
+  })
+  it('cut-offs: 4+ men, 3+ women', () => {
+    const a = [2, 1, 0]                                          // 2 + 1 + 0 = 3
+    expect(score('auditc', a)).toBe(3)
+    expect(band(e('auditc', a, { sex: 'f' })).code).toBe('over')
+    expect(band(e('auditc', a, { sex: 'm' })).code).toBe('under')
+    expect(band(e('auditc', [4, 4, 4], { sex: 'm' })).code).toBe('over')
+    expect(score('auditc', [4, 4, 4])).toBe(12)
+  })
+})
+
+describe('Indian Diabetes Risk Score (Mohan 2005)', () => {
+  it('maps age and waist to the bands', () => {
+    expect([34, 35, 49, 50].map(ageIndex)).toEqual([0, 1, 1, 2])
+    expect([79, 80, 89, 90].map(c => waistIndex(c, 'f'))).toEqual([0, 1, 1, 2])
+    expect([89, 90, 99, 100].map(c => waistIndex(c, 'm'))).toEqual([0, 1, 1, 2])
+  })
+  it('scores 0-100 with low <30, moderate 30-50, high 60+', () => {
+    expect(score('idrs', [2, 2, 3, 2])).toBe(100)
+    expect(score('idrs', [0, 0, 0, 0])).toBe(0)
+    expect(band(e('idrs', [1, 0, 0, 0], { sex: 'm' })).code).toBe('low')       // 20
+    expect(band(e('idrs', [1, 1, 0, 0], { sex: 'm' })).code).toBe('moderate')  // 30
+    expect(band(e('idrs', [1, 1, 2, 0], { sex: 'm' })).code).toBe('moderate')  // 50
+    expect(band(e('idrs', [2, 0, 3, 0], { sex: 'm' })).code).toBe('high')      // 60
+  })
+})
+
+describe('region, due, cleaning, sync', () => {
+  it('India from the time zone unless chosen', () => {
+    expect(regionOf({}, 'Asia/Kolkata')).toBe('in')
+    expect(regionOf({}, 'Europe/London')).toBe('intl')
+    expect(regionOf({ region: 'intl' }, 'Asia/Kolkata')).toBe('intl')
+  })
+  it('WHO-5 is due again after 14 days; one-off checks never nag', () => {
+    const list = [e('who5', [0, 0, 0, 0, 0], { d: '2026-11-01' })]
+    expect(dueOn([], 'who5', '2026-11-19')).toBe(true)
+    expect(dueOn(list, 'who5', '2026-11-14')).toBe(false)
+    expect(dueOn(list, 'who5', '2026-11-15')).toBe(true)
+    expect(dueOn([], 'idrs', '2026-11-19')).toBe(false)
+  })
+  it('drops bad entries from a backup', () => {
+    expect(cleanEntry(e('who5', [0, 0, 0, 0]))).toBe(null)             // too few answers
+    expect(cleanEntry(e('who5', [0, 0, 0, 0, 6]))).toBe(null)          // out of range
+    expect(cleanEntry(e('auditc', [1, 1, 1]))).toBe(null)              // no sex for the cut-off
+    expect(cleanEntry(e('nope', [0]))).toBe(null)
+    expect(cleanEntry({ ...e('who5', [0, 0, 0, 0, 0]), d: '2026-02-30' })).toBe(null)
+    expect(cleanEntry({ ...e('who5', [0, 0, 0, 0, 0]), note: 'x' })).not.toHaveProperty('note')
+    expect(cleanSelfchecks('junk')).toEqual([])
+    expect(cleanSelfcheckPrefs({ region: 'mars', deleted: [1, 'a'] })).toEqual({ region: null, deleted: ['a'], cleared: null })
+  })
+  it('sync: union, and a delete on either device wins', () => {
+    const a = e('who5', [0, 0, 0, 0, 0], { id: 'a', at: 10 }), b = e('who5', [1, 1, 1, 1, 1], { id: 'b', at: 20 })
+    expect(mergeSelfchecks([a], [b]).map(x => x.id)).toEqual(['a', 'b'])
+    expect(mergeSelfchecks([a], [a, b], {}, { deleted: ['a'] }).map(x => x.id)).toEqual(['b'])
+    expect(mergeSelfchecks([a], [b], { cleared: 15 }).map(x => x.id)).toEqual(['b'])
+  })
+})
