@@ -1285,16 +1285,16 @@ export async function runUpdateCheck(interactive) {
 }
 
 /* ============================ workout lifecycle ============================ */
-// opts.min: every cardio set starts at this many minutes (a 20-minute walk from Things that can help)
-export function startFlow(routineId, opts) {
+export function startFlow(routineId) {
   const last = lastBW(S())
-  if (S().askWeight === false) { beginWorkout(routineId, last && last.d === todayISO() ? last.w : null, opts); return }
+  if (S().askWeight === false) { beginWorkout(routineId, last && last.d === todayISO() ? last.w : null); return }
   if (last && last.d === todayISO() && last.w) {
-    beginWorkout(routineId, last.w, opts)
+    beginWorkout(routineId, last.w)
     return
   }
-  bwSheet({ required: true, onDone: bw => beginWorkout(routineId, bw, opts) })
+  bwSheet({ required: true, onDone: bw => beginWorkout(routineId, bw) })
 }
+// opts.min: every cardio set starts at this many minutes (a 20-minute walk from Things that can help)
 export function beginWorkout(routineId, bw, opts) {
   const st = S()
   const r = routineId ? st.routines.find(x => x.id === routineId) : null

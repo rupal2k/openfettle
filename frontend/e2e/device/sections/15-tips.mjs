@@ -7,6 +7,10 @@ import { fixtures, iso } from '../lib/fixtures.mjs'
 const DAY = 864e5
 const PHQ = (total, harm = 0) => { const a = Array(9).fill(0); for (let i = 0; i < 8 && total > 0; i++) { a[i] = Math.min(3, total); total -= a[i] } a[8] = harm; return a }
 const result = (inst, a, extra = {}) => ({ id: 'ofreg-' + inst, inst, d: iso(Date.now() - DAY), at: Date.now() - DAY, a, ...extra })
+const WALK_EX = { id: 'cofreg-walk', n: 'Brisk walk', bp: 'cardio', desc: '', tg: '', eq: 'custom', custom: true }
+const WALK_R = { id: 'rofreg-walk', name: 'Brisk walk', emoji: 'figureRun', ex: [{ id: WALK_EX.id, sets: 1, min: 10, speed: 5 }] }
+const walkedYesterday = s => ({ ...s, customEx: [...(s.customEx || []), WALK_EX], routines: [...s.routines, WALK_R],
+  workouts: [...s.workouts, { id: 'wofreg-walk', d: iso(Date.now() - DAY), start: Date.now() - DAY, end: Date.now() - DAY + 10 * 6e4, routineId: WALK_R.id, name: 'Brisk walk', bw: null, entries: [{ id: WALK_EX.id, sets: [{ min: 10, speed: 5, done: true }] }] }] })
 const withResults = (list, patch = {}) => ({ ...fixtures.trained(), selfchecks: list, selfcheckPrefs: { region: 'in', deleted: [], cleared: null, hiddenTips: [] }, ...patch })
 
 export default {
@@ -36,7 +40,7 @@ export default {
     // Mobility & Core: Start adds the plan (week unchanged) and starts it
     const week0 = JSON.stringify(readState().week)
     await app.tap(card('Mobility & Core').getByRole('button', { name: 'Start', exact: true }), { after: 1500 })
-    if (await app.sheets() && /weigh|weight/i.test(await app.sheetText())) await app.tapText('Start without weighing in', null, { after: 1200 })
+    check('a suggestion starts without asking for a weigh-in', !/weigh/i.test(await app.sheetText()) && !readState().bodyweight.some(b => b.d === iso()))
     check('Start on Mobility & Core starts that session', await waitFor(async () => (await app.route()).startsWith('workout'), { timeout: 6000, label: 'the workout' }).then(() => true, () => false) && /Mobility & Core/.test(await app.text('#app')))
     check('… and leaves the weekly schedule alone', JSON.stringify(readState().week) === week0)
     await app.discardWorkout()
@@ -44,12 +48,17 @@ export default {
     // strength: the trained fixture has routines, so it offers the last one
     s = await openResult('PHQ-9')
     check('strength offers the routine last trained', await card('Strength training').getByRole('button', { name: /^Start Beginner A$/ }).count() === 1)
+    await app.closeSheets()
+    await seed(walkedYesterday(withResults([result('phq9', PHQ(12))])))
+    await openResult('PHQ-9')
+    check('… never the Brisk walk, even when that was the last session', await card('Strength training').getByRole('button', { name: /^Start Beginner A$/ }).count() === 1)
+    await app.closeSheets()
+    await seed(withResults([result('phq9', PHQ(12))]))
 
     // Brisk walk (phase 2): 10, 20 or 30 minutes; the first tap makes the routine and starts it, a second reuses it
     s = await openResult('PHQ-9')
     check('the walk can start at 10, 20 or 30 minutes', (await card('Brisk walk').getByRole('button', { name: /^Walk \d+ min$/ }).allInnerTexts()).join(' | ') === 'Walk 10 min | Walk 20 min | Walk 30 min')
     await app.tap(card('Brisk walk').getByRole('button', { name: 'Walk 10 min' }), { after: 1500 })
-    if (await app.sheets() && /weigh|weight/i.test(await app.sheetText())) await app.tapText('Start without weighing in', null, { after: 1200 })
     const started = await waitFor(async () => (await app.route()).startsWith('workout'), { timeout: 6000, label: 'the workout' }).then(() => true, () => false)
     const wtext = await app.text('#app')
     check('Walk 10 min starts a Brisk walk session', started && /Brisk walk/.test(wtext) && /Cardio/.test(wtext), (await app.route()) + ' · ' + wtext.replace(/\s+/g, ' ').slice(0, 160))
@@ -58,7 +67,6 @@ export default {
     await app.discardWorkout()
     await openResult('PHQ-9')
     await app.tap(card('Brisk walk').getByRole('button', { name: 'Walk 20 min' }), { after: 1500 })
-    if (await app.sheets() && /weigh|weight/i.test(await app.sheetText())) await app.tapText('Start without weighing in', null, { after: 1200 })
     await waitFor(async () => (await app.route()).startsWith('workout'), { timeout: 6000, label: 'the workout' }).catch(() => {})
     check('… Walk 20 min starts at 20 minutes', await waitFor(() => readState().active?.entries?.[0]?.sets?.[0]?.min === 20, { timeout: 5000, label: 'a 20-minute set' }).then(() => true, () => false))
     check('… and a second walk reuses the routine', walks() === 1)
@@ -156,6 +164,17 @@ export default {
     await app.closeSheets()
     await openResult('AUDIT-C')
     check('… and not asked again', !/Were these suggestions useful/.test(await app.sheetText()))
+    await app.closeSheets()
+
+    // after a self-harm answer the question is never asked, and that result isn't counted
+    await seed(withResults([], { selfcheckPrefs: { region: 'in', deleted: [], cleared: null, hiddenTips: [], tipsShown: 1 } }))
+    await openHub()
+    await app.tap(app.sheet().locator('.lrow', { hasText: 'PHQ-9' }), { after: 1000 })
+    await app.waitSheet(/PHQ-9/)
+    for (let i = 0; i < 9; i++) await app.tap(app.sheet().locator(`[aria-labelledby=sc-q${i}] .chip`).nth(i === 8 ? 1 : 0), { after: 150 })
+    await app.tapButton('See my result', app.sheet(), { after: 1200 })
+    await app.tap(app.sheet().getByRole('button', { name: /When you feel ready/ }), { after: 400 })
+    check('a self-harm answer: no "useful?" question, not counted', /Talk to someone/.test(await app.sheetText()) && !/Were these suggestions useful/.test(await app.sheetText()) && (await sleep(1500), readState().selfcheckPrefs.tipsShown === 1 && !readState().selfcheckPrefs.tipsAsked))
     await app.closeSheets()
 
     // another language: mental-health suggestions wait for review; diabetes ones show

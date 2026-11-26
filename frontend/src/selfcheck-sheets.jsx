@@ -8,7 +8,9 @@ import { fmtDate, todayISO } from './lib/format.js'
 import { privacyScreen } from './lib/mobile.js'
 import { latestByMarker } from './lib/labs/reports.js'
 import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, selfHarm, waistIndex, ageIndex, ageFromYear, regionOf, lastOf, dueOn, dueChecks } from './lib/selfcheck.js'
-import { confirmSheet, startFlow, addPlanRoutines, walkRoutine, windDownSheet } from './sheets.jsx'
+import { confirmSheet, beginWorkout, addPlanRoutines, walkRoutine, windDownSheet } from './sheets.jsx'
+import { isCardio } from './lib/exercises.js'
+import { lastBW } from './lib/history.js'
 import { breathingSheet } from './checkin-sheets.jsx'
 import { tipsFor, reasonsShown, sinceLast } from './lib/move.js'
 import { nav } from './lib/nav.js'
@@ -79,12 +81,14 @@ const findRoutine = name => S().routines.find(r => r.name === name)
 
 function tipCard(tip, why, minutes, done) {
   const go = fn => () => { done(); ui().afterClose(fn) }   // close the sheets first, then act
-  const startRoutine = r => go(() => startFlow(r.id))
+  // no weigh-in prompt: right after a mood result, a scale is the wrong thing to put first (spec: no weight focus)
+  const start = (id, opts) => { const l = lastBW(S()); beginWorkout(id, l && l.d === todayISO() ? l.w : null, opts) }
+  const startRoutine = r => go(() => start(r.id))
   const mobility = () => {
     const r = findRoutine(t('Mobility & Core'))
-    return { label: t('Start'), onClick: r ? startRoutine(r) : go(() => startFlow(addPlanRoutines('home-mobility')[0].id)) }
+    return { label: t('Start'), onClick: r ? startRoutine(r) : go(() => start(addPlanRoutines('home-mobility')[0].id)) }
   }
-  const walkFor = min => ({ label: t('Walk {0} min', min), onClick: go(() => startFlow(walkRoutine(), { min })) })
+  const walkFor = min => ({ label: t('Walk {0} min', min), onClick: go(() => start(walkRoutine(), { min })) })
   const walks = [10, 20, 30].map(walkFor)
   // spec: hard intervals feel like anxiety (racing heart), so build up
   const caution = why === 'anxiety' ? t('Hard intervals raise your heart rate like anxiety can, so build up gradually.') : null
@@ -93,8 +97,10 @@ function tipCard(tip, why, minutes, done) {
     case 'keep-moving': return { title: t('Keep moving'), note: t('{0} active minutes in the last 7 days. The guideline is 150 to 300.', minutes), why: WHY.walk[why]?.(), caution, action: walks }
     case 'gentle-walk': return { title: t('A 10-minute walk outside'), why: t('Gentle movement can help, when you feel ready. Talking to someone comes first.'), action: walkFor(10) }
     case 'strength': {
-      const last = [...S().workouts].reverse().map(w => S().routines.find(r => r.id === w.routineId)).find(Boolean)
-      const r = last || S().routines.find(x => x.ex?.length && x.name !== t('Mobility & Core'))
+      // a strength routine: not the Brisk walk or another all-cardio one, not Mobility & Core
+      const lifts = r => r && r.name !== t('Mobility & Core') && r.ex?.some(e => !isCardio(e.id))
+      const last = [...S().workouts].reverse().map(w => S().routines.find(r => r.id === w.routineId)).find(lifts)
+      const r = last || S().routines.find(lifts)
       // no routine yet: the app doesn't know where they train, so both beginner plans
       const load = (id, name) => ({ label: t(name), onClick: go(() => { const rs = addPlanRoutines(id); toast(t('Loaded “{0}” ({1} routines)', t(name), rs.length)); nav('/plan') }) })
       return {
@@ -124,7 +130,8 @@ function Tips({ hub, fresh, only }) {
     return why && { tip: x, reason: why, ...tipCard(x, why, res.minutes, () => ui().closeAll()) }
   }).filter(c => c && c.title)
   // counted once per result just taken that shows suggestions; asked on the second
-  const [shows] = useState(() => fresh && cards.length > 0)
+  // never after a severe result or a self-harm answer: the suggestions are folded and it's the wrong moment
+  const [shows] = useState(() => fresh && cards.length > 0 && !res.gentle)
   const [ask] = useState(() => shows && !prefs.tipsAsked && (prefs.tipsShown || 0) >= 1)
   const [answered, setAnswered] = useState(false)
   const counted = useRef(false)
