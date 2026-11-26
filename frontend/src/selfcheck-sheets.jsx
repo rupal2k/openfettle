@@ -84,31 +84,36 @@ function tipCard(tip, why, minutes, done) {
     const r = findRoutine(t('Mobility & Core'))
     return { label: t('Start'), onClick: r ? startRoutine(r) : go(() => startFlow(addPlanRoutines('home-mobility')[0].id)) }
   }
-  const walk = { label: t('Start a walk'), onClick: go(() => startFlow(walkRoutine())) }
+  const walkFor = min => ({ label: t('Walk {0} min', min), onClick: go(() => startFlow(walkRoutine(), { min })) })
+  const walks = [10, 20, 30].map(walkFor)
+  // spec: hard intervals feel like anxiety (racing heart), so build up
+  const caution = why === 'anxiety' ? t('Hard intervals raise your heart rate like anxiety can, so build up gradually.') : null
   switch (tip.id) {
-    case 'walk': return { title: t('Brisk walk, 10 minutes, 3 times this week'), note: t('Last 7 days: {0} of 150 active minutes', minutes), why: WHY.walk[why]?.(), action: walk }
-    case 'keep-moving': return { title: t('Keep moving'), note: t('{0} active minutes in the last 7 days. The guideline is 150 to 300.', minutes), why: WHY.walk[why]?.(), action: walk }
-    case 'gentle-walk': return { title: t('A 10-minute walk outside'), why: t('Gentle movement can help, when you feel ready. Talking to someone comes first.'), action: walk }
+    case 'walk': return { title: t('Brisk walk, 10 minutes, 3 times this week'), note: t('Last 7 days: {0} of 150 active minutes', minutes), why: WHY.walk[why]?.(), caution, action: walks }
+    case 'keep-moving': return { title: t('Keep moving'), note: t('{0} active minutes in the last 7 days. The guideline is 150 to 300.', minutes), why: WHY.walk[why]?.(), caution, action: walks }
+    case 'gentle-walk': return { title: t('A 10-minute walk outside'), why: t('Gentle movement can help, when you feel ready. Talking to someone comes first.'), action: walkFor(10) }
     case 'strength': {
       const last = [...S().workouts].reverse().map(w => S().routines.find(r => r.id === w.routineId)).find(Boolean)
       const r = last || S().routines.find(x => x.ex?.length && x.name !== t('Mobility & Core'))
+      // no routine yet: the app doesn't know where they train, so both beginner plans
+      const load = (id, name) => ({ label: t(name), onClick: go(() => { const rs = addPlanRoutines(id); toast(t('Loaded “{0}” ({1} routines)', t(name), rs.length)); nav('/plan') }) })
       return {
         title: t('Strength training twice a week'), why: WHY.strength[why]?.(),
         action: r ? { label: t('Start {0}', r.name), onClick: startRoutine(r) }
-          : { label: t('Add to my plan'), onClick: go(() => { const rs = addPlanRoutines('home-bw-3'); toast(t('Loaded “{0}” ({1} routines)', t('Home Bodyweight Full Body (3‑day)'), rs.length)); nav('/plan') }) },
+          : [load('beginner-gym-3', 'Beginner Full Body (3‑day)'), load('home-bw-3', 'Home Bodyweight Full Body (3‑day)')],
       }
     }
     case 'mobility': return { title: t('Mobility & Core, about 15 minutes'), why: WHY.mobility[why]?.(), action: mobility() }
     case 'rest': return { title: t('A rest day, then Mobility & Core'), why: t('Hard training every day can wear you down. Rest is part of training.'), action: mobility() }
     case 'breathing': return { title: t('Box breathing, about a minute'), why: t('Slow breathing can calm you in the moment.'), action: { label: t('Begin'), onClick: go(breathingSheet) } }
-    case 'evening': return { title: t('An evening routine instead of a drink'), why: t('Wind down sounds and a short walk can take the place of a drink. Cutting down helps at any point.'), action: { label: t('Wind down'), onClick: go(windDownSheet) } }
+    case 'evening': return { title: t('An evening routine instead of a drink'), why: t('Wind down sounds and a short walk can take the place of a drink. Cutting down helps at any point.'), action: [{ label: t('Wind down'), onClick: go(windDownSheet) }, walkFor(10)] }
     case 'keep': return { title: t('Your results look fine. Keep doing what you do.'), why: t('Guidelines suggest 150 to 300 active minutes a week.') }
     default: return null
   }
 }
 
 // hub: "Suggested for you" at the top of Self-checks; fresh: a result just saved, where the
-// "useful?" question may be asked (once, from the second result on)
+// "useful?" question may be asked (once, on the second such result that shows suggestions)
 function Tips({ hub, fresh, only }) {
   const st = useStore(s => s.S)
   const [open, setOpen] = useState(false)
@@ -118,9 +123,16 @@ function Tips({ hub, fresh, only }) {
     const why = reasonsShown(x, lang)[0]
     return why && { tip: x, reason: why, ...tipCard(x, why, res.minutes, () => ui().closeAll()) }
   }).filter(c => c && c.title)
-  const [ask] = useState(() => fresh && cards.length > 0 && !prefs.tipsAsked && (st.selfchecks || []).length >= 2)
+  // counted once per result just taken that shows suggestions; asked on the second
+  const [shows] = useState(() => fresh && cards.length > 0)
+  const [ask] = useState(() => shows && !prefs.tipsAsked && (prefs.tipsShown || 0) >= 1)
   const [answered, setAnswered] = useState(false)
-  useEffect(() => { if (ask) update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, tipsAsked: true } }) }, [ask])
+  const counted = useRef(false)
+  useEffect(() => {
+    if (!shows || counted.current) return
+    counted.current = true
+    update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, tipsShown: (s.selfcheckPrefs.tipsShown || 0) + 1, ...(ask ? { tipsAsked: true } : {}) } })
+  }, [shows, ask])
   if (!cards.length || (only && only !== (res.gentle ? 'gentle' : 'plain'))) return null
   const answer = v => { update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, tipsUseful: v } }); setAnswered(true); toast(t('Thanks. Your answer stays on this phone.')) }
   const hide = id => update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, hiddenTips: [...new Set([...(s.selfcheckPrefs.hiddenTips || []), id])] } })
@@ -130,9 +142,10 @@ function Tips({ hub, fresh, only }) {
       <div className="tip-t">{c.title}</div>
       {c.note && <div className="small muted">{c.note}</div>}
       {c.why && <div className="small" style={{ marginTop: 4 }}>{c.why}</div>}
+      {c.caution && <div className="small muted" style={{ marginTop: 4 }}>{c.caution}</div>}
       {c.src && <div className="small dim" style={{ marginTop: 4 }}>{t('Source: {0}', c.src)}</div>}
-      <div className="row" style={{ gap: 8, marginTop: 8 }}>
-        {c.action && <Button size="sm" variant="tinted" onClick={c.action.onClick}>{c.action.label}</Button>}
+      <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+        {[].concat(c.action || []).map(a => <Button key={a.label} size="sm" variant="tinted" onClick={a.onClick}>{a.label}</Button>)}
         <Button size="sm" variant="ghost" className="dim" onClick={() => hide(c.tip.id)}>{t('Hide this')}</Button>
       </div>
     </div>)}

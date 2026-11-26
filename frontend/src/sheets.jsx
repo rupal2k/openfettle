@@ -1285,16 +1285,17 @@ export async function runUpdateCheck(interactive) {
 }
 
 /* ============================ workout lifecycle ============================ */
-export function startFlow(routineId) {
+// opts.min: every cardio set starts at this many minutes (a 20-minute walk from Things that can help)
+export function startFlow(routineId, opts) {
   const last = lastBW(S())
-  if (S().askWeight === false) { beginWorkout(routineId, last && last.d === todayISO() ? last.w : null); return }
+  if (S().askWeight === false) { beginWorkout(routineId, last && last.d === todayISO() ? last.w : null, opts); return }
   if (last && last.d === todayISO() && last.w) {
-    beginWorkout(routineId, last.w)
+    beginWorkout(routineId, last.w, opts)
     return
   }
-  bwSheet({ required: true, onDone: bw => beginWorkout(routineId, bw) })
+  bwSheet({ required: true, onDone: bw => beginWorkout(routineId, bw, opts) })
 }
-export function beginWorkout(routineId, bw) {
+export function beginWorkout(routineId, bw, opts) {
   const st = S()
   const r = routineId ? st.routines.find(x => x.id === routineId) : null
   // The prescription is applied as the session is built, so you walk up to the bar with the
@@ -1304,6 +1305,7 @@ export function beginWorkout(routineId, bw) {
     const plan = nextPrescription(st, cfg, r)
     return { id: cfg.id, sg: cfg.sg, target: sessionTarget(cfg, plan), plan, sets: applyPrescription(sessionSets(st, cfg, r?.format), plan) }
   })
+  if (opts?.min) entries.forEach(e => e.sets.forEach(s => { if ('min' in s) s.min = opts.min }))
   update(s => {
     s.active = { id: uid(), d: todayISO(), start: Date.now(), routineId, name: r ? r.name : t('Freestyle'), bw: bw || null, cur: 0, entries, ...(r?.rest ? { rest: r.rest } : {}), ...(r?.format ? { format: r.format } : {}), ...(r?.cap ? { cap: r.cap } : {}) }
   })

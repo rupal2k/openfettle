@@ -102,12 +102,13 @@ Leading indicator we *can* see: whether people open and use it (GitHub issues, r
 ### Phase 2 — the hub and walking (≈ 2 days)
 
 - "Suggested for you" at the top of Self-checks (D5), from the latest result of each check.
-- "Brisk walk" routine (D4): the library has no outdoor walk, so the first "Start a walk" makes a custom cardio exercise and a one-exercise routine (10 min at 5 km/h, lengthened in the session); not in the week. Built as a card action rather than a catalogue plan, since catalogue plans may only use library exercises.
+- "Brisk walk" routine (D4): the library has no outdoor walk, so the first "Start a walk" makes a custom cardio exercise and a one-exercise routine (5 km/h; the card starts it at 10, 20 or 30 min); not in the week. Built as a card action rather than a catalogue plan, since catalogue plans may only use library exercises.
 - Follow-up line on the next result: "Since your last check: N sessions, M minutes."
 
 ### Phase 3 — feedback (≈ 1 day)
 
-- "Were these suggestions useful?" once, on a just-saved result that shows suggestions when there are 2+ results; stored locally (`selfcheckPrefs.tipsAsked`, `tipsUseful`), synced, in backups.
+- "Were these suggestions useful?" once, on the second just-saved result that shows suggestions (`selfcheckPrefs.tipsShown` counts them); stored locally (`tipsAsked`, `tipsUseful`), synced, in backups.
+- Built as specified, with two notes: the drinking card offers Wind down and a 10-minute walk (the app has no cut-down links to reuse), and with no routines yet the strength card offers both beginner plans (gym and home), since the app doesn't record where someone trains.
 - GitHub issue template.
 
 ### Release

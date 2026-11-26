@@ -165,6 +165,7 @@ export function cleanSelfcheckPrefs(p) {
     // "Things that can help" cards the user hid (tip ids from lib/move.js)
     hiddenTips: [...new Set((Array.isArray(p.hiddenTips) ? p.hiddenTips : []).filter(x => typeof x === 'string' && /^[a-z-]{1,20}$/.test(x)))].slice(0, 20),
     // "Were these suggestions useful?": asked once; the answer stays on the phone
+    tipsShown: Number.isInteger(p.tipsShown) && p.tipsShown > 0 ? Math.min(p.tipsShown, 1000) : 0,
     tipsAsked: p.tipsAsked === true,
     tipsUseful: p.tipsUseful === 'yes' || p.tipsUseful === 'no' ? p.tipsUseful : null
   }
