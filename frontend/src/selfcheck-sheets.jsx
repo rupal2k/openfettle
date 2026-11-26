@@ -8,9 +8,9 @@ import { fmtDate, todayISO } from './lib/format.js'
 import { privacyScreen } from './lib/mobile.js'
 import { latestByMarker } from './lib/labs/reports.js'
 import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, selfHarm, waistIndex, ageIndex, ageFromYear, regionOf, lastOf, dueOn, dueChecks } from './lib/selfcheck.js'
-import { confirmSheet, startFlow, addPlanRoutines, windDownSheet } from './sheets.jsx'
+import { confirmSheet, startFlow, addPlanRoutines, walkRoutine, windDownSheet } from './sheets.jsx'
 import { breathingSheet } from './checkin-sheets.jsx'
-import { tipsFor, reasonsShown } from './lib/move.js'
+import { tipsFor, reasonsShown, sinceLast } from './lib/move.js'
 import { nav } from './lib/nav.js'
 import { Button, Segmented, Section, Row, NumberField } from './components/ui.jsx'
 import Icon from './components/Icon.jsx'
@@ -84,10 +84,11 @@ function tipCard(tip, why, minutes, done) {
     const r = findRoutine(t('Mobility & Core'))
     return { label: t('Start'), onClick: r ? startRoutine(r) : go(() => startFlow(addPlanRoutines('home-mobility')[0].id)) }
   }
+  const walk = { label: t('Start a walk'), onClick: go(() => startFlow(walkRoutine())) }
   switch (tip.id) {
-    case 'walk': return { title: t('Brisk walk, 10 minutes, 3 times this week'), note: t('Last 7 days: {0} of 150 active minutes', minutes), why: WHY.walk[why]?.() }
-    case 'keep-moving': return { title: t('Keep moving'), note: t('{0} active minutes in the last 7 days. The guideline is 150 to 300.', minutes), why: WHY.walk[why]?.() }
-    case 'gentle-walk': return { title: t('A 10-minute walk outside'), why: t('Gentle movement can help, when you feel ready. Talking to someone comes first.') }
+    case 'walk': return { title: t('Brisk walk, 10 minutes, 3 times this week'), note: t('Last 7 days: {0} of 150 active minutes', minutes), why: WHY.walk[why]?.(), action: walk }
+    case 'keep-moving': return { title: t('Keep moving'), note: t('{0} active minutes in the last 7 days. The guideline is 150 to 300.', minutes), why: WHY.walk[why]?.(), action: walk }
+    case 'gentle-walk': return { title: t('A 10-minute walk outside'), why: t('Gentle movement can help, when you feel ready. Talking to someone comes first.'), action: walk }
     case 'strength': {
       const last = [...S().workouts].reverse().map(w => S().routines.find(r => r.id === w.routineId)).find(Boolean)
       const r = last || S().routines.find(x => x.ex?.length && x.name !== t('Mobility & Core'))
@@ -106,16 +107,22 @@ function tipCard(tip, why, minutes, done) {
   }
 }
 
-function Tips() {
+// hub: "Suggested for you" at the top of Self-checks; fresh: a result just saved, where the
+// "useful?" question may be asked (once, from the second result on)
+function Tips({ hub, fresh, only }) {
   const st = useStore(s => s.S)
   const [open, setOpen] = useState(false)
-  const lang = getLang(), hidden = st.selfcheckPrefs?.hiddenTips || []
+  const lang = getLang(), prefs = st.selfcheckPrefs || {}, hidden = prefs.hiddenTips || []
   const res = tipsFor({ selfchecks: st.selfchecks, workouts: st.workouts, today: todayISO() })
   const cards = res.tips.filter(x => !hidden.includes(x.id)).map(x => {
     const why = reasonsShown(x, lang)[0]
     return why && { tip: x, reason: why, ...tipCard(x, why, res.minutes, () => ui().closeAll()) }
   }).filter(c => c && c.title)
-  if (!cards.length) return null
+  const [ask] = useState(() => fresh && cards.length > 0 && !prefs.tipsAsked && (st.selfchecks || []).length >= 2)
+  const [answered, setAnswered] = useState(false)
+  useEffect(() => { if (ask) update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, tipsAsked: true } }) }, [ask])
+  if (!cards.length || (only && only !== (res.gentle ? 'gentle' : 'plain'))) return null
+  const answer = v => { update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, tipsUseful: v } }); setAnswered(true); toast(t('Thanks. Your answer stays on this phone.')) }
   const hide = id => update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, hiddenTips: [...new Set([...(s.selfcheckPrefs.hiddenTips || []), id])] } })
   cards.forEach((c, i) => { c.src = sourceOf(c.tip.id, c.reason); if (i && c.src === cards[i - 1].src0) c.src = null; c.src0 = sourceOf(c.tip.id, c.reason) })
   const list = <>
@@ -130,9 +137,16 @@ function Tips() {
       </div>
     </div>)}
     <div className="small dim" style={{ margin: '6px 0 10px' }}>{t('If you have heart trouble, chest pain, feel faint when active, or are pregnant, ask a doctor before starting harder exercise.')}</div>
+    {ask && !answered && <div className="card" style={{ marginBottom: 10 }}>
+      <div className="small" id="tips-useful">{t('Were these suggestions useful?')}</div>
+      <div className="row" role="group" aria-labelledby="tips-useful" style={{ gap: 8, marginTop: 6 }}>
+        <Button size="sm" variant="tinted" onClick={() => answer('yes')}>{t('Yes')}</Button>
+        <Button size="sm" variant="tinted" onClick={() => answer('no')}>{t('Not really')}</Button>
+      </div>
+    </div>}
   </>
   return <div className="tips">
-    <h4 className="sec" style={{ margin: '14px 0 8px' }}>{t('Things that can help')}</h4>
+    <h4 className="sec" style={{ margin: '14px 0 8px' }}>{hub ? t('Suggested for you') : t('Things that can help')}</h4>
     {res.gentle
       ? <><button type="button" className="lab-more" onClick={() => setOpen(v => !v)} aria-expanded={open}>{t('When you feel ready')} <Icon name={open ? 'chevronUp' : 'chevronDown'} /></button>{open && list}</>
       : list}
@@ -151,6 +165,7 @@ function SelfChecks() {
   return <>
     <h3>{t('Self-checks')}</h3>
     <div className="muted small" style={{ marginBottom: 12 }}>{t('Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.')}</div>
+    <Tips hub only="plain" />
     <Section title={t('Questionnaires')}>
       {INST_IDS.map(inst => {
         const last = lastOf(list, inst), due = dueOn(list, inst, today)
@@ -164,6 +179,7 @@ function SelfChecks() {
       <Row icon="globe" iconTint="var(--teal)" title={t('WHOeyes (vision)')} subtitle={t('Free WHO app · near and distance vision')} accessory="chevron" onClick={() => openUrl(LINKS.whoeyes)} />
     </Section>
     <Support region={region} />
+    <Tips hub only="gentle" />
     <Section title={t('Where you live')} footer={t('Sets the helplines and drink sizes shown.')}>
       <div style={{ padding: '10px 14px' }}>
         <Segmented options={[{ value: 'in', label: t('India') }, { value: 'intl', label: t('Another country') }]} value={region}
@@ -285,16 +301,19 @@ function Result({ e, onDelete, noTitle }) {
   const harm = selfHarm(e.inst, e.a), diff = prev ? (shown(e) > shown(prev) ? '+' : '') + (shown(e) - shown(prev)) : ''
   const a1c = e.inst === 'idrs' && latestByMarker(st.labs?.reports || []).find(x => x.key === 'diabetes.hba1c')
   const isLatest = lastOf(st.selfchecks, e.inst)?.id === e.id   // advice follows the latest results, so not on an old one
+  // only shown when something was logged: a "0 sessions" line after a mood check would read as a nudge
+  const since = I.everyDays > 0 && prev && sinceLast(st.workouts, prev.d, e.d)
   return <>
     {!noTitle && <h3>{nameOf(e.inst)}</h3>}
     <div className="small muted">{fmtDate(e.d, true)}</div>
     {harm && <SafetyCard region={region} announce={!onDelete} />}
     <div style={{ fontSize: 28, fontWeight: 600, margin: '8px 0', color: b.level === 'high' ? 'var(--orange)' : undefined }}>{scoreLine(e)}</div>
     {I.everyDays > 0 && prev && <div className="small muted" style={{ marginBottom: 6 }}>{e.inst === 'who5' ? t('Change since last time: {0} (higher is better)', diff) : t('Change since last time: {0} (lower is better)', diff)}</div>}
+    {since?.n > 0 && <div className="small muted" style={{ marginBottom: 6 }}>{t('Since your last check · Sessions: {0} · Active minutes: {1}', since.n, since.minutes)}</div>}
     <div style={{ marginBottom: 10 }}>{resultText(e)}</div>
     {a1c && <div className="card small" style={{ marginBottom: 10 }}>{t('Your latest HbA1c in Labs: {0}% ({1}). A measured value tells you more than a risk score.', a1c.m.v, fmtDate(a1c.report.d))}</div>}
     {b.level === 'high' && I.mental && !harm && <Support region={region} />}
-    {isLatest && <Tips />}
+    {isLatest && <Tips fresh={noTitle} />}
     <div className="small dim" style={{ margin: '10px 0' }}>{t('Source: {0}', I.source)}</div>
     <Button variant="plain" size="sm" icon="link" onClick={() => openUrl(I.url)}>{t('About this questionnaire')}</Button>
     {onDelete && <><div style={{ height: 8 }} /><Button variant="ghost" className="danger" icon="trash" onClick={onDelete}>{t('Delete result')}</Button></>}

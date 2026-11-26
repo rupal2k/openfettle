@@ -163,7 +163,10 @@ export function cleanSelfcheckPrefs(p) {
     deleted: (Array.isArray(p.deleted) ? p.deleted : []).filter(x => typeof x === 'string').slice(-MAX_SELFCHECKS),
     cleared: Number.isFinite(+p.cleared) && +p.cleared > 0 ? +p.cleared : null,
     // "Things that can help" cards the user hid (tip ids from lib/move.js)
-    hiddenTips: [...new Set((Array.isArray(p.hiddenTips) ? p.hiddenTips : []).filter(x => typeof x === 'string' && /^[a-z-]{1,20}$/.test(x)))].slice(0, 20)
+    hiddenTips: [...new Set((Array.isArray(p.hiddenTips) ? p.hiddenTips : []).filter(x => typeof x === 'string' && /^[a-z-]{1,20}$/.test(x)))].slice(0, 20),
+    // "Were these suggestions useful?": asked once; the answer stays on the phone
+    tipsAsked: p.tipsAsked === true,
+    tipsUseful: p.tipsUseful === 'yes' || p.tipsUseful === 'no' ? p.tipsUseful : null
   }
 }
 // Own-server sync: union by id, then drop what either device deleted, so a deleted result never returns

@@ -37,7 +37,7 @@ export const DEF = {
   // End-of-day check-ins and their settings - see lib/checkin.js (cleanCheckins, PREFS_DEF)
   checkins: [], checkinPrefs: { ...PREFS_DEF, days: [...PREFS_DEF.days], deleted: [] },
   // Self-checks (questionnaire results) and their settings - see lib/selfcheck.js
-  selfchecks: [], selfcheckPrefs: { region: null, deleted: [], cleared: null, hiddenTips: [] }
+  selfchecks: [], selfcheckPrefs: { region: null, deleted: [], cleared: null, hiddenTips: [], tipsAsked: false, tipsUseful: null }
 }
 const clone = o => JSON.parse(JSON.stringify(o))
 

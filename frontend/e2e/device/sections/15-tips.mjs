@@ -22,6 +22,7 @@ export default {
     }
     const cards = () => app.sheet().locator('.tip-card')
     const card = name => app.sheet().locator('.tip-card', { hasText: name })
+    const openHub = async () => { await app.go('stats'); await app.tap(app.page.locator('.lab-entry', { hasText: 'Self-checks' }), { after: 1000 }); return app.waitSheet(/Questionnaires/) }
 
     // low mood (PHQ-9 12): walk, strength, Mobility & Core, with a source and the safety line
     await seed(withResults([result('phq9', PHQ(12))]))
@@ -44,7 +45,30 @@ export default {
     s = await openResult('PHQ-9')
     check('strength offers the routine last trained', await card('Strength training').getByRole('button', { name: /^Start Beginner A$/ }).count() === 1)
 
+    // Brisk walk (phase 2): the first tap makes the routine and starts it; a second tap reuses it
+    s = await openResult('PHQ-9')
+    await app.tap(card('Brisk walk').getByRole('button', { name: 'Start a walk' }), { after: 1500 })
+    if (await app.sheets() && /weigh|weight/i.test(await app.sheetText())) await app.tapText('Start without weighing in', null, { after: 1200 })
+    const started = await waitFor(async () => (await app.route()).startsWith('workout'), { timeout: 6000, label: 'the workout' }).then(() => true, () => false)
+    const wtext = await app.text('#app')
+    check('Start a walk starts a Brisk walk session', started && /Brisk walk/.test(wtext) && /Cardio/.test(wtext), (await app.route()) + ' · ' + wtext.replace(/\s+/g, ' ').slice(0, 160))
+    const walks = () => readState().routines.filter(r => r.name === 'Brisk walk').length
+    check('… as a cardio routine outside the weekly schedule', walks() === 1 && readState().customEx.some(c => c.n === 'Brisk walk' && c.bp === 'cardio') && JSON.stringify(readState().week) === week0)
+    await app.discardWorkout()
+    await openResult('PHQ-9')
+    await app.tap(card('Brisk walk').getByRole('button', { name: 'Start a walk' }), { after: 1500 })
+    if (await app.sheets() && /weigh|weight/i.test(await app.sheetText())) await app.tapText('Start without weighing in', null, { after: 1200 })
+    await waitFor(async () => (await app.route()).startsWith('workout'), { timeout: 6000, label: 'the workout' }).catch(() => {})
+    check('… and a second walk reuses it', walks() === 1)
+    await app.discardWorkout()
+
+    // the hub: "Suggested for you" above the questionnaires
+    let hub = await openHub()
+    check('the Self-checks hub starts with "Suggested for you"', hub.indexOf('Suggested for you') >= 0 && hub.indexOf('Suggested for you') < hub.indexOf('Questionnaires'))
+    await app.closeSheets()
+
     // Hide this: gone, and still gone after a restart
+    await openResult('PHQ-9')
     await app.tap(card('Brisk walk').getByRole('button', { name: 'Hide this' }), { after: 500 })
     check('Hide this removes the card', await card('Brisk walk').count() === 0)
     // the app writes its file a moment after a change: restart once the hide is saved
@@ -60,7 +84,21 @@ export default {
     check('a self-harm answer: suggestions are folded under "When you feel ready"', /When you feel ready/.test(s) && await cards().count() === 0)
     check('… below the safety card', s.indexOf('thoughts of being better off dead') < s.indexOf('Things that can help'))
     await app.tap(app.sheet().getByRole('button', { name: /When you feel ready/ }), { after: 400 })
+    check('… opened: the walk can be started too', await card('A 10-minute walk').getByRole('button', { name: 'Start a walk' }).count() === 1)
     check('… opened: only a short walk and gentle stretching', (await cards().allInnerTexts()).map(x => x.split('\n')[0]).join(' | ') === 'A 10-minute walk outside | Mobility & Core, about 15 minutes' && !/150|Strength/.test(await app.sheetText()))
+    await app.closeSheets()
+
+    hub = await openHub()
+    check('the hub puts the helplines before the suggestions, which stay folded', hub.indexOf('Questionnaires') < hub.indexOf('Talk to someone') && hub.indexOf('Talk to someone') < hub.indexOf('Suggested for you') && /When you feel ready/.test(hub) && await app.sheet().locator('.tip-card').count() === 0)
+    await app.closeSheets()
+
+    // since the last check (phase 2): sessions and minutes between two results of the same check
+    const two = withResults([result('phq9', PHQ(14)), result('phq9', PHQ(8))])
+    two.selfchecks[0] = { ...two.selfchecks[0], id: 'ofreg-phq9-old', d: iso(Date.now() - 15 * DAY), at: Date.now() - 15 * DAY }
+    await seed(two)
+    s = await openResult('PHQ-9')
+    const since = s.match(/Since your last check · Sessions: (\d+) · Active minutes: (\d+)/)
+    check('a repeat result says what was done since the last one', !!since && +since[1] > 0, since?.[0] || s.slice(0, 200))
     await app.closeSheets()
 
     // anxiety: box breathing opens and runs (its beeps are counted in the page)
@@ -81,6 +119,22 @@ export default {
     await openResult('AUDIT-C')
     await app.tap(card('An evening routine').getByRole('button', { name: 'Wind down' }), { after: 1200 })
     check('a drinking result offers an evening routine that opens Wind down', /Fire|Water|Night/.test(await app.waitSheet().catch(() => '')))
+    await app.closeSheets()
+
+    // "Were these suggestions useful?" (phase 3): once, on a result just taken, from the second result on
+    await seed(withResults([result('gad7', [2, 2, 2, 1, 1, 0, 0])]))
+    await openHub()
+    await app.tap(app.sheet().locator('.lrow', { hasText: 'AUDIT-C' }), { after: 1000 })
+    await app.waitSheet(/drink/i)
+    await app.tap(app.sheet().locator('[aria-labelledby=sc-sex]').getByRole('button', { name: 'Man' }), { after: 200 })
+    for (let i = 0; i < 3; i++) await app.tap(app.sheet().locator(`[aria-labelledby=sc-q${i}] .chip`).nth(4), { after: 200 })
+    await app.tapButton('See my result', app.sheet(), { after: 1200 })
+    check('a second result asks once whether the suggestions were useful', /Were these suggestions useful\?/.test(await app.sheetText()))
+    await app.tapButton('Yes', app.sheet(), { after: 600 })
+    check('… the answer is kept on the phone', await waitFor(() => readState().selfcheckPrefs?.tipsUseful === 'yes' && readState().selfcheckPrefs.tipsAsked, { timeout: 5000, label: 'the saved answer' }).then(() => true, () => false))
+    await app.closeSheets()
+    await openResult('AUDIT-C')
+    check('… and not asked again', !/Were these suggestions useful/.test(await app.sheetText()))
     await app.closeSheets()
 
     // another language: mental-health suggestions wait for review; diabetes ones show

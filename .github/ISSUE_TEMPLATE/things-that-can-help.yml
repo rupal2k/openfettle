@@ -1,0 +1,43 @@
+name: Things that can help (suggestions) feedback
+description: Tell us how the activity suggestions under a Self-check result work for you. Please don't share your scores or answers.
+title: "Suggestions feedback: "
+labels: ["self-checks", "feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping. Your Self-check results stay on your phone and we never see them. Please describe the suggestions, not your results.
+
+        If you are struggling right now, please talk to someone: in India call Tele-MANAS on 14416, elsewhere find a free helpline at https://findahelpline.com.
+  - type: dropdown
+    id: useful
+    attributes:
+      label: Were the suggestions useful to you?
+      options:
+        - "Yes"
+        - "Sometimes"
+        - "Not really"
+    validations:
+      required: true
+  - type: dropdown
+    id: tried
+    attributes:
+      label: Did you try one of them?
+      options:
+        - "Yes, more than once"
+        - "Yes, once"
+        - "No"
+  - type: textarea
+    id: wrong
+    attributes:
+      label: Did any suggestion feel wrong, pushy or not right for you?
+      description: For example something you can't do, wording that felt off in your language, or a suggestion that came at a bad moment.
+  - type: textarea
+    id: wish
+    attributes:
+      label: What would make them better for you?
+  - type: input
+    id: setup
+    attributes:
+      label: App version, phone and language
+      placeholder: "1.9.0, Samsung Galaxy S21, Deutsch"

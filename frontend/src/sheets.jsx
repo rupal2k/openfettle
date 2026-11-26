@@ -198,6 +198,23 @@ export function addPlanRoutines(templateId) {
   return routines
 }
 
+// "Brisk walk" for Things that can help: the library has no outdoor walk, so the first tap makes
+// a custom cardio exercise and a one-exercise routine (10 min at 5 km/h); later taps reuse them.
+// Found by name, like Mobility & Core. Not in the week. → the routine's id
+export function walkRoutine() {
+  const name = t('Brisk walk'), same = x => x.n?.toLowerCase() === name.toLowerCase()
+  let id = S().routines.find(r => r.name === name && r.ex.length === 1 && isCardio(r.ex[0].id))?.id
+  if (id) return id
+  id = uid()
+  update(st => {
+    st.customEx = st.customEx || []
+    let ex = st.customEx.find(c => same(c) && c.bp === 'cardio')
+    if (!ex) { ex = { id: 'c' + uid(), n: name, bp: 'cardio', desc: t('A walk fast enough that you breathe harder but can still talk.'), tg: '', eq: 'custom', custom: true }; st.customEx.push(ex) }
+    st.routines.push({ id, name, emoji: 'figureRun', ex: [{ id: ex.id, sets: 1, min: 10, speed: 5 }] })
+  })
+  return id
+}
+
 export function loadStarterPlan() {
   const [push, pull, legs] = starterRoutines()
   update(st => {

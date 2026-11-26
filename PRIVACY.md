@@ -19,7 +19,7 @@ OpenFettle is open source (AGPL v3); everything below can be checked in the code
 | Workouts, routines, body weight, meals, custom foods, blood test results, settings | App storage on the phone | No (see "Sync" for self-hosted servers) |
 | End-of-day check-ins: how you rated your energy and mood, what weighed on you, your notes and plans | App storage on the phone | No (see "Sync") |
 | Self-check results (WHO-5, PHQ-9, GAD-7, AUDIT-C, Indian Diabetes Risk Score): which answer you picked for each question, the date, and for the alcohol and diabetes checks whether you answered as a woman or a man. Your waist and age are turned into an answer band; the numbers you type are not kept | App storage on the phone | No (see "Sync") |
-| Which "Things that can help" suggestions you hid. The suggestions themselves are worked out on the phone each time from your latest results and workouts, and are not stored | App storage on the phone | No (see "Sync") |
+| Which "Things that can help" suggestions you hid, and your answer to "Were these suggestions useful?" if you gave one. The suggestions themselves are worked out on the phone each time from your latest results and workouts, and are not stored | App storage on the phone | No (see "Sync") |
 | Blood test reports | Only the values you confirm, plus the sample date and your birth year (never the file name or full date of birth) | No |
 | Camera photos (food, lab reports) | Copied into memory to be read, then the photo file is deleted | No |
 | Downloaded food-recognition model and exercise pictures | App cache, to work offline | No |

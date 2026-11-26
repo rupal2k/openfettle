@@ -1,6 +1,6 @@
 # Exercise suggestions from Self-checks ("Move for your mind")
 
-Status: **Phase 1 built for 1.9.0** (branch `feat/things-that-can-help`). Decisions taken 2026-11-26: D1 "Things that can help", D2 English-only mental-health cards until reviewed (`TIP_LANGS`), D3 folded and gentle under the support card, D4 Brisk walk routine in Phase 2, D5 top of the hub (Phase 2).
+Status: **Phases 1–3 built for 1.9.0** (branch `feat/things-that-can-help`). Decisions taken 2026-11-26: D1 "Things that can help", D2 English-only mental-health cards until reviewed (`TIP_LANGS`), D3 folded and gentle under the support card, D4 Brisk walk routine in Phase 2, D5 top of the hub (Phase 2).
 
 ## 1. The problem and the bet
 
@@ -102,12 +102,12 @@ Leading indicator we *can* see: whether people open and use it (GitHub issues, r
 ### Phase 2 — the hub and walking (≈ 2 days)
 
 - "Suggested for you" at the top of Self-checks (D5), from the latest result of each check.
-- "Brisk walk" routine (D4): a timed cardio routine in the Intervals/Mobility group, so it doesn't touch the week. Library exercise check first; a custom entry if none fits.
+- "Brisk walk" routine (D4): the library has no outdoor walk, so the first "Start a walk" makes a custom cardio exercise and a one-exercise routine (10 min at 5 km/h, lengthened in the session); not in the week. Built as a card action rather than a catalogue plan, since catalogue plans may only use library exercises.
 - Follow-up line on the next result: "Since your last check: N sessions, M minutes."
 
 ### Phase 3 — feedback (≈ 1 day)
 
-- "Were these suggestions useful?" once, after the second result that showed suggestions; stored locally.
+- "Were these suggestions useful?" once, on a just-saved result that shows suggestions when there are 2+ results; stored locally (`selfcheckPrefs.tipsAsked`, `tipsUseful`), synced, in backups.
 - GitHub issue template.
 
 ### Release

@@ -77,3 +77,11 @@ export function tipsFor({ selfchecks, workouts, today }) {
 // The reasons a tip may give in this language (mental-health ones only in TIP_LANGS); none → hide the tip.
 const MENTAL = ['mood', 'anxiety', 'severe']
 export const reasonsShown = (tip, lang) => TIP_LANGS.includes(lang) ? tip.why : tip.why.filter(w => !MENTAL.includes(w))
+
+// "Since your last check": sessions and active minutes after the earlier result's day, up to the newer one's
+export function sinceLast(workouts, from, to) {
+  const days = isoDays(from, to)
+  if (days < 1) return null
+  const n = (workouts || []).filter(w => { const a = isoDays(w.d, to); return a >= 0 && a < days }).length
+  return { n, minutes: activeMinutes(workouts, to, days) }
+}

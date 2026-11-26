@@ -8,6 +8,10 @@ Things that can help: activity suggestions under your Self-check results.
 - 🛟 **Support first:** after a severe low-mood result or any answer about self-harm, the support card stays on top and only gentle suggestions appear, folded under "When you feel ready".
 - 🌐 Suggestions for mood, anxiety and wellbeing show in English for now, until each translation has been reviewed; the diabetes, alcohol and general ones show in every language.
 - 🙈 **Hide this** removes a suggestion you don't want. Nothing new leaves the phone, and nothing appears on Home.
+- 📋 **Suggested for you** at the top of Self-checks gathers the suggestions from your latest results in one place.
+- 🚶 **Brisk walk:** the walk suggestion starts a 10-minute Brisk walk session (a cardio routine you can lengthen), so walks are logged and count toward your active minutes. It isn't added to your weekly schedule.
+- 📈 **Since your last check:** a repeat result shows how many sessions and active minutes you logged since the previous one.
+- 💬 Once, the app asks whether the suggestions were useful. The answer stays on your phone.
 
 ## 1.8.3
 

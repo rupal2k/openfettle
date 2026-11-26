@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { tipsFor, flagsOf, activeMinutes, reasonsShown, WEEK_TARGET, MAX_TIPS } from './move.js'
+import { tipsFor, flagsOf, activeMinutes, reasonsShown, sinceLast, WEEK_TARGET, MAX_TIPS } from './move.js'
 
 const TODAY = '2026-11-26'
 const day = n => { const d = new Date(TODAY + 'T12:00:00'); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10) }
@@ -90,5 +90,13 @@ describe('reasonsShown', () => {
   it('other languages drop mental-health reasons until reviewed', () => {
     expect(reasonsShown(walk, 'hi')).toEqual(['diabetes'])
     expect(reasonsShown({ id: 'breathing', why: ['anxiety'] }, 'de')).toEqual([])
+  })
+})
+
+describe('sinceLast', () => {
+  it('counts sessions and minutes after the earlier result, up to the newer one', () => {
+    const w = [W(20, 30), W(14, 40), W(10, 30), W(3, 25), W(0, 20), W(-1, 50)]
+    expect(sinceLast(w, day(14), TODAY)).toEqual({ n: 3, minutes: 75 })   // not the day of the earlier check, not tomorrow
+    expect(sinceLast(w, TODAY, TODAY)).toBeNull()
   })
 })
