@@ -6,6 +6,7 @@ import { readSettings, restoreSettings, setOffline, sleep } from '../lib/device.
 
 export default {
   id: '01b-offline', title: 'Offline (turns the phone’s network off)', fixture: 'trained', needs: 'offline',
+  ignoreErrors: [/^Failed to load resource: net::ERR_/],   // what offline means; the checks below prove it is handled
   async run(t) {
     const saved = readSettings()
     try {

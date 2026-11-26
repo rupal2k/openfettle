@@ -122,4 +122,4 @@ export function pushTestFile(local, name) {
   adb('push', local, `${TEST_DIR}/${name}`)
   shell('am', 'broadcast', '-a', 'android.intent.action.MEDIA_SCANNER_SCAN_FILE', '-d', `file://${TEST_DIR}/${name}`)
 }
-export const removeTestFiles = () => shell('rm', '-rf', TEST_DIR, '/sdcard/Pictures/OpenFettleTest')
+export const removeTestFiles = () => shell('rm', '-rf', TEST_DIR)

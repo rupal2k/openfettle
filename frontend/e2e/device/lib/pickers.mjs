@@ -1,4 +1,4 @@
-// System pickers. Both only ever tap our own test files: the file picker is searched for the exact
+// The system file picker. It only ever taps our own test files: the file picker is searched for the exact
 // test file name and a result is tapped only when every result shown is a test file (ofreg-*).
 import { shell, sleep, waitFor, topActivity, uiDump, uiFind, uiTap, back, PKG } from './device.mjs'
 
@@ -22,15 +22,4 @@ export async function pickFile(name) {
     for (let i = 0; i < 3 && !topActivity().startsWith(PKG + '/'); i++) { back(); await sleep(600) }
     throw e
   }
-}
-
-// The Android photo picker: open the OpenFettleTest album (it holds only our test image) and pick
-// its one photo. Tiles carry dates, not names, so the album is what keeps the user's photos out.
-export async function pickTestPhoto() {
-  await waitFor(() => /photopicker|providers\.media|documentsui/i.test(topActivity()), { timeout: 10000, label: 'the photo picker' })
-  await uiTap('Collections|Albums', { after: 1500 })
-  await uiTap('OpenFettleTest[^"]*', { after: 1500 })
-  await uiTap('Photo taken on[^"]*|Photo[^"]*', { attr: 'content-desc', after: 1500 })
-  if (!topActivity().startsWith(PKG + '/')) await uiTap('Done|Add|Select|OK', { attr: 'text', after: 1500 }).catch(() => {})
-  await waitFor(() => topActivity().startsWith(PKG + '/'), { timeout: 10000, label: 'back in the app' })
 }

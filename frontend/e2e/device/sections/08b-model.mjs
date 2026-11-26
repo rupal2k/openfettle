@@ -3,7 +3,7 @@
 import { waitFor } from '../lib/device.mjs'
 
 export default {
-  id: '08c-model', title: 'Food-recognition model download (93 MB)', fixture: 'trained', needs: 'model',
+  id: '08b-model', title: 'Food-recognition model download (93 MB)', fixture: 'trained', needs: 'model',
   async run({ app, check }) {
     await app.go('settings')
     const row = () => app.main().locator('.lrow, .card, section').filter({ hasText: 'Food-101' }).first()

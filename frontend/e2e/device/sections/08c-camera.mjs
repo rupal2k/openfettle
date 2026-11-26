@@ -1,11 +1,9 @@
 // Checklist 8 (camera and photos). Uses the phone's camera for one real photo (deleted by the
-// app's own clean-up), taps the system permission dialog, and picks from the OpenFettleTest album
-// only. Opt in: node run.mjs --with camera
+// app's own clean-up), taps the system permission dialog. Choose photo is left to a person (see the end). Needs the model (08b) installed: Take photo is offered only then. Opt in: --with model,camera
 import { shell, uiTap, uiFind, topActivity, waitFor, sleep, PKG } from '../lib/device.mjs'
-import { pickTestPhoto } from '../lib/pickers.mjs'
 
 export default {
-  id: '08b-camera', title: 'Camera, barcode permission and photo logging', fixture: 'trained', needs: 'camera',
+  id: '08c-camera', title: 'Camera, barcode permission and photo logging', fixture: 'trained', needs: 'camera',
   async run(t) {
     let { app, check } = t
     const sheet = () => app.sheet()
@@ -13,6 +11,8 @@ export default {
     const preview = () => app.page.evaluate(() => { const i = document.querySelector('[role=dialog] img'); return i && i.complete && i.naturalWidth > 0 ? i.naturalWidth : 0 })
 
     // camera permission denied: the barcode sheet still takes a typed code
+    // a "Don't allow" from an earlier run is remembered and would stop the dialog: forget it first
+    shell('pm', 'clear-permission-flags', PKG, 'android.permission.CAMERA', 'user-set', 'user-fixed')
     shell('pm', 'revoke', PKG, 'android.permission.CAMERA')
     app = await t.relaunch()
     await app.go('nutrition')
@@ -41,13 +41,8 @@ export default {
     check('Retake clears the preview', !await preview())
     await app.closeSheets()
 
-    // Choose photo: the system photo picker, the test album only
-    await app.tapButton('Log from photo', app.main(), { after: 800 })
-    await app.tap(sheet().getByRole('button', { name: /Choose photo/ }), { after: 300 })
-    await pickTestPhoto()
-    await reconnect()
-    check('Choose photo shows the picked image as a preview', await waitFor(preview, { timeout: 10000, label: 'the preview' }).catch(() => 0) > 0)
-    check('… with Retake offered', await sheet().getByRole('button', { name: 'Retake' }).count() === 1)
-    await app.closeSheets()
+    // Choose photo stays a manual check: the system photo picker gives the automation no album
+    // names, so the only thing it could tap is "the newest photo", which may be one of the user's.
+    t.manual('Choose photo shows a preview with Retake', 'My Meals → Log from photo → Choose photo, pick any photo')
   },
 }

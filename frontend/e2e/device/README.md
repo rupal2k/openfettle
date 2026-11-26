@@ -25,9 +25,9 @@ Exactly one phone must be connected and authorised. The report goes to `reports/
 - **Only the debug app and its data.** Each section starts from its own fixture
   (`lib/fixtures.mjs`: `fresh`, `trained`, `selfchecks`), so no section depends on another. The
   debug app's data from before the run is saved first and written back at the end.
-- **Test files** in `/sdcard/Download/OpenFettleTest` and one image in
-  `/sdcard/Pictures/OpenFettleTest`, deleted at the end. The pickers only ever tap these: the file
-  picker is searched for the exact `ofreg-*` name, the photo picker opens the test album.
+- **Test files** in `/sdcard/Download/OpenFettleTest`, deleted at the end. The file picker only
+  ever taps these: it is searched for the exact `ofreg-*` name, and a result is tapped only when
+  every result shown is a test file. The photo picker is never automated.
 - **The phone's main profile only.** Package queries pass `--user 0`. System dumps (alarms, audio)
   are filtered on the phone to the debug app's lines before they reach the computer, and crash
   screenshots are taken only while the debug app is on screen.
@@ -39,8 +39,8 @@ Opt-in sections (`--with`):
 | needs    | section       | what it does to the phone |
 |----------|---------------|---------------------------|
 | offline  | 01b-offline   | airplane mode + Wi-Fi off for about a minute (the app's requests use native HTTP, so a WebView-only offline can't test this) |
-| camera   | 08b-camera    | revokes then grants the camera permission, taps "Don't allow" in the system dialog, takes one real photo, opens the photo picker on the test album |
-| model    | 08c-model     | downloads the 93 MB food-recognition model |
+| camera   | 08c-camera    | revokes then grants the camera permission, taps "Don't allow" in the system dialog, takes one real photo (Choose photo stays a manual check: the photo picker can't be limited to a test image) |
+| model    | 08b-model     | downloads the 93 MB food-recognition model |
 
 ## How the checks prove things
 

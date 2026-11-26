@@ -24,13 +24,9 @@ export async function prepareFiles(out) {
     bigJson: make('ofreg-big.json', p => pad(p, '{"pad":"', '"}', 21 * MB)),                 // over the 20 MB backup limit
     bigPdf: make('ofreg-oversize.pdf', p => pad(p, '%PDF-1.4\n%', '\n%%EOF\n', 26 * MB)),     // over the 25 MB lab-report limit
   }
-  // the photo picker: one image alone in its own album
-  shell('mkdir', '-p', '/sdcard/Pictures/OpenFettleTest')
-  adb('push', join(REPO_LABS, 'reference-page1-photo.jpg'), '/sdcard/Pictures/OpenFettleTest/ofreg-photo.jpg')
-  shell('am', 'broadcast', '-a', 'android.intent.action.MEDIA_SCANNER_SCAN_FILE', '-d', 'file:///sdcard/Pictures/OpenFettleTest/ofreg-photo.jpg')
   // the pickers search Android's media index: wait until it lists every test file (the query
   // names our files only, so nothing of the user's is read)
-  const want = [...Object.values(files), 'ofreg-photo.jpg']
+  const want = Object.values(files)
   await waitFor(() => { const seen = indexed(); return want.every(n => seen.includes(n)) }, { timeout: 30000, label: 'the media index to list the test files' })
   return { ...files, dir, push: (name, local) => put(name, local) }
 }

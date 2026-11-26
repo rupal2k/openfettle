@@ -33,6 +33,8 @@ const check = (name, ok, info = '') => {
   console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}${info ? '  — ' + String(info).replace(/\s+/g, ' ').slice(0, 160) : ''}`)
   return !!ok
 }
+// something a person has to check by hand: listed in the report, not counted as a pass
+const manual = (name, how) => { results.push({ section: current, name, ok: null, info: how }); console.log(`  MANUAL  ${name}  — ${how}`) }
 
 // ---- setup -----------------------------------------------------------------------------------------
 const phone = dev.device()
@@ -58,12 +60,13 @@ try {
     try {
       app = await launch(errors)
       const t = {
-        check, files, phone, out: OUT, get app() { return app },
+        check, manual, files, phone, out: OUT, get app() { return app },
         relaunch: async () => { await app.close(); stop(); app = await launch(errors); return app },
         reconnect: async () => { await app.close(); app = await connect(errors); return app },   // after a system picker or camera
       }
       await s.run(t)
-      check('no console errors', !errors.length, errors.join(' / '))
+      const real = errors.filter(e => !(s.ignoreErrors || []).some(r => r.test(e)))   // a section may expect some (offline: failed loads)
+      check('no console errors', !real.length, real.join(' / '))
     } catch (e) {
       check('section ran to the end', false, e.message)
       // only of the debug app itself: never a camera view, a picker or another app
@@ -89,11 +92,12 @@ try {
 }
 
 // ---- report ----------------------------------------------------------------------------------------
-const pass = results.filter(r => r.ok).length, fail = results.length - pass
+const pass = results.filter(r => r.ok === true).length, fail = results.filter(r => r.ok === false).length, todo = results.filter(r => r.ok === null)
 const lines = [`# Device regression ${stamp}`, '', `${phone.model} · ${dev.PKG} ${version} · ${pass} passed, ${fail} failed`, '']
 if (skipped.length) lines.push(`Not run (add with --with): ${skipped.map(s => `${s.id} (${s.needs})`).join(', ')}`, '')
-for (const r of results) lines.push(`- ${r.ok ? 'PASS' : '**FAIL**'} [${r.section}] ${r.name}${r.info ? ' — ' + r.info.replace(/\s+/g, ' ') : ''}`)
+if (todo.length) lines.push(`To check by hand: ${todo.map(r => r.name).join('; ')}`, '')
+for (const r of results) lines.push(`- ${r.ok === null ? 'MANUAL' : r.ok ? 'PASS' : '**FAIL**'} [${r.section}] ${r.name}${r.info ? ' — ' + r.info.replace(/\s+/g, ' ') : ''}`)
 writeFileSync(join(OUT, 'report.md'), lines.join('\n') + '\n')
 writeFileSync(join(OUT, 'results.json'), JSON.stringify(results, null, 1))
-console.log(`\n${pass} passed, ${fail} failed${skipped.length ? `; not run: ${skipped.map(s => s.id).join(', ')}` : ''}\n${join(OUT, 'report.md')}`)
+console.log(`\n${pass} passed, ${fail} failed${todo.length ? `, ${todo.length} to check by hand` : ''}${skipped.length ? `; not run: ${skipped.map(s => s.id).join(', ')}` : ''}\n${join(OUT, 'report.md')}`)
 process.exit(fail ? 1 : 0)
