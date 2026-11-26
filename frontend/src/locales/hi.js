@@ -1410,6 +1410,8 @@ export default {
   'Self-checks': 'स्व-जाँच',
   'Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.': 'डॉक्टर और शोधकर्ता जिन छोटी प्रश्नावलियों का इस्तेमाल करते हैं। ये किसी ऐसी बात की ओर इशारा कर सकती हैं जिसकी जाँच करानी चाहिए; ये कोई निदान नहीं करतीं। आपके जवाब इसी फ़ोन पर रहते हैं।',
   'Questionnaires': 'प्रश्नावलियाँ',
+  '1 questionnaire': '1 प्रश्नावली',
+  '{0} questionnaires': '{0} प्रश्नावलियाँ',
   'Due': 'करने का समय',
   'Last: {0} · {1}': 'पिछली बार: {0} · {1}',
   '{0} out of {1}': '{1} में से {0}',

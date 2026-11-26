@@ -1410,6 +1410,8 @@ export default {
   'Self-checks': 'Самопроверки',
   'Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.': 'Короткие опросники, которыми пользуются врачи и исследователи. Они могут указать на то, что стоит проверить, но ничего не диагностируют. Ваши ответы остаются на этом телефоне.',
   'Questionnaires': 'Опросники',
+  '1 questionnaire': '1 опросник',
+  '{0} questionnaires': '{0} опросника',
   'Due': 'Пора',
   'Last: {0} · {1}': 'Последний: {0} · {1}',
   '{0} out of {1}': '{0} из {1}',

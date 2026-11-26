@@ -11,6 +11,7 @@ import Icon from '../components/Icon.jsx'
 import { Button, Segmented } from '../components/ui.jsx'
 import { hasWeights } from '../lib/units-convert.js'
 import { glyphOf } from '../lib/glyphs.js'
+import { SelfChecksHomeCard } from '../selfcheck-sheets.jsx'
 
 // Home = what to do now + a quick glance. Deep charts & history live in Stats.
 export default function Home() {
@@ -88,6 +89,7 @@ export default function Home() {
         <Icon name="chevronRight" className="chev" />
       </button>
     )}
+    {!S.active && <SelfChecksHomeCard S={S} />}
 
     <div className="card">
       <div className="row between" style={{ marginBottom: 8 }}>

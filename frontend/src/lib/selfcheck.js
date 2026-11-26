@@ -133,6 +133,8 @@ export function dueOn(list, inst, today) {
   return !!n && !!last && days(last.d, today) >= n
 }
 
+export const dueChecks = (list, today) => INST_IDS.filter(inst => dueOn(list, inst, today))
+
 /* ------------------------------------------------ backup and sync -- */
 export const MAX_SELFCHECKS = 500
 export const PREFS_DEF = Object.freeze({ region: null, deleted: [], cleared: null })

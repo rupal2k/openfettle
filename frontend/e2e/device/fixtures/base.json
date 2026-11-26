@@ -1,0 +1,572 @@
+{
+ "unit": "kg",
+ "restSec": 90,
+ "sound": true,
+ "keepAwake": true,
+ "lang": "en",
+ "theme": "dark",
+ "routines": [
+  {
+   "id": "mwo16pucyvs5m",
+   "name": "Beginner A",
+   "emoji": "figureStrength",
+   "rest": 90,
+   "ex": [
+    {
+     "id": "0739",
+     "sets": 3,
+     "reps": 12,
+     "weight": 0
+    },
+    {
+     "id": "0289",
+     "sets": 3,
+     "reps": 10,
+     "weight": 0
+    },
+    {
+     "id": "2330",
+     "sets": 3,
+     "reps": 12,
+     "weight": 0
+    },
+    {
+     "id": "0405",
+     "sets": 3,
+     "reps": 10,
+     "weight": 0
+    },
+    {
+     "id": "0586",
+     "sets": 3,
+     "reps": 12,
+     "weight": 0
+    },
+    {
+     "id": "3665",
+     "sets": 2,
+     "mode": "time",
+     "sec": 30,
+     "weight": 0
+    }
+   ]
+  },
+  {
+   "id": "mwo16pucnx9e1",
+   "name": "Beginner B",
+   "emoji": "dumbbell",
+   "rest": 90,
+   "ex": [
+    {
+     "id": "1760",
+     "sets": 3,
+     "reps": 10,
+     "weight": 0
+    },
+    {
+     "id": "1323",
+     "sets": 3,
+     "reps": 12,
+     "weight": 0
+    },
+    {
+     "id": "0493",
+     "sets": 3,
+     "reps": 10,
+     "weight": 0
+    },
+    {
+     "id": "1459",
+     "sets": 3,
+     "reps": 10,
+     "weight": 0
+    },
+    {
+     "id": "0585",
+     "sets": 3,
+     "reps": 12,
+     "weight": 0
+    },
+    {
+     "id": "0276",
+     "sets": 2,
+     "reps": 10,
+     "weight": 0
+    }
+   ]
+  },
+  {
+   "id": "mwo19ibzqka64",
+   "name": "Tabata Express",
+   "emoji": "bolt",
+   "rest": 10,
+   "format": "tabata",
+   "ex": [
+    {
+     "id": "0514",
+     "sets": 4,
+     "mode": "time",
+     "sec": 20,
+     "weight": 0,
+     "sg": "sgmwo19ic00mlcs"
+    },
+    {
+     "id": "0662",
+     "sets": 4,
+     "mode": "time",
+     "sec": 20,
+     "weight": 0,
+     "sg": "sgmwo19ic00mlcs"
+    },
+    {
+     "id": "0630",
+     "sets": 4,
+     "mode": "time",
+     "sec": 20,
+     "weight": 0,
+     "sg": "sgmwo19ic0ruuft"
+    },
+    {
+     "id": "3582",
+     "sets": 4,
+     "mode": "time",
+     "sec": 20,
+     "weight": 0,
+     "sg": "sgmwo19ic0ruuft"
+    },
+    {
+     "id": "3223",
+     "sets": 4,
+     "mode": "time",
+     "sec": 20,
+     "weight": 0,
+     "sg": "sgmwo19ic0lgnc8"
+    },
+    {
+     "id": "3665",
+     "sets": 4,
+     "mode": "time",
+     "sec": 20,
+     "weight": 0,
+     "sg": "sgmwo19ic0lgnc8"
+    },
+    {
+     "id": "3361",
+     "sets": 4,
+     "mode": "time",
+     "sec": 20,
+     "weight": 0,
+     "sg": "sgmwo19ic0bv6st"
+    },
+    {
+     "id": "0687",
+     "sets": 4,
+     "mode": "time",
+     "sec": 20,
+     "weight": 0,
+     "sg": "sgmwo19ic0bv6st"
+    }
+   ]
+  },
+  {
+   "id": "mwo1afc9ru1c6",
+   "name": "EMOM 20",
+   "emoji": "timer",
+   "format": "emom",
+   "ex": [
+    {
+     "id": "0662",
+     "sets": 5,
+     "mode": "time",
+     "sec": 60,
+     "weight": 0,
+     "reps": 10,
+     "sg": "sgmwo1afc96c5wk"
+    },
+    {
+     "id": "1685",
+     "sets": 5,
+     "mode": "time",
+     "sec": 60,
+     "weight": 0,
+     "reps": 15,
+     "sg": "sgmwo1afc96c5wk"
+    },
+    {
+     "id": "0872",
+     "sets": 5,
+     "mode": "time",
+     "sec": 60,
+     "weight": 0,
+     "reps": 12,
+     "sg": "sgmwo1afc96c5wk"
+    },
+    {
+     "id": "1160",
+     "sets": 5,
+     "mode": "time",
+     "sec": 60,
+     "weight": 0,
+     "reps": 8,
+     "sg": "sgmwo1afc96c5wk"
+    }
+   ]
+  },
+  {
+   "id": "mwo1ahzl44xfm",
+   "name": "AMRAP 15",
+   "emoji": "flame",
+   "format": "amrap",
+   "cap": 900,
+   "ex": [
+    {
+     "id": "0662",
+     "sets": 10,
+     "reps": 10,
+     "weight": 0,
+     "sg": "sgmwo1ahzlij9tu"
+    },
+    {
+     "id": "1685",
+     "sets": 10,
+     "reps": 15,
+     "weight": 0,
+     "sg": "sgmwo1ahzlij9tu"
+    },
+    {
+     "id": "1460",
+     "sets": 10,
+     "reps": 20,
+     "weight": 0,
+     "side": true,
+     "sg": "sgmwo1ahzlij9tu"
+    },
+    {
+     "id": "0872",
+     "sets": 10,
+     "reps": 15,
+     "weight": 0,
+     "sg": "sgmwo1ahzlij9tu"
+    }
+   ]
+  },
+  {
+   "id": "mwo1akn9balmt",
+   "name": "Kettlebell EMOM 16",
+   "emoji": "kettlebell",
+   "format": "emom",
+   "ex": [
+    {
+     "id": "0549",
+     "sets": 8,
+     "mode": "time",
+     "sec": 60,
+     "weight": 0,
+     "reps": 15,
+     "sg": "sgmwo1akn9k3low"
+    },
+    {
+     "id": "0534",
+     "sets": 8,
+     "mode": "time",
+     "sec": 60,
+     "weight": 0,
+     "reps": 10,
+     "sg": "sgmwo1akn9k3low"
+    }
+   ]
+  }
+ ],
+ "week": {
+  "1": "mwo16pucyvs5m",
+  "3": "mwo16pucnx9e1",
+  "5": "mwo16pucyvs5m"
+ },
+ "exWeights": {
+  "2330": {
+   "w": 12,
+   "d": "2026-11-20"
+  },
+  "0739": {
+   "w": 16,
+   "d": "2026-11-20"
+  },
+  "0289": {
+   "w": 12,
+   "d": "2026-11-20"
+  },
+  "0405": {
+   "w": 12,
+   "d": "2026-11-20"
+  },
+  "0586": {
+   "w": 12,
+   "d": "2026-11-20"
+  },
+  "0025": {
+   "w": 60,
+   "d": "2026-11-10"
+  },
+  "0043": {
+   "w": 80,
+   "d": "2026-11-12"
+  }
+ },
+ "workouts": [
+  {
+   "id": "iwmwo250k6oyw6j",
+   "d": "2026-11-10",
+   "start": 1794276000000,
+   "end": 1794276000000,
+   "routineId": null,
+   "name": "Push day",
+   "entries": [
+    {
+     "id": "0025",
+     "sets": [
+      {
+       "w": 60,
+       "r": 8,
+       "done": true
+      },
+      {
+       "w": 60,
+       "r": 8,
+       "done": true,
+       "rpe": 8
+      }
+     ],
+     "topW": 60
+    }
+   ],
+   "prs": [],
+   "vol": 960
+  },
+  {
+   "id": "iwmwo250k6kcon7",
+   "d": "2026-11-12",
+   "start": 1794448800000,
+   "end": 1794448800000,
+   "routineId": null,
+   "name": "Leg day",
+   "entries": [
+    {
+     "id": "0043",
+     "sets": [
+      {
+       "w": 80,
+       "r": 5,
+       "done": true
+      }
+     ],
+     "topW": 80
+    }
+   ],
+   "prs": [],
+   "vol": 400
+  },
+  {
+   "id": "mwo17enwbr89u",
+   "d": "2026-11-20",
+   "start": 1795121858300,
+   "end": 1795121922810,
+   "routineId": "mwo16pucyvs5m",
+   "name": "Beginner A",
+   "bw": 70,
+   "entries": [
+    {
+     "id": "0739",
+     "sets": [
+      {
+       "w": 16,
+       "r": 10,
+       "done": true,
+       "rir": 1
+      },
+      {
+       "w": 12,
+       "r": 12,
+       "done": true,
+       "rir": 2
+      },
+      {
+       "w": 12,
+       "r": 12,
+       "done": true,
+       "rir": 4
+      }
+     ],
+     "topW": 16,
+     "target": {
+      "id": "0739",
+      "sets": 3,
+      "reps": 12,
+      "weight": 0
+     }
+    },
+    {
+     "id": "0289",
+     "sets": [
+      {
+       "w": 12,
+       "r": 10,
+       "done": true,
+       "rir": 1
+      },
+      {
+       "w": 12,
+       "r": 10,
+       "done": true,
+       "rir": 2
+      },
+      {
+       "w": 12,
+       "r": 10,
+       "done": true,
+       "rir": 4
+      }
+     ],
+     "topW": 12,
+     "target": {
+      "id": "0289",
+      "sets": 3,
+      "reps": 10,
+      "weight": 0
+     }
+    },
+    {
+     "id": "2330",
+     "sets": [
+      {
+       "w": 12,
+       "r": 12,
+       "done": true,
+       "rir": 1
+      },
+      {
+       "w": 12,
+       "r": 12,
+       "done": true,
+       "rir": 2
+      },
+      {
+       "w": 12,
+       "r": 12,
+       "done": true,
+       "rir": 4
+      }
+     ],
+     "topW": 12,
+     "target": {
+      "id": "2330",
+      "sets": 3,
+      "reps": 12,
+      "weight": 0
+     }
+    },
+    {
+     "id": "0405",
+     "sets": [
+      {
+       "w": 12,
+       "r": 10,
+       "done": true,
+       "rir": 1
+      },
+      {
+       "w": 12,
+       "r": 10,
+       "done": true,
+       "rir": 2
+      },
+      {
+       "w": 12,
+       "r": 10,
+       "done": true,
+       "rir": 4
+      }
+     ],
+     "topW": 12,
+     "target": {
+      "id": "0405",
+      "sets": 3,
+      "reps": 10,
+      "weight": 0
+     }
+    },
+    {
+     "id": "0586",
+     "sets": [
+      {
+       "w": 12,
+       "r": 12,
+       "done": true,
+       "rir": 1
+      },
+      {
+       "w": 12,
+       "r": 12,
+       "done": true,
+       "rir": 2
+      },
+      {
+       "w": 12,
+       "r": 12,
+       "done": true,
+       "rir": 4
+      }
+     ],
+     "topW": 12,
+     "target": {
+      "id": "0586",
+      "sets": 3,
+      "reps": 12,
+      "weight": 0
+     }
+    },
+    {
+     "id": "3665",
+     "sets": [
+      {
+       "sec": 30,
+       "w": 0,
+       "done": true,
+       "rir": 1
+      },
+      {
+       "sec": 30,
+       "w": 0,
+       "done": true,
+       "rir": 2
+      }
+     ],
+     "topW": null,
+     "target": {
+      "id": "3665",
+      "sets": 2,
+      "mode": "time",
+      "sec": 30,
+      "weight": 0
+     }
+    }
+   ],
+   "prs": [
+    "0739",
+    "0289",
+    "2330",
+    "0405",
+    "0586"
+   ],
+   "vol": 2032
+  }
+ ],
+ "bodyweight": [
+  {
+   "d": "2026-11-20",
+   "w": 70,
+   "t": 1795121832950
+  }
+ ],
+ "effort": "none",
+ "askWeight": true
+}

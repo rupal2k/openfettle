@@ -1112,6 +1112,7 @@ body.resting #startfab{bottom:calc(240px + var(--sab))}
 /* ---------- Labs (blood tests) ---------- */
 .lab-entry{display:flex;align-items:center;gap:12px;width:100%;text-align:left;color:var(--label)}
 .lab-entry>span:nth-child(2){flex:1}
+.sc-high .lrow-s{color:var(--orange)}
 .lab-empty{text-align:center;padding:28px 20px}
 .lab-empty>.icn{font-size:34px;color:var(--red)}
 .lab-empty h2{text-transform:none;letter-spacing:0;font-size:19px;margin:10px 0 6px;color:var(--label)}

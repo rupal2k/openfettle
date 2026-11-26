@@ -1410,6 +1410,8 @@ export default {
   'Self-checks': 'Autoavaliações',
   'Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.': 'Questionários curtos usados por médicos e investigadores. Podem indicar algo que vale a pena verificar; não diagnosticam nada. As tuas respostas ficam neste telemóvel.',
   'Questionnaires': 'Questionários',
+  '1 questionnaire': '1 questionário',
+  '{0} questionnaires': '{0} questionários',
   'Due': 'A fazer',
   'Last: {0} · {1}': 'Último: {0} · {1}',
   '{0} out of {1}': '{0} de {1}',

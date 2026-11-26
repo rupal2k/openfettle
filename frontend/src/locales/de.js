@@ -1431,6 +1431,8 @@ export default {
   'Self-checks': 'Selbstchecks',
   'Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.': 'Kurze Fragebögen, die Ärzte und Forschende nutzen. Sie können auf etwas hinweisen, das eine Abklärung wert ist; eine Diagnose stellen sie nicht. Deine Antworten bleiben auf diesem Telefon.',
   'Questionnaires': 'Fragebögen',
+  '1 questionnaire': '1 Fragebogen',
+  '{0} questionnaires': '{0} Fragebögen',
   'Due': 'Fällig',
   'Last: {0} · {1}': 'Zuletzt: {0} · {1}',
   '{0} out of {1}': '{0} von {1}',

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.8.3
+
+Self-checks on Home and in My Stats.
+
+- 📋 **Self-checks on Home:** a card under Wind down opens Self-checks and says when one is due again. It shows how many, never which ones or their scores, so Home stays safe to show to others.
+- 📊 **Results in My Stats:** the latest result of each questionnaire you’ve taken, with results worth a closer look in orange, including any answer about self-harm. Tap one to see it in full. While those results are on screen, My Stats is kept out of screenshots and the recent-apps view, as Blood tests is.
+
 ## 1.8.2
 
 Self-checks, and a fix for Wind down sounds in the breathing exercise.

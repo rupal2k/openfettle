@@ -17,6 +17,7 @@ import {
   effortHistogram, isHardSet, HARD_RIR
 } from '../lib/effort.js'
 import { Button, Segmented, SelectRow } from '../components/ui.jsx'
+import { SelfChecksStatsCard } from '../selfcheck-sheets.jsx'
 
 // Which muscles the training in a window actually hit — and, the point of the card,
 // which ones it keeps missing. Shading is relative within the window (lib/muscles.js).
@@ -216,6 +217,7 @@ export default function Stats() {
         ? t('{0} reports · charts and scores', S.labs.reports.length) : t('Import a lab report, read on this device')}</span></span>
       <Icon name="chevronRight" />
     </button>
+    <SelfChecksStatsCard S={S} />
 
     {S.workouts.length > 0 && <MuscleBalance S={S} />}
     {anyEffort && <EffortCard S={S} />}

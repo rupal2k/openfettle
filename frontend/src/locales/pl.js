@@ -1410,6 +1410,8 @@ export default {
   'Self-checks': 'Samoocena',
   'Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.': 'Krótkie kwestionariusze, których używają lekarze i badacze. Mogą wskazać coś, co warto sprawdzić; niczego nie diagnozują. Twoje odpowiedzi zostają na tym telefonie.',
   'Questionnaires': 'Kwestionariusze',
+  '1 questionnaire': '1 kwestionariusz',
+  '{0} questionnaires': '{0} kwestionariusze',
   'Due': 'Do zrobienia',
   'Last: {0} · {1}': 'Ostatnio: {0} · {1}',
   '{0} out of {1}': '{0} z {1}',
