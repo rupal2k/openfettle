@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.9.0
+
+Things that can help: activity suggestions under your Self-check results.
+
+- 🚶 **Things that can help:** under a result, up to three things to do this week, chosen from what research supports for that result and from what you already log: a brisk walk toward 150 active minutes a week, strength training twice a week, Mobility & Core, box breathing, or an evening routine with Wind down. Each says why, with its source, and one tap starts it. Plans go into My Plan without changing your weekly schedule.
+- 🛟 **Support first:** after a severe low-mood result or any answer about self-harm, the support card stays on top and only gentle suggestions appear, folded under "When you feel ready".
+- 🌐 Suggestions for mood, anxiety and wellbeing show in English for now, until each translation has been reviewed; the diabetes, alcohol and general ones show in every language.
+- 🙈 **Hide this** removes a suggestion you don't want. Nothing new leaves the phone, and nothing appears on Home.
+
 ## 1.8.3
 
 Self-checks on Home and in My Stats.

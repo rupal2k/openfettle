@@ -137,7 +137,7 @@ export const dueChecks = (list, today) => INST_IDS.filter(inst => dueOn(list, in
 
 /* ------------------------------------------------ backup and sync -- */
 export const MAX_SELFCHECKS = 500
-export const PREFS_DEF = Object.freeze({ region: null, deleted: [], cleared: null })
+export const PREFS_DEF = Object.freeze({ region: null, deleted: [], cleared: null, hiddenTips: [] })
 const ISO = /^\d{4}-\d{2}-\d{2}$/
 const plain = o => o && typeof o === 'object' && !Array.isArray(o)
 
@@ -161,7 +161,9 @@ export function cleanSelfcheckPrefs(p) {
   return {
     region: p.region === 'in' || p.region === 'intl' ? p.region : null,
     deleted: (Array.isArray(p.deleted) ? p.deleted : []).filter(x => typeof x === 'string').slice(-MAX_SELFCHECKS),
-    cleared: Number.isFinite(+p.cleared) && +p.cleared > 0 ? +p.cleared : null
+    cleared: Number.isFinite(+p.cleared) && +p.cleared > 0 ? +p.cleared : null,
+    // "Things that can help" cards the user hid (tip ids from lib/move.js)
+    hiddenTips: [...new Set((Array.isArray(p.hiddenTips) ? p.hiddenTips : []).filter(x => typeof x === 'string' && /^[a-z-]{1,20}$/.test(x)))].slice(0, 20)
   }
 }
 // Own-server sync: union by id, then drop what either device deleted, so a deleted result never returns

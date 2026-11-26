@@ -1044,6 +1044,8 @@ body.resting #startfab{bottom:calc(240px + var(--sab))}
 .wind-card:active{background:var(--surface-2)}
 .wind-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .wind-t{font-size:17px;font-weight:600;letter-spacing:-.012em}
+.tip-card{margin-bottom:8px}
+.tip-t{font-weight:600}
 .seg.tall button{min-height:44px}
 .seg+.seg{margin-top:6px}   /* stacked rows of one choice (Wind down sound) */
 .sld.tall{height:44px}

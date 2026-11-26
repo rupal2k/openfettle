@@ -191,6 +191,13 @@ function PlanCatalog({ close, start }) {
 }
 
 /* ============================ starter plan ============================ */
+// A template's routines added to My Plan without touching the week ("Things that can help").
+export function addPlanRoutines(templateId) {
+  const { routines } = instantiatePlan(PLAN_TEMPLATES.find(p => p.id === templateId))
+  update(st => { st.routines.push(...routines) })
+  return routines
+}
+
 export function loadStarterPlan() {
   const [push, pull, legs] = starterRoutines()
   update(st => {

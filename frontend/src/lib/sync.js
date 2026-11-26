@@ -21,7 +21,7 @@ export function mergeState(local, remote) {
   out.checkinPrefs = { ...lp, deleted: [...new Set([...(lp.deleted || []), ...(rp.deleted || [])])], cleared: Math.max(lp.cleared || 0, rp.cleared || 0) || null }
   const lsp = local.selfcheckPrefs || {}, rsp = remote.selfcheckPrefs || {}
   out.selfchecks = mergeSelfchecks(local.selfchecks, remote.selfchecks, lsp, rsp)
-  out.selfcheckPrefs = { ...lsp, deleted: [...new Set([...(lsp.deleted || []), ...(rsp.deleted || [])])], cleared: Math.max(lsp.cleared || 0, rsp.cleared || 0) || null }
+  out.selfcheckPrefs = { ...lsp, deleted: [...new Set([...(lsp.deleted || []), ...(rsp.deleted || [])])], cleared: Math.max(lsp.cleared || 0, rsp.cleared || 0) || null, hiddenTips: [...new Set([...(lsp.hiddenTips || []), ...(rsp.hiddenTips || [])])] }
   out.workouts = byId(local.workouts, remote.workouts).sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : 0))
   out.routines = byId(local.routines, remote.routines)
   out.customEx = byId(local.customEx, remote.customEx)
