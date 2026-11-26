@@ -228,7 +228,8 @@ export const selfChecksSheet = () => ui().openSheet(() => <SelfChecks />)
 // Home card: names only (never scores), so Home stays safe to screenshot
 export function SelfChecksHomeCard({ S }) {
   const due = dueChecks(S.selfchecks, todayISO())
-  return <button type="button" className="card tappable wind-card" onClick={selfChecksSheet} aria-label={t('Self-checks')}>
+  // no aria-label: TalkBack reads the title and which checks are due
+  return <button type="button" className="card tappable wind-card" onClick={selfChecksSheet}>
     <span className="lrow-i" style={{ '--tint': 'var(--indigo)' }}><Icon name="clipboard" /></span>
     <span className="wind-m">
       <span className="wind-t">{t('Self-checks')}</span>
@@ -244,7 +245,8 @@ function StatsResults({ list }) {
   const today = todayISO()
   return <Section>
     {INST_IDS.map(inst => lastOf(list, inst)).filter(Boolean).map(e => {
-      const high = band(e).level === 'high'
+      // a self-harm answer is flagged whatever the total, as the result sheet's support card is
+      const high = band(e).level === 'high' || selfHarm(e.inst, e.a)
       return <Row key={e.inst} title={nameOf(e.inst)} accessory="chevron"
         subtitle={(dueOn(list, e.inst, today) ? t('Due') + ' · ' : '') + t('Last: {0} · {1}', fmtDate(e.d), scoreLine(e))}
         className={high ? 'sc-high' : ''} onClick={() => ui().openSheet(close => <Detail e={e} close={close} />)} />
