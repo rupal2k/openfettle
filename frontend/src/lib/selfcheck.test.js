@@ -74,7 +74,11 @@ describe('region, due, cleaning, sync', () => {
     expect(cleanEntry({ ...e('who5', [0, 0, 0, 0, 0]), d: '2026-02-30' })).toBe(null)
     expect(cleanEntry({ ...e('who5', [0, 0, 0, 0, 0]), note: 'x' })).not.toHaveProperty('note')
     expect(cleanSelfchecks('junk')).toEqual([])
-    expect(cleanSelfcheckPrefs({ region: 'mars', deleted: [1, 'a'] })).toEqual({ region: null, deleted: ['a'], cleared: null })
+    expect(cleanSelfcheckPrefs({ region: 'mars', deleted: [1, 'a'] })).toEqual({ region: null, deleted: ['a'], cleared: null, hiddenTips: [], tipsShown: 0, tipsAsked: false, tipsUseful: null })
+    expect(cleanSelfcheckPrefs({ hiddenTips: ['walk', 'walk', 'Bad Id!', 3] }).hiddenTips).toEqual(['walk'])
+    expect(cleanSelfcheckPrefs({ tipsShown: -2, tipsAsked: 'yes', tipsUseful: 'maybe' })).toMatchObject({ tipsShown: 0, tipsAsked: false, tipsUseful: null })
+    expect(cleanSelfcheckPrefs({ tipsShown: 1e9 }).tipsShown).toBe(1000)
+    expect(cleanSelfcheckPrefs({ tipsAsked: true, tipsUseful: 'no' })).toMatchObject({ tipsAsked: true, tipsUseful: 'no' })
   })
   it('sync: union, and a delete on either device wins', () => {
     const a = e('who5', [0, 0, 0, 0, 0], { id: 'a', at: 10 }), b = e('who5', [1, 1, 1, 1, 1], { id: 'b', at: 20 })

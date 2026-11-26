@@ -8,7 +8,12 @@ import { fmtDate, todayISO } from './lib/format.js'
 import { privacyScreen } from './lib/mobile.js'
 import { latestByMarker } from './lib/labs/reports.js'
 import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, selfHarm, waistIndex, ageIndex, ageFromYear, regionOf, lastOf, dueOn, dueChecks } from './lib/selfcheck.js'
-import { confirmSheet } from './sheets.jsx'
+import { confirmSheet, beginWorkout, addPlanRoutines, walkRoutine, windDownSheet } from './sheets.jsx'
+import { isCardio } from './lib/exercises.js'
+import { lastBW } from './lib/history.js'
+import { breathingSheet } from './checkin-sheets.jsx'
+import { tipsFor, reasonsShown, sinceLast } from './lib/move.js'
+import { nav } from './lib/nav.js'
 import { Button, Segmented, Section, Row, NumberField } from './components/ui.jsx'
 import Icon from './components/Icon.jsx'
 
@@ -54,6 +59,120 @@ function SafetyCard({ region, announce }) {
   </div>
 }
 
+/* ------------------------------------------------ things that can help -- */
+// docs/specs/2026-11-26-move-for-your-mind.md. The rules are in lib/move.js; here they get words,
+// a source and a button that does it. Plans go into My Plan without touching the weekly schedule.
+// short citations (author, journal, year); each card names its source once, a repeat is left out
+const SRC = {
+  mood: 'Noetel et al., BMJ 2024 (218 trials)',
+  anxiety: 'Singh et al., Br J Sports Med 2023',
+  diabetes: 'Diabetes Prevention Program, NEJM 2002; Indian DPP, Diabetologia 2006',
+  fine: 'WHO physical activity guidelines, 2020',
+  breathing: 'Zaccaro et al., Front Hum Neurosci 2018',
+}
+const WHY = {
+  walk: { mood: () => t('Walking and jogging lower low-mood symptoms in trials. Any amount helps.'), anxiety: () => t('Regular aerobic exercise lowers anxiety symptoms.'), diabetes: () => t('About 150 minutes of activity a week, with healthier eating, more than halved type 2 diabetes cases in a large trial.') },
+  strength: { mood: () => t('Strength training lowers low-mood symptoms too.'), diabetes: () => t('Strength training helps your body use insulin.'), fine: () => t('Guidelines suggest strength training on two days a week.') },
+  mobility: { mood: () => t('Yoga-style movement eases low mood and anxiety.'), anxiety: () => t('Yoga-style movement eases low mood and anxiety.'), severe: () => t('Gentle stretching, at your own pace.') },
+}
+WHY['keep-moving'] = WHY.walk
+const sourceOf = (id, why) => id === 'breathing' ? SRC.breathing : why === 'severe' ? null : SRC[why] || null
+const findRoutine = name => S().routines.find(r => r.name === name)
+
+function tipCard(tip, why, minutes, done) {
+  const go = fn => () => { done(); ui().afterClose(fn) }   // close the sheets first, then act
+  // no weigh-in prompt: right after a mood result, a scale is the wrong thing to put first (spec: no weight focus)
+  const start = (id, opts) => { const l = lastBW(S()); beginWorkout(id, l && l.d === todayISO() ? l.w : null, opts) }
+  const startRoutine = r => go(() => start(r.id))
+  const mobility = () => {
+    const r = findRoutine(t('Mobility & Core'))
+    return { label: t('Start'), onClick: r ? startRoutine(r) : go(() => start(addPlanRoutines('home-mobility')[0].id)) }
+  }
+  const walkFor = min => ({ label: t('Walk {0} min', min), onClick: go(() => start(walkRoutine(), { min })) })
+  const walks = [10, 20, 30].map(walkFor)
+  // spec: hard intervals feel like anxiety (racing heart), so build up
+  const caution = why === 'anxiety' ? t('Hard intervals raise your heart rate like anxiety can, so build up gradually.') : null
+  switch (tip.id) {
+    case 'walk': return { title: t('Brisk walk, 10 minutes, 3 times this week'), note: t('Last 7 days: {0} of 150 active minutes', minutes), why: WHY.walk[why]?.(), caution, action: walks }
+    case 'keep-moving': return { title: t('Keep moving'), note: t('{0} active minutes in the last 7 days. The guideline is 150 to 300.', minutes), why: WHY.walk[why]?.(), caution, action: walks }
+    case 'gentle-walk': return { title: t('A 10-minute walk outside'), why: t('Gentle movement can help, when you feel ready. Talking to someone comes first.'), action: walkFor(10) }
+    case 'strength': {
+      // a strength routine: not the Brisk walk or another all-cardio one, not Mobility & Core
+      const lifts = r => r && r.name !== t('Mobility & Core') && r.ex?.some(e => !isCardio(e.id))
+      const last = [...S().workouts].reverse().map(w => S().routines.find(r => r.id === w.routineId)).find(lifts)
+      const r = last || S().routines.find(lifts)
+      // no routine yet: the app doesn't know where they train, so both beginner plans
+      const load = (id, name) => ({ label: t(name), onClick: go(() => { const rs = addPlanRoutines(id); toast(t('Loaded “{0}” ({1} routines)', t(name), rs.length)); nav('/plan') }) })
+      return {
+        title: t('Strength training twice a week'), why: WHY.strength[why]?.(),
+        action: r ? { label: t('Start {0}', r.name), onClick: startRoutine(r) }
+          : [load('beginner-gym-3', 'Beginner Full Body (3‑day)'), load('home-bw-3', 'Home Bodyweight Full Body (3‑day)')],
+      }
+    }
+    case 'mobility': return { title: t('Mobility & Core, about 15 minutes'), why: WHY.mobility[why]?.(), action: mobility() }
+    case 'rest': return { title: t('A rest day, then Mobility & Core'), why: t('Hard training every day can wear you down. Rest is part of training.'), action: mobility() }
+    case 'breathing': return { title: t('Box breathing, about a minute'), why: t('Slow breathing can calm you in the moment.'), action: { label: t('Begin'), onClick: go(breathingSheet) } }
+    case 'evening': return { title: t('An evening routine instead of a drink'), why: t('Wind down sounds and a short walk can take the place of a drink. Cutting down helps at any point.'), action: [{ label: t('Wind down'), onClick: go(windDownSheet) }, walkFor(10)] }
+    case 'keep': return { title: t('Your results look fine. Keep doing what you do.'), why: t('Guidelines suggest 150 to 300 active minutes a week.') }
+    default: return null
+  }
+}
+
+// hub: "Suggested for you" at the top of Self-checks; fresh: a result just saved, where the
+// "useful?" question may be asked (once, on the second such result that shows suggestions)
+function Tips({ hub, fresh, only }) {
+  const st = useStore(s => s.S)
+  const [open, setOpen] = useState(false)
+  const lang = getLang(), prefs = st.selfcheckPrefs || {}, hidden = prefs.hiddenTips || []
+  const res = tipsFor({ selfchecks: st.selfchecks, workouts: st.workouts, today: todayISO() })
+  const cards = res.tips.filter(x => !hidden.includes(x.id)).map(x => {
+    const why = reasonsShown(x, lang)[0]
+    return why && { tip: x, reason: why, ...tipCard(x, why, res.minutes, () => ui().closeAll()) }
+  }).filter(c => c && c.title)
+  // counted once per result just taken that shows suggestions; asked on the second
+  // never after a severe result or a self-harm answer: the suggestions are folded and it's the wrong moment
+  const [shows] = useState(() => fresh && cards.length > 0 && !res.gentle)
+  const [ask] = useState(() => shows && !prefs.tipsAsked && (prefs.tipsShown || 0) >= 1)
+  const [answered, setAnswered] = useState(false)
+  const counted = useRef(false)
+  useEffect(() => {
+    if (!shows || counted.current) return
+    counted.current = true
+    update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, tipsShown: (s.selfcheckPrefs.tipsShown || 0) + 1, ...(ask ? { tipsAsked: true } : {}) } })
+  }, [shows, ask])
+  if (!cards.length || (only && only !== (res.gentle ? 'gentle' : 'plain'))) return null
+  const answer = v => { update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, tipsUseful: v } }); setAnswered(true); toast(t('Thanks. Your answer stays on this phone.')) }
+  const hide = id => update(s => { s.selfcheckPrefs = { ...s.selfcheckPrefs, hiddenTips: [...new Set([...(s.selfcheckPrefs.hiddenTips || []), id])] } })
+  cards.forEach((c, i) => { c.src = sourceOf(c.tip.id, c.reason); if (i && c.src === cards[i - 1].src0) c.src = null; c.src0 = sourceOf(c.tip.id, c.reason) })
+  const list = <>
+    {cards.map(c => <div key={c.tip.id} className="card tip-card">
+      <div className="tip-t">{c.title}</div>
+      {c.note && <div className="small muted">{c.note}</div>}
+      {c.why && <div className="small" style={{ marginTop: 4 }}>{c.why}</div>}
+      {c.caution && <div className="small muted" style={{ marginTop: 4 }}>{c.caution}</div>}
+      {c.src && <div className="small dim" style={{ marginTop: 4 }}>{t('Source: {0}', c.src)}</div>}
+      <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+        {[].concat(c.action || []).map(a => <Button key={a.label} size="sm" variant="tinted" onClick={a.onClick}>{a.label}</Button>)}
+        <Button size="sm" variant="ghost" className="dim" onClick={() => hide(c.tip.id)}>{t('Hide this')}</Button>
+      </div>
+    </div>)}
+    <div className="small dim" style={{ margin: '6px 0 10px' }}>{t('If you have heart trouble, chest pain, feel faint when active, or are pregnant, ask a doctor before starting harder exercise.')}</div>
+    {ask && !answered && <div className="card" style={{ marginBottom: 10 }}>
+      <div className="small" id="tips-useful">{t('Were these suggestions useful?')}</div>
+      <div className="row" role="group" aria-labelledby="tips-useful" style={{ gap: 8, marginTop: 6 }}>
+        <Button size="sm" variant="tinted" onClick={() => answer('yes')}>{t('Yes')}</Button>
+        <Button size="sm" variant="tinted" onClick={() => answer('no')}>{t('Not really')}</Button>
+      </div>
+    </div>}
+  </>
+  return <div className="tips">
+    <h4 className="sec" style={{ margin: '14px 0 8px' }}>{hub ? t('Suggested for you') : t('Things that can help')}</h4>
+    {res.gentle
+      ? <><button type="button" className="lab-more" onClick={() => setOpen(v => !v)} aria-expanded={open}>{t('When you feel ready')} <Icon name={open ? 'chevronUp' : 'chevronDown'} /></button>{open && list}</>
+      : list}
+  </div>
+}
+
 /* ---------------------------------------------------------------- hub -- */
 function SelfChecks() {
   usePrivate()
@@ -66,6 +185,7 @@ function SelfChecks() {
   return <>
     <h3>{t('Self-checks')}</h3>
     <div className="muted small" style={{ marginBottom: 12 }}>{t('Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.')}</div>
+    <Tips hub only="plain" />
     <Section title={t('Questionnaires')}>
       {INST_IDS.map(inst => {
         const last = lastOf(list, inst), due = dueOn(list, inst, today)
@@ -79,6 +199,7 @@ function SelfChecks() {
       <Row icon="globe" iconTint="var(--teal)" title={t('WHOeyes (vision)')} subtitle={t('Free WHO app · near and distance vision')} accessory="chevron" onClick={() => openUrl(LINKS.whoeyes)} />
     </Section>
     <Support region={region} />
+    <Tips hub only="gentle" />
     <Section title={t('Where you live')} footer={t('Sets the helplines and drink sizes shown.')}>
       <div style={{ padding: '10px 14px' }}>
         <Segmented options={[{ value: 'in', label: t('India') }, { value: 'intl', label: t('Another country') }]} value={region}
@@ -199,15 +320,20 @@ function Result({ e, onDelete, noTitle }) {
   const prev = (st.selfchecks || []).filter(x => x.inst === e.inst && x.at < e.at).sort((x, y) => x.at - y.at).at(-1)
   const harm = selfHarm(e.inst, e.a), diff = prev ? (shown(e) > shown(prev) ? '+' : '') + (shown(e) - shown(prev)) : ''
   const a1c = e.inst === 'idrs' && latestByMarker(st.labs?.reports || []).find(x => x.key === 'diabetes.hba1c')
+  const isLatest = lastOf(st.selfchecks, e.inst)?.id === e.id   // advice follows the latest results, so not on an old one
+  // only shown when something was logged: a "0 sessions" line after a mood check would read as a nudge
+  const since = I.everyDays > 0 && prev && sinceLast(st.workouts, prev.d, e.d)
   return <>
     {!noTitle && <h3>{nameOf(e.inst)}</h3>}
     <div className="small muted">{fmtDate(e.d, true)}</div>
     {harm && <SafetyCard region={region} announce={!onDelete} />}
     <div style={{ fontSize: 28, fontWeight: 600, margin: '8px 0', color: b.level === 'high' ? 'var(--orange)' : undefined }}>{scoreLine(e)}</div>
     {I.everyDays > 0 && prev && <div className="small muted" style={{ marginBottom: 6 }}>{e.inst === 'who5' ? t('Change since last time: {0} (higher is better)', diff) : t('Change since last time: {0} (lower is better)', diff)}</div>}
+    {since?.n > 0 && <div className="small muted" style={{ marginBottom: 6 }}>{t('Since your last check · Sessions: {0} · Active minutes: {1}', since.n, since.minutes)}</div>}
     <div style={{ marginBottom: 10 }}>{resultText(e)}</div>
     {a1c && <div className="card small" style={{ marginBottom: 10 }}>{t('Your latest HbA1c in Labs: {0}% ({1}). A measured value tells you more than a risk score.', a1c.m.v, fmtDate(a1c.report.d))}</div>}
     {b.level === 'high' && I.mental && !harm && <Support region={region} />}
+    {isLatest && <Tips fresh={noTitle} />}
     <div className="small dim" style={{ margin: '10px 0' }}>{t('Source: {0}', I.source)}</div>
     <Button variant="plain" size="sm" icon="link" onClick={() => openUrl(I.url)}>{t('About this questionnaire')}</Button>
     {onDelete && <><div style={{ height: 8 }} /><Button variant="ghost" className="danger" icon="trash" onClick={onDelete}>{t('Delete result')}</Button></>}

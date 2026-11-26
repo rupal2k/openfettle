@@ -191,6 +191,30 @@ function PlanCatalog({ close, start }) {
 }
 
 /* ============================ starter plan ============================ */
+// A template's routines added to My Plan without touching the week ("Things that can help").
+export function addPlanRoutines(templateId) {
+  const { routines } = instantiatePlan(PLAN_TEMPLATES.find(p => p.id === templateId))
+  update(st => { st.routines.push(...routines) })
+  return routines
+}
+
+// "Brisk walk" for Things that can help: the library has no outdoor walk, so the first tap makes
+// a custom cardio exercise and a one-exercise routine (10 min at 5 km/h); later taps reuse them.
+// Found by name, like Mobility & Core. Not in the week. → the routine's id
+export function walkRoutine() {
+  const name = t('Brisk walk'), same = x => x.n?.toLowerCase() === name.toLowerCase()
+  let id = S().routines.find(r => r.name === name && r.ex.length === 1 && isCardio(r.ex[0].id))?.id
+  if (id) return id
+  id = uid()
+  update(st => {
+    st.customEx = st.customEx || []
+    let ex = st.customEx.find(c => same(c) && c.bp === 'cardio')
+    if (!ex) { ex = { id: 'c' + uid(), n: name, bp: 'cardio', desc: t('A walk fast enough that you breathe harder but can still talk.'), tg: '', eq: 'custom', custom: true }; st.customEx.push(ex) }
+    st.routines.push({ id, name, emoji: 'figureRun', ex: [{ id: ex.id, sets: 1, min: 10, speed: 5 }] })
+  })
+  return id
+}
+
 export function loadStarterPlan() {
   const [push, pull, legs] = starterRoutines()
   update(st => {
@@ -1270,7 +1294,8 @@ export function startFlow(routineId) {
   }
   bwSheet({ required: true, onDone: bw => beginWorkout(routineId, bw) })
 }
-export function beginWorkout(routineId, bw) {
+// opts.min: every cardio set starts at this many minutes (a 20-minute walk from Things that can help)
+export function beginWorkout(routineId, bw, opts) {
   const st = S()
   const r = routineId ? st.routines.find(x => x.id === routineId) : null
   // The prescription is applied as the session is built, so you walk up to the bar with the
@@ -1280,6 +1305,7 @@ export function beginWorkout(routineId, bw) {
     const plan = nextPrescription(st, cfg, r)
     return { id: cfg.id, sg: cfg.sg, target: sessionTarget(cfg, plan), plan, sets: applyPrescription(sessionSets(st, cfg, r?.format), plan) }
   })
+  if (opts?.min) entries.forEach(e => e.sets.forEach(s => { if ('min' in s) s.min = opts.min }))
   update(s => {
     s.active = { id: uid(), d: todayISO(), start: Date.now(), routineId, name: r ? r.name : t('Freestyle'), bw: bw || null, cur: 0, entries, ...(r?.rest ? { rest: r.rest } : {}), ...(r?.format ? { format: r.format } : {}), ...(r?.cap ? { cap: r.cap } : {}) }
   })

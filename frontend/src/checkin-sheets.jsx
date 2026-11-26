@@ -356,3 +356,8 @@ function CheckinDetail({ e, onDelete }) {
   </>
 }
 export const checkinSettingsSheet = () => ui().openSheet(() => <CheckinSettings />)
+// The check-in's breathing on its own ("Things that can help"), with the user's sound/vibration cue
+export const breathingSheet = () => ui().openSheet(close => <>
+  <h3>{t('Box breathing')}</h3>
+  <Breathing cue={useStore.getState().S.checkinPrefs?.cue || 'both'} onDone={close} />
+</>)
