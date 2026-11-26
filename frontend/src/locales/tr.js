@@ -1410,6 +1410,8 @@ export default {
   'Self-checks': 'Öz değerlendirmeler',
   'Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.': 'Doktorların ve araştırmacıların kullandığı kısa anketler. Kontrol ettirmeye değer bir şeye işaret edebilirler; teşhis koymazlar. Yanıtların bu telefonda kalır.',
   'Questionnaires': 'Anketler',
+  '1 questionnaire': '1 anket',
+  '{0} questionnaires': '{0} anket',
   'Due': 'Zamanı geldi',
   'Last: {0} · {1}': 'Son: {0} · {1}',
   '{0} out of {1}': '{1} üzerinden {0}',

@@ -225,7 +225,8 @@ function Detail({ e, close }) {
 const takeSheet = inst => ui().openSheet(() => <Take inst={inst} />)
 export const selfChecksSheet = () => ui().openSheet(() => <SelfChecks />)
 
-// Home card: names only (never scores), so Home stays safe to screenshot
+// Home card: how many checks are due, never which ones or their scores (Home can be screenshotted
+// and seen over a shoulder; the hub and My Stats name them)
 export function SelfChecksHomeCard({ S }) {
   const due = dueChecks(S.selfchecks, todayISO())
   // no aria-label: TalkBack reads the title and which checks are due
@@ -233,7 +234,7 @@ export function SelfChecksHomeCard({ S }) {
     <span className="lrow-i" style={{ '--tint': 'var(--indigo)' }}><Icon name="clipboard" /></span>
     <span className="wind-m">
       <span className="wind-t">{t('Self-checks')}</span>
-      <span className="muted small">{due.length ? t('Due') + ' · ' + due.map(nameOf).join(', ') : t('Wellbeing, mood, anxiety, alcohol and diabetes risk questionnaires')}</span>
+      <span className="muted small">{due.length ? t('Due') + ' · ' + t(due.length === 1 ? '1 questionnaire' : '{0} questionnaires', due.length) : t('Wellbeing, mood, anxiety, alcohol and diabetes risk questionnaires')}</span>
     </span>
     <Icon name="chevronRight" className="chev" />
   </button>

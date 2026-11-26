@@ -1410,6 +1410,8 @@ export default {
   'Self-checks': '自我检查',
   'Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.': '医生和研究人员使用的简短问卷。它们可以提示值得检查的问题,但不能做出诊断。你的回答只保存在这部手机上。',
   'Questionnaires': '问卷',
+  '1 questionnaire': '1 份问卷',
+  '{0} questionnaires': '{0} 份问卷',
   'Due': '该做了',
   'Last: {0} · {1}': '上次:{0} · {1}',
   '{0} out of {1}': '{0} / {1}',

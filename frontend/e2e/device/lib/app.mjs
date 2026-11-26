@@ -30,12 +30,15 @@ export const stop = () => shell('am', 'force-stop', PKG)
 export async function launch(errors = []) {
   wake()
   shell('am', 'start', '-n', ACTIVITY)
-  await waitFor(() => /webview_devtools_remote_\d+/.test(shell('cat', '/proc/net/unix')), { timeout: 20000, label: 'the WebView to start' })
-  return connect(errors)
+  // the socket is named after the process: wait for the new one (a force-stopped one can linger)
+  const pid = await waitFor(() => shell('pidof', PKG).trim().split(/\s+/)[0], { timeout: 20000, label: 'the app process' })
+  await waitFor(() => shell('cat', '/proc/net/unix').includes('webview_devtools_remote_' + pid), { timeout: 20000, label: 'the WebView to start' })
+  return connect(errors, pid)
 }
 // errors: one list per section, kept across relaunches and reconnects
-export async function connect(errors = []) {
-  const sock = shell('cat', '/proc/net/unix').match(/webview_devtools_remote_\d+/)
+export async function connect(errors = [], pid = shell('pidof', PKG).trim().split(/\s+/)[0]) {
+  const name = 'webview_devtools_remote_' + pid
+  const sock = pid && (shell('cat', '/proc/net/unix').match(/webview_devtools_remote_\d+/g) || []).includes(name) && [name]
   if (!sock) throw new Error('the app is not running')
   adb('forward', `tcp:${PORT}`, 'localabstract:' + sock[0])
   const browser = await waitFor(() => chromium.connectOverCDP(`http://127.0.0.1:${PORT}`), { timeout: 15000, label: 'CDP' })
@@ -68,8 +71,9 @@ function instrumentPage() {
 // app catches: clearCaptures() (lib/mobile.js) lists folders that don't exist until the first
 // camera capture or file pick, and handles that; closing the share sheet rejects shareExport(),
 // which Settings catches ("share sheet dismissed"); Tesseract (lab OCR) prints its progress
-// notes through console.error.
-const KNOWN = [/'readdir' failed because file at .*\/(Pictures|picks)\/' does not exist.*OS-PLUG-FILE-0008/, /^\{message: Share canceled\}$/, /^Estimating resolution as \d+$/]
+// notes through console.error; on a fresh install nativeLoad() (lib/mobile.js) reads a state file
+// that isn't there yet and falls back to an empty state.
+const KNOWN = [/'readdir' failed because file at .*\/(Pictures|picks)\/' does not exist.*OS-PLUG-FILE-0008/, /^\{message: Share canceled\}$/, /^Estimating resolution as \d+$/, /'readFile' failed because file at .*files\/(openfit|opengym)-state\.json' does not exist.*OS-PLUG-FILE-0008/]
 
 export class App {
   constructor(browser, page, errors = []) {

@@ -1410,6 +1410,8 @@ export default {
   'Self-checks': '자가 점검',
   'Short questionnaires that doctors and researchers use. They can point to something worth checking; they can’t diagnose anything. Your answers stay on this phone.': '의사와 연구자가 쓰는 짧은 설문입니다. 확인해 볼 만한 점을 알려 줄 수는 있지만 진단은 하지 않습니다. 답변은 이 휴대폰에만 남습니다.',
   'Questionnaires': '설문',
+  '1 questionnaire': '설문 1개',
+  '{0} questionnaires': '설문 {0}개',
   'Due': '할 때',
   'Last: {0} · {1}': '최근: {0} · {1}',
   '{0} out of {1}': '{1}점 중 {0}점',

@@ -1,4 +1,4 @@
-// Self-checks on Home (names only, never scores) and the latest results on My Stats, which stays
+// Self-checks on Home (how many are due, never which or their scores) and the latest results on My Stats, which stays
 // out of screenshots while results show (1.8.3).
 import { screencap, contrast, waitFor } from '../lib/device.mjs'
 import { writeState } from '../lib/app.mjs'
@@ -13,8 +13,8 @@ export default {
     const card = p.locator('.wind-card', { hasText: 'Self-checks' })
     const ct = (await card.innerText().catch(() => '')).replace(/\s+/g, ' ')
     check('Home shows the Self-checks card', await card.count() === 1, ct)
-    check('the card names the due check and shows no score', /Due · WHO-5/.test(ct) && !/out of/.test(ct), ct)
-    check('TalkBack hears which check is due', await p.getByRole('button', { name: /Self-checks.*Due · WHO-5/ }).count() === 1)
+    check('the card says how many checks are due, not which or their scores', /Due · 1 questionnaire$/.test(ct) && !/WHO-5|PHQ|out of/.test(ct), ct)
+    check('TalkBack hears that a check is due', await p.getByRole('button', { name: /Self-checks.*Due · 1 questionnaire/ }).count() === 1)
     check('Home can be screenshotted', contrast(screencap()) > 10)
     await app.tap(card)
     check('the card opens Self-checks', /Questionnaires/.test(await app.waitSheet(/Questionnaires/)))
