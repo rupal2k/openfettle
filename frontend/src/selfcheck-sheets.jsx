@@ -7,9 +7,10 @@ import { t, getLang } from './lib/i18n.js'
 import { fmtDate, todayISO } from './lib/format.js'
 import { privacyScreen } from './lib/mobile.js'
 import { latestByMarker } from './lib/labs/reports.js'
-import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, selfHarm, waistIndex, ageIndex, ageFromYear, regionOf, lastOf, dueOn } from './lib/selfcheck.js'
+import { INSTRUMENTS, INST_IDS, AUDIT_CUT, band, shown, skipped, selfHarm, waistIndex, ageIndex, ageFromYear, regionOf, lastOf, dueOn, dueChecks } from './lib/selfcheck.js'
 import { confirmSheet } from './sheets.jsx'
 import { Button, Segmented, Section, Row, NumberField } from './components/ui.jsx'
+import Icon from './components/Icon.jsx'
 
 const S = () => useStore.getState().S
 const update = (...a) => useStore.getState().update(...a)
@@ -223,3 +224,41 @@ function Detail({ e, close }) {
 
 const takeSheet = inst => ui().openSheet(() => <Take inst={inst} />)
 export const selfChecksSheet = () => ui().openSheet(() => <SelfChecks />)
+
+// Home card: names only (never scores), so Home stays safe to screenshot
+export function SelfChecksHomeCard({ S }) {
+  const due = dueChecks(S.selfchecks, todayISO())
+  return <button type="button" className="card tappable wind-card" onClick={selfChecksSheet} aria-label={t('Self-checks')}>
+    <span className="lrow-i" style={{ '--tint': 'var(--indigo)' }}><Icon name="clipboard" /></span>
+    <span className="wind-m">
+      <span className="wind-t">{t('Self-checks')}</span>
+      <span className="muted small">{due.length ? t('Due') + ' · ' + due.map(nameOf).join(', ') : t('Wellbeing, mood, anxiety, alcohol and diabetes risk questionnaires')}</span>
+    </span>
+    <Icon name="chevronRight" className="chev" />
+  </button>
+}
+
+// My Stats: the latest result of each questionnaire taken; scores on screen, so the screen goes private
+function StatsResults({ list }) {
+  usePrivate()
+  const today = todayISO()
+  return <Section>
+    {INST_IDS.map(inst => lastOf(list, inst)).filter(Boolean).map(e => {
+      const high = band(e).level === 'high'
+      return <Row key={e.inst} title={nameOf(e.inst)} accessory="chevron"
+        subtitle={(dueOn(list, e.inst, today) ? t('Due') + ' · ' : '') + t('Last: {0} · {1}', fmtDate(e.d), scoreLine(e))}
+        className={high ? 'sc-high' : ''} onClick={() => ui().openSheet(close => <Detail e={e} close={close} />)} />
+    })}
+  </Section>
+}
+export function SelfChecksStatsCard({ S }) {
+  const list = S.selfchecks || []
+  return <>
+    <button type="button" className="card lab-entry" onClick={selfChecksSheet}>
+      <span className="lrow-i" style={{ '--tint': 'var(--indigo)' }}><Icon name="clipboard" /></span>
+      <span><b>{t('Self-checks')}</b><br /><span className="muted small">{t('Wellbeing, mood, anxiety, alcohol and diabetes risk questionnaires')}</span></span>
+      <Icon name="chevronRight" />
+    </button>
+    {list.length > 0 && <StatsResults list={list} />}
+  </>
+}

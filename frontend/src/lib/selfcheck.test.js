@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { INSTRUMENTS, score, band, shown, selfHarm, waistIndex, ageIndex, ageFromYear, regionOf, dueOn, cleanEntry, cleanSelfchecks, cleanSelfcheckPrefs, mergeSelfchecks } from './selfcheck.js'
+import { INSTRUMENTS, score, band, shown, selfHarm, waistIndex, ageIndex, ageFromYear, regionOf, dueOn, dueChecks, cleanEntry, cleanSelfchecks, cleanSelfcheckPrefs, mergeSelfchecks } from './selfcheck.js'
 
 const e = (inst, a, extra = {}) => ({ id: inst + '-1', inst, d: '2026-11-19', at: 1, a, ...extra })
 
@@ -119,5 +119,14 @@ describe('age from the profile birth year', () => {
     expect(ageFromYear(1976, 2026)).toBe(null)   // 49 or 50
     expect(ageFromYear(1960, 2026)).toBe(2)
     expect(ageFromYear(null, 2026)).toBe(null)
+  })
+})
+
+describe('dueChecks (Home card)', () => {
+  it('lists only the two-weekly checks taken 14+ days ago', () => {
+    const list = [e('who5', [0, 0, 0, 0, 0], { d: '2026-11-01' }), e('phq9', Array(9).fill(0), { d: '2026-11-10' }), e('idrs', [0, 0, 0, 0], { d: '2026-01-01' })]
+    expect(dueChecks(list, '2026-11-15')).toEqual(['who5'])
+    expect(dueChecks(list, '2026-11-24')).toEqual(['who5', 'phq9'])
+    expect(dueChecks(undefined, '2026-11-24')).toEqual([])
   })
 })
