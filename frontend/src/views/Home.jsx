@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
 import { effectiveRoutine, effectiveRoutineId, streakWeeks, lastBW, setsDoneActive, showWindDown } from '../lib/history.js'
@@ -12,6 +12,7 @@ import { Button, Segmented } from '../components/ui.jsx'
 import { hasWeights } from '../lib/units-convert.js'
 import { glyphOf } from '../lib/glyphs.js'
 import { SelfChecksHomeCard } from '../selfcheck-sheets.jsx'
+import { isAndroid, runExerciseForm } from '../lib/exercise-form.js'
 
 // Home = what to do now + a quick glance. Deep charts & history live in Stats.
 export default function Home() {
@@ -19,6 +20,9 @@ export default function Home() {
   const S = useStore(s => s.S)
   const user = useStore(s => s.user)
   const [weekOffset, setWeekOffset] = useState(0)
+  const [android, setAndroid] = useState(false)
+
+  useEffect(() => { isAndroid().then(setAndroid) }, [])
 
   const today = new Date()
   const routine = effectiveRoutine(S, todayISO())
@@ -90,6 +94,15 @@ export default function Home() {
       </button>
     )}
     {!S.active && <SelfChecksHomeCard S={S} />}
+
+    {android && <button type="button" className="card tappable" onClick={() => { runExerciseForm() }} aria-label={t('Exercise')}>
+      <span className="lrow-i" style={{ '--tint': 'var(--acc)' }}><Icon name="figureStrength" /></span>
+      <span className="wind-m">
+        <span className="wind-t">{t('Exercise')}</span>
+        <span className="muted small">{t('Movement')}</span>
+      </span>
+      <Icon name="chevronRight" className="chev" />
+    </button>}
 
     <div className="card">
       <div className="row between" style={{ marginBottom: 8 }}>
