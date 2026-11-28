@@ -9,6 +9,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(PrivacyScreenPlugin.class);   // local plugin: FLAG_SECURE for blood tests
         registerPlugin(WindDownPlugin.class);        // local plugin: Wind down keeps playing in the background
+        registerPlugin(ExerciseFormPlugin.class);   // local plugin: native exercise-form SDK
         super.onCreate(savedInstanceState);
         // picked files reach the WebView as our own cached copies (PNG picks failed on Samsung)
         PickCopyChromeClient.clear(this);

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "enabled": true,
+  "minimumCheckedAngles": 2,
+  "maxOutOfRangeAngles": 2,
+  "maxAngleJumps": 1,
+  "maxFrameAngleDeltaDegrees": 120,
+  "angles": [
+    { "id": "left.knee", "a": 23, "vertex": 25, "c": 27, "minDegrees": 5, "maxDegrees": 180 },
+    { "id": "right.knee", "a": 24, "vertex": 26, "c": 28, "minDegrees": 5, "maxDegrees": 180 },
+    { "id": "left.elbow", "a": 11, "vertex": 13, "c": 15, "minDegrees": 5, "maxDegrees": 180 },
+    { "id": "right.elbow", "a": 12, "vertex": 14, "c": 16, "minDegrees": 5, "maxDegrees": 180 },
+    { "id": "left.shoulder", "a": 13, "vertex": 11, "c": 23, "minDegrees": 5, "maxDegrees": 180 },
+    { "id": "right.shoulder", "a": 14, "vertex": 12, "c": 24, "minDegrees": 5, "maxDegrees": 180 },
+    { "id": "left.hip", "a": 11, "vertex": 23, "c": 25, "minDegrees": 5, "maxDegrees": 180 },
+    { "id": "right.hip", "a": 12, "vertex": 24, "c": 26, "minDegrees": 5, "maxDegrees": 180 },
+    { "id": "left.ankle", "a": 25, "vertex": 27, "c": 31, "minDegrees": 20, "maxDegrees": 180 },
+    { "id": "right.ankle", "a": 26, "vertex": 28, "c": 32, "minDegrees": 20, "maxDegrees": 180 }
+  ]
+}
